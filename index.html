@@ -371,7 +371,41 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .btn.primary { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); box-shadow: 0 3px 0 var(--accent-deep); }
 .btn.primary:active { box-shadow: 0 1px 0 var(--accent-deep); }
 
-/* ---------- Editor: arma tu mezcla ---------- */
+/* Pantallas de poca altura: tarjetas más compactas para que todo quepa sin scroll */
+@media (min-width: 1040px) and (max-height: 820px) {
+  .mode small { display: none; }
+  .mode { padding: 8px 10px; grid-template-columns: 32px minmax(0, 1fr) auto; }
+  .mode svg { width: 32px; height: 32px; }
+  .mode .go { width: 26px; height: 26px; }
+  .target { grid-template-columns: 72px minmax(0, 1fr); }
+  .target svg { width: 72px; }
+  .card { padding: 14px; gap: 10px; }
+}
+
+/* ---------- Dificultad ---------- */
+.levels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; background: var(--card-2); border-radius: 14px; padding: 4px; }
+.levels button {
+  border: 0; border-radius: 11px; background: transparent; cursor: pointer; padding: 7px 4px;
+  display: grid; gap: 1px; justify-items: center; color: var(--ink);
+  transition: background-color 0.15s ease, transform 0.12s ease, color 0.15s ease;
+}
+.levels button b { font-weight: 700; font-size: 13px; }
+.levels button small { font-family: var(--f-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.levels button:hover { background: var(--card); }
+.levels button:active { transform: scale(0.96); }
+.levels button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.levels button[aria-pressed="true"] small { color: var(--bg); opacity: 0.8; }
+.levels button[data-level="easy"][aria-pressed="true"] { background: var(--ok); color: #FFFFFF; }
+.levels button[data-level="mid"][aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.levels button[data-level="mid"][aria-pressed="true"] small { color: var(--accent-ink); }
+.levels button[data-level="hard"][aria-pressed="true"] { background: var(--face-left); color: #FFFFFF; }
+.levels button[data-level="easy"][aria-pressed="true"] small, .levels button[data-level="hard"][aria-pressed="true"] small { color: #FFFFFF; }
+.levels button:disabled { opacity: 0.35; cursor: not-allowed; background: transparent; transform: none; }
+.level-note { margin: -4px 0 0; font-size: 12.5px; color: var(--muted); }
+.goal.bound .goal-n { background: var(--accent); color: var(--accent-ink); }
+.busy-board #tiles { opacity: 0.55; transition: opacity 0.2s ease; }
+
+/* ---------- Editor: arma tu mezcla (estilos) ---------- */
 .dock.edit { border-radius: 22px; border: 2px solid var(--face-top); }
 .edit-label { font-family: var(--f-mono); font-weight: 600; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-left: 8px; }
 .swatches { display: inline-flex; gap: 6px; }
@@ -554,8 +588,14 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <aside class="side right">
       <section class="card" style="--d:100ms">
         <h2>Nueva partida</h2>
+        <div class="levels" role="group" aria-label="Dificultad">
+          <button type="button" data-level="easy" aria-pressed="true"><b>Fácil</b><small id="lv-easy">6–9</small></button>
+          <button type="button" data-level="mid" aria-pressed="false"><b>Intermedio</b><small id="lv-mid">10–15</small></button>
+          <button type="button" data-level="hard" aria-pressed="false"><b>Difícil</b><small id="lv-hard">16–21</small></button>
+        </div>
+        <p class="level-note" id="level-note">Movimientos para resolver la mezcla.</p>
         <div class="modes">
-          <button class="mode" type="button" id="mix-pile" data-current="true">
+          <button class="mode" type="button" id="mix-pile" data-current="true" title="Giros de 180°. Siempre verás cubitos apilados.">
             <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
               <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
               <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-left)"/>
@@ -564,7 +604,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
             <span><b>En pilas</b><small>Giros de 180°. Siempre verás cubitos apilados.</small></span>
             <span class="go" aria-hidden="true">→</span>
           </button>
-          <button class="mode" type="button" id="mix-chaos" data-current="false">
+          <button class="mode" type="button" id="mix-chaos" data-current="false" title="Giros de 60°. Colores y orientaciones revueltos.">
             <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
               <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-right)"/>
               <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-top)"/>
@@ -573,7 +613,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
             <span><b>Caos total</b><small>Giros de 60°. Colores y orientaciones revueltos.</small></span>
             <span class="go" aria-hidden="true">→</span>
           </button>
-          <button class="mode" type="button" id="mix-custom" data-current="false">
+          <button class="mode" type="button" id="mix-custom" data-current="false" title="Pinta y acomoda los rombos como quieras, y juega desde ahí.">
             <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
               <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
               <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:none;stroke:var(--muted);stroke-width:0.08;stroke-dasharray:0.14 0.1"/>
@@ -617,7 +657,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       <li><span>Cada toque gira el grupo 60°. Con <kbd>Shift</kbd> o clic derecho gira al revés.</span></li>
       <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
       <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
-      <li><span>Cada mezcla te dice el <b>mínimo de movimientos</b> para resolverla. Lograrlo justo en ese número es una partida perfecta.</span></li>
+      <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (10–15) o Difícil (16–21). En 2×2×2 hay menos posibilidades: en pilas el máximo es 8 y en caos, 14.</span></li>
+      <li><span>Cada mezcla te dice en cuántos movimientos se puede resolver. Cuando dice “mínimo”, es el mínimo exacto. En caos Intermedio y Difícil de 3×3×3 y 4×4×4 es una meta segura: seguro se puede en esa cantidad, aunque quizá exista un camino un poco más corto. Lograrlo en ese número o menos es una partida perfecta.</span></li>
       <li><span><b>Arma tu mezcla:</b> elige un color y toca o arrastra sobre los rombos para pintarlos; con “Girar” mueves grupos de tres a otra posición. Necesitas la misma cantidad de cada color. Luego presiona “Jugar desde aquí”.</span></li>
       <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
     </ul>
@@ -762,7 +803,9 @@ const Core = (() => {
   }
 
   /* ---- Solucionador exacto (búsqueda bidireccional, hasta BACK + FWD movimientos) ---- */
-  const BACK = 5, FWD = 3;
+  // En 2×2×2 la búsqueda cubre hasta 14 (el máximo posible); en 3×3×3 y 4×4×4, hasta 8.
+  const BACK_N = (N) => (N === 2 ? 7 : 5), FWD_N = (N) => (N === 2 ? 7 : 3);
+  const maxExact = (N) => BACK_N(N) + FWD_N(N);
   const solvers = {};
   function solver(N) {
     if (solvers[N]) return solvers[N];
@@ -802,7 +845,7 @@ const Core = (() => {
     const solvedNode = encode(createState(N));
     const back = new Map([[key(solvedNode.P, solvedNode.C), 0]]);
     let frontier = [solvedNode];
-    for (let d = 1; d <= BACK; d++) {
+    for (let d = 1; d <= BACK_N(N); d++) {
       const next = [];
       for (const n of frontier) children(n, (c) => { const kk = key(c.P, c.C); if (!back.has(kk)) { back.set(kk, d); next.push(c); } });
       frontier = next;
@@ -823,7 +866,7 @@ const Core = (() => {
     let best = Infinity, bestMove = null;
     const seen = new Set([rk]);
     let level = [{ n: root, first: null }];
-    for (let df = 1; df <= FWD && best > df; df++) {
+    for (let df = 1, FWD = FWD_N(st.N); df <= FWD && best > df; df++) {
       const next = [];
       for (const { n, first } of level) S.children(n, (c, v, k) => {
         const kk = S.key(c.P, c.C);
@@ -858,38 +901,81 @@ const Core = (() => {
     return solve(st);
   }
 
-  // Devuelve el mínimo exacto de movimientos para resolver la mezcla.
-  function scramble(st, mode, rand = Math.random) {
-    const total = st.tiles.length;
+  /* ---- Mezclas por dificultad ---- */
+  const RANGES = { easy: [6, 9], mid: [10, 15], hard: [16, 21] };
+  // Mayor mínimo posible: en pilas, los cubitos de la caja; en caos, 14 para 2×2×2.
+  const maxFor = (N, mode) => (mode === "pile" ? N * N * N : N === 2 ? 14 : Infinity);
+  function rangeFor(N, mode, level) {
+    const [lo, hi] = RANGES[level], m = maxFor(N, mode);
+    return lo > m ? null : [lo, Math.min(hi, m)];
+  }
+  const adjacent = (a, b) => { const da = a[0] - b[0], db = a[1] - b[1]; return Math.abs(da) <= 1 && Math.abs(db) <= 1 && Math.abs(da + db) <= 1; };
+  const inverse = (used) => used.slice().reverse().map((u) => ({ v: [...u.v], k: (6 - u.k) % 6 }));
+
+  // Giros al azar que no se fusionan con uno anterior (mismo punto sin un giro vecino en medio).
+  function walk(st, K, mode, rand) {
+    const used = [];
+    for (let i = 0; i < K; i++) {
+      const all = movesOf(st);
+      const ok = all.filter((v) => {
+        for (let j = used.length - 1; j >= 0; j--) if (adjacent(used[j].v, v)) return !(used[j].v[0] === v[0] && used[j].v[1] === v[1]);
+        return true;
+      });
+      const pool = ok.length ? ok : all;
+      const v = pool[Math.floor(rand() * pool.length)];
+      const k = mode === "pile" ? 3 : 1 + Math.floor(rand() * 5);
+      applyMove(st, v, k);
+      used.push({ v: [...v], k });
+    }
+    return used;
+  }
+
+  // Devuelve { par, exact, route, level }: par es el mínimo exacto (exact) o una meta segura,
+  // y route es una solución conocida de esa longitud (para las pistas).
+  function scramble(st, mode, level = "easy", rand = Math.random) {
+    let range = rangeFor(st.N, mode, level);
+    if (!range) { level = "easy"; range = rangeFor(st.N, mode, level); }
+    const [lo, hi] = range;
+    const pick = () => lo + Math.floor(rand() * (hi - lo + 1));
+    const base = copyTiles(createState(st.N).tiles);
+    const reset = () => { st.tiles = copyTiles(base); reindex(st); };
+
     if (mode === "pile") {
-      let n = 8 * st.N * st.N, last = null, guard = 0;
-      while ((n > 0 || correctCount(st) > total * 0.45) && guard++ < 5000) {
-        const cands = movesOf(st).filter((v) => !last || v[0] !== last[0] || v[1] !== last[1]);
-        const pool = cands.length ? cands : movesOf(st);
-        const v = pool[Math.floor(rand() * pool.length)];
-        applyMove(st, v, 3);
-        last = v; n--;
+      // Quitar d cubitos de la caja: el mínimo es exactamente d.
+      reset();
+      const d = pick(), used = [];
+      for (let i = 0; i < d; i++) {
+        const c = movesOf(st).filter((v) => cubeDelta(st, v) === 1);
+        const v = c[Math.floor(rand() * c.length)];
+        applyMove(st, v, 3); used.push({ v: [...v], k: 3 });
       }
-      return { par: analyze(st).d };
+      return { par: d, exact: true, route: inverse(used), level };
     }
-    // Caos: pocos giros de 60°/120°/180°/… elegidos para que el mínimo quede cerca de K y se pueda calcular exacto.
-    const K = st.N === 2 ? 6 : BACK + FWD;
-    const base = copyTiles(st.tiles);
-    let res = null;
-    for (let attempt = 0; attempt < 12; attempt++) {
-      st.tiles = copyTiles(base); reindex(st);
-      const used = [];
-      for (let i = 0; i < K; i++) {
-        const cands = movesOf(st).filter((v) => !used.slice(-2).some((u) => u[0] === v[0] && u[1] === v[1]));
-        const pool = cands.length ? cands : movesOf(st);
-        const v = pool[Math.floor(rand() * pool.length)];
-        applyMove(st, v, 1 + Math.floor(rand() * 5));
-        used.push(v);
+
+    const M = maxExact(st.N), t0 = Date.now();
+    let fallback = null;
+    for (let attempt = 0; attempt < 40; attempt++) {
+      reset();
+      // En 2×2×2 casi cualquier posición revuelta está a 9–12 giros: para Intermedio se revuelve a fondo y se mide.
+      const deep = st.N === 2 && level !== "easy";
+      const K = pick(), used = walk(st, deep ? 40 : K, mode, rand);
+      const r = solve(st);
+      if (deep || K <= M + 1) {
+        // Se puede verificar: si no hay solución en M o menos y se mezcló con M + 1, el mínimo es M + 1.
+        const d = r.d !== null ? r.d : K;
+        const out = { par: d, exact: true, route: inverse(used), level, tiles: copyTiles(st.tiles) };
+        if (d >= lo && d <= hi) return out;
+        if (!fallback || Math.abs(d - lo) < Math.abs(fallback.par - lo)) fallback = out;
+      } else if (r.d === null) {
+        // Más allá de lo que se calcula al instante: se garantiza que se resuelve en K y que necesita más de M.
+        return { par: K, exact: false, route: inverse(used), level };
       }
-      res = solve(st);
-      if (res.d >= K - 2 && correctCount(st) <= total * 0.65) break;
+      if (Date.now() - t0 > 2500 && fallback) break;
     }
-    return { par: res.d };
+    if (fallback) { st.tiles = fallback.tiles; reindex(st); delete fallback.tiles; return fallback; }
+    reset();
+    const used = walk(st, hi, mode, rand);
+    return { par: hi, exact: false, route: inverse(used), level };
   }
 
   // Pista: mejor giro mirando dos movimientos hacia adelante.
@@ -910,7 +996,7 @@ const Core = (() => {
     return best;
   }
 
-  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve };
+  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve, rangeFor, maxFor };
 })();
 /*END CORE*/
 
@@ -1007,6 +1093,12 @@ const Sound = (() => {
   let hover = null, focusKey = null, hintMove = null, hintsUsed = 0;
   let par = null;         // mínimo exacto de la mezcla actual
   let parOver = false;    // true si el mínimo es mayor que lo que se calcula al instante
+  let parExact = true;    // false si par es una meta segura (no necesariamente el mínimo)
+  let level = "easy";     // easy | mid | hard
+  let route = null;       // solución conocida desde la posición actual: [{v, k}]
+  let editGen = null;     // mezcla al azar del editor sin cambios: {par, exact, route}
+  let generating = false;
+  const LEVEL_NAMES = { easy: "Fácil", mid: "Intermedio", hard: "Difícil" };
   let tool = "paint", paintColor = 1, painting = false, editBackup = null;
   const COLOR_NAMES = { 1: ["amarillo", "amarillos"], 0: ["rojo", "rojos"], 2: ["azul", "azules"] };
   let layers = {};
@@ -1085,7 +1177,8 @@ const Sound = (() => {
     $("#mix-custom").dataset.current = String(mode === "custom" || phase === "edit");
     if (phase === "edit") $("#mix-pile").dataset.current = "false";
     const label = phase === "edit" ? "Armando" : mode === "pile" ? "En pilas" : mode === "chaos" ? "Caos total" : "Tu mezcla";
-    $("#mode-chip").textContent = `${label} · ${sizeName(st.N)}`;
+    $("#mode-chip").textContent = mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
+    syncLevels();
     syncEditUI();
     lastShown = { moves: null, ok: null };
     render();
@@ -1215,12 +1308,14 @@ const Sound = (() => {
     }
     if (par !== null) {
       $("#s-par").textContent = par;
-      $("#s-par-text").textContent = `Se resuelve en ${movs(par)}`;
+      $("#s-par-text").textContent = parExact ? `Mínimo: ${movs(par)}` : `Se puede en ${movs(par)}`;
       const left = par - hist.length, solved = Core.isSolved(st);
       goal.classList.toggle("perfect", solved && hist.length <= par);
-      $("#s-par-sub").textContent = solved ? (hist.length <= par ? "¡Partida perfecta! Lo hiciste en el mínimo." : "Resuelto. Ese era el mínimo posible.")
-        : left > 0 ? `Es el mínimo posible. Te quedan ${left} para una partida perfecta.`
-        : "Ya pasaste el mínimo, pero todavía puedes resolverlo.";
+      goal.classList.toggle("bound", !parExact && !(solved && hist.length <= par));
+      $("#s-par-sub").textContent = solved
+        ? (hist.length <= par ? (parExact ? "¡Partida perfecta! Lo hiciste en el mínimo." : "¡Meta cumplida!") : (parExact ? "Resuelto. Ese era el mínimo posible." : "Resuelto. Esa era la meta."))
+        : left > 0 ? (parExact ? `Es el mínimo exacto. Te quedan ${left} para una partida perfecta.` : `Meta segura. Te quedan ${left}; quizá exista un camino un poco más corto.`)
+        : (parExact ? "Ya pasaste el mínimo, pero todavía puedes resolverlo." : "Ya pasaste la meta, pero todavía puedes resolverlo.");
     }
     const b = readBest()[st.N];
     $("#s-best").innerHTML = b
@@ -1336,8 +1431,11 @@ const Sound = (() => {
       if (record && phase === "playing") startTimer();
       const before = new Set(st.tiles.filter((t) => Core.isCorrect(st, t)).map((t) => t.id));
       if (record || editing) Sound.lift(); else Sound.undo();
+      const board = st;
       await animate(ids, v, step);
+      if (st !== board) return; // se empezó otra partida durante la animación
       Core.applyMove(st, v, step);
+      trackRoute(v, step, editing);
       if (record && !editing) pushHist(v, step);
       if (hintMove && !sameV(hintMove.v, v)) hintMove = null;
       else if (hintMove) { hintMove.k = (((hintMove.k - step) % 6) + 6) % 6; if (hintMove.k === 0) hintMove = null; }
@@ -1404,9 +1502,9 @@ const Sound = (() => {
     const isRecord = !prev || moves < prev.moves || (moves === prev.moves && ms < prev.ms);
     if (isRecord) { best[st.N] = { moves, ms }; try { localStorage.setItem(BEST, JSON.stringify(best)); } catch (e) {} }
     const perfect = par !== null && moves <= par;
-    $("#win-title").textContent = perfect ? "¡Partida perfecta!" : "¡Cubo restaurado!";
+    $("#win-title").textContent = perfect ? (parExact ? "¡Partida perfecta!" : "¡Meta cumplida!") : "¡Cubo restaurado!";
     let line = `${movs(moves)} · ${fmt(ms)}`;
-    if (par !== null) line = perfect ? `Lo hiciste en el mínimo posible: ${line}` : `El mínimo era ${par}. Tú: ${line}`;
+    if (par !== null) line = perfect ? `${parExact ? "Lo hiciste en el mínimo posible" : "Dentro de la meta"}: ${line}` : `${parExact ? "El mínimo era" : "La meta era"} ${par}. Tú: ${line}`;
     if (hintsUsed) line += ` · ${hintsUsed} ${hintsUsed === 1 ? "pista" : "pistas"}`;
     $("#win-line").textContent = line;
     $("#win-rec").hidden = !(isRecord && prev);
@@ -1430,22 +1528,70 @@ const Sound = (() => {
   }
 
   function newGame(N, m, quiet) {
+    if (generating) return;
+    generating = true;
     mode = m;
-    st = Core.createState(N);
-    const r = Core.scramble(st, m);
-    resetSession("playing");
-    par = r.par; parOver = false;
-    buildBoard();
-    playIntro();
-    if (!quiet) Sound.shuffle();
-    say(`${m === "pile" ? "Mezclado en pilas" : "Caos total"}: se puede resolver en ${movs(par)}. Tu primer giro arranca el reloj.`);
-    save();
+    if (!quiet) { say(`Mezclando (${LEVEL_NAMES[level].toLowerCase()})…`); svg.classList.add("busy-board"); }
+    // Deja que la pantalla muestre "Mezclando…" antes del cálculo.
+    setTimeout(() => {
+      try {
+        const want = level;
+        st = Core.createState(N);
+        const r = Core.scramble(st, m, level);
+        level = r.level;
+        resetSession("playing");
+        par = r.par; parExact = r.exact; parOver = false; route = r.route;
+        buildBoard();
+        playIntro();
+        if (!quiet) Sound.shuffle();
+        const name = `${m === "pile" ? "En pilas" : "Caos total"}, ${LEVEL_NAMES[level].toLowerCase()}`;
+        const note = want !== level ? ` (En ${sizeName(N)} ${m === "pile" ? "en pilas el máximo es 8" : "en caos el máximo es 14"}, así que usé ${LEVEL_NAMES[level]}.)` : "";
+        say(`${name}: ${parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.${note}`);
+        save();
+      } finally {
+        generating = false;
+        svg.classList.remove("busy-board");
+      }
+    }, quiet ? 0 : 30);
+  }
+
+  // Mantiene "route" como una solución válida desde la posición actual.
+  function trackRoute(v, step, editing) {
+    if (editing) { route = null; editGen = null; return; }
+    if (!route) return;
+    const k = ((step % 6) + 6) % 6;
+    if (route.length && sameV(route[0].v, v)) {
+      route[0].k = (((route[0].k - k) % 6) + 6) % 6;
+      if (route[0].k === 0) route.shift();
+    } else route.unshift({ v: [...v], k: (6 - k) % 6 });
+  }
+
+  function syncLevels() {
+    const m = phase === "edit" || mode === "custom" ? "chaos" : mode;
+    for (const lv of ["easy", "mid", "hard"]) {
+      const r = Core.rangeFor(st.N, m, lv);
+      const b = document.querySelector(`.levels [data-level="${lv}"]`);
+      b.disabled = !r;
+      b.setAttribute("aria-pressed", String(lv === level));
+      $(`#lv-${lv}`).textContent = r ? (r[0] === r[1] ? `${r[0]}` : `${r[0]}–${r[1]}`) : "—";
+    }
+    $("#level-note").textContent = st.N === 2
+      ? (m === "pile" ? "En 2×2×2 en pilas el máximo es 8 movimientos." : "En 2×2×2 en caos el máximo es 14 movimientos.")
+      : "Movimientos para resolver la mezcla.";
+  }
+
+  function setLevel(lv) {
+    if (generating) return;
+    level = lv;
+    Sound.tick();
+    if (phase === "edit") { syncLevels(); return; }
+    newGame(st.N, mode === "custom" ? "chaos" : mode);
   }
 
   function resetToCube() {
     st = Core.createState(st.N);
     resetSession("free");
-    par = null; parOver = false;
+    par = null; parOver = false; parExact = true; route = null;
     buildBoard();
     playIntro();
     Sound.place();
@@ -1465,7 +1611,9 @@ const Sound = (() => {
     if (busy || phase === "edit" || Core.isSolved(st)) return;
     // Primero el camino más corto exacto; si está demasiado lejos para calcularlo, una pista aproximada.
     const a = Core.analyze(st);
-    const h = a.move ? { v: a.move.v, k: a.move.k, left: a.d - 1 } : Core.hint(st, hist[hist.length - 1]);
+    const h = a.move ? { v: a.move.v, k: a.move.k, left: a.d - 1 }
+      : route && route.length ? { v: route[0].v, k: route[0].k, left: route.length - 1, known: true }
+      : Core.hint(st, hist[hist.length - 1]);
     if (!h) { say("No hay ningún grupo que se pueda girar.", "warn"); return; }
     hintMove = { v: h.v, k: h.k };
     hintsUsed++;
@@ -1474,7 +1622,7 @@ const Sound = (() => {
     const stp = hintStep(hintMove);
     const turn = Math.abs(stp) === 3 ? "media vuelta (180°)" : `${Math.abs(stp) * 60}° en sentido ${stp < 0 ? "horario" : "antihorario"}`;
     const extra = h.left !== undefined
-      ? (h.left === 0 ? " y quedará resuelto." : `. Es el camino más corto: después te faltarán ${movs(h.left)}.`)
+      ? (h.left === 0 ? " y quedará resuelto." : h.known ? `. Siguiendo este camino te faltarán ${movs(h.left)}.` : `. Es el camino más corto: después te faltarán ${movs(h.left)}.`)
       : (h.gain > 0 ? ` y pondrá ${h.gain} ${h.gain === 1 ? "rombo" : "rombos"} en su sitio.` : " y te dejará listo para la siguiente jugada.");
     say(`Pista: toca una vez el grupo amarillo que dice “Toca aquí”. Girará ${turn}${extra}`);
   }
@@ -1514,7 +1662,7 @@ const Sound = (() => {
     stopTimer();
     if (N && N !== st.N) st = Core.createState(N);
     resetSession("edit");
-    par = null; parOver = false;
+    par = null; parOver = false; route = null; editGen = null;
     tool = "paint";
     buildBoard();
     Sound.tick();
@@ -1540,6 +1688,7 @@ const Sound = (() => {
     const t = st.tiles[+g.dataset.id];
     if (!t || t.c === paintColor) return;
     t.c = paintColor;
+    editGen = null;
     render(null, t.id);
     Sound.tickAt(PAINT_NOTE[paintColor]);
     sayEdit();
@@ -1547,14 +1696,23 @@ const Sound = (() => {
   }
 
   function editRandom() {
-    for (let i = 0; i < 30 * st.N; i++) {
-      const m = Core.movesOf(st);
-      Core.applyMove(st, m[Math.floor(Math.random() * m.length)], 1 + Math.floor(Math.random() * 5));
-    }
-    render(); playIntro(); Sound.shuffle(); sayEdit(); save();
+    if (generating) return;
+    generating = true;
+    say(`Mezclando al azar (${LEVEL_NAMES[level].toLowerCase()})…`);
+    setTimeout(() => {
+      try {
+        const r = Core.scramble(st, "chaos", level);
+        level = r.level;
+        editGen = { par: r.par, exact: r.exact, route: r.route };
+        syncLevels(); render(); playIntro(); Sound.shuffle();
+        say(`Mezcla al azar, ${LEVEL_NAMES[level].toLowerCase()}: ${r.exact ? `mínimo ${movs(r.par)}` : `se puede en ${movs(r.par)}`}. Puedes retocarla o presionar “Jugar desde aquí”.`);
+        save();
+      } finally { generating = false; }
+    }, 30);
   }
   function editClear() {
     st = Core.createState(st.N);
+    editGen = null;
     render(); playIntro(); Sound.place(); sayEdit(); save();
   }
 
@@ -1563,23 +1721,26 @@ const Sound = (() => {
     if (cnt.some((c) => c !== need)) { Sound.bad(); restart(wrap, "shake"); sayEdit(); return; }
     if (Core.isSolved(st)) { Sound.bad(); restart(wrap, "shake"); say("Así ya es el cubo armado. Pinta o gira algunos rombos antes de jugar.", "warn"); return; }
     say("Calculando el mínimo de movimientos…");
-    const a = Core.analyze(st);
+    const gen = editGen;
+    const a = gen ? null : Core.analyze(st);
     mode = "custom";
     resetSession("playing");
-    par = a.d; parOver = a.d === null;
+    if (gen) { par = gen.par; parExact = gen.exact; parOver = false; route = gen.route; }
+    else { par = a.d; parExact = true; parOver = a.d === null; route = null; }
+    editGen = null;
     editBackup = null;
     buildBoard();
     playIntro();
     Sound.shuffle();
     say(par !== null
-      ? `¡Listo! Tu mezcla se puede resolver en ${movs(par)}. Tu primer giro arranca el reloj.`
+      ? `¡Listo! Tu mezcla ${parExact ? `se resuelve en mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.`
       : "¡Listo! Tu mezcla necesita más de 8 movimientos. Tu primer giro arranca el reloj.");
     save();
   }
 
   /* ---------- Persistencia ---------- */
   function serialize() {
-    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver };
+    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver, parExact, level, route, editGen };
   }
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(serialize())); } catch (e) {}
@@ -1600,6 +1761,11 @@ const Sound = (() => {
       hintsUsed = +snap.hintsUsed || 0;
       par = Number.isInteger(snap.par) && snap.par > 0 ? snap.par : null;
       parOver = !!snap.parOver && par === null;
+      parExact = snap.parExact !== false;
+      level = ["easy", "mid", "hard"].includes(snap.level) ? snap.level : "easy";
+      const okRoute = (r) => Array.isArray(r) && r.every((m) => m && Array.isArray(m.v) && m.k >= 1 && m.k <= 5);
+      route = okRoute(snap.route) ? snap.route : null;
+      editGen = snap.editGen && okRoute(snap.editGen.route) ? snap.editGen : null;
       return true;
     } catch (e) { return false; }
   }
@@ -1692,6 +1858,7 @@ const Sound = (() => {
   $("#mix-chaos").addEventListener("click", () => newGame(st.N, "chaos"));
   $("#win-again").addEventListener("click", () => (mode === "custom" ? enterEditor() : newGame(st.N, mode)));
   $("#mix-custom").addEventListener("click", () => enterEditor());
+  document.querySelectorAll(".levels [data-level]").forEach((b) => b.addEventListener("click", () => setLevel(b.dataset.level)));
   $("#tool-paint").addEventListener("click", () => setTool("paint"));
   $("#tool-rotate").addEventListener("click", () => setTool("rotate"));
   document.querySelectorAll(".sw").forEach((b) => b.addEventListener("click", () => setPaintColor(+b.dataset.color)));
