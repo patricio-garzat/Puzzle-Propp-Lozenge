@@ -1,0 +1,1762 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Versión web del puzzle magnético Propp Lozenge: gira grupos de tres rombos para volver a armar el cubo.">
+<title>Rombos de Propp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: consola de juego a pantalla completa. Barra superior; tres columnas en escritorio (tu partida · tablero · nueva partida); en móvil se apila y hace scroll */
+:root {
+  --bg: #F4F1FF;
+  --pat-a: #EEEAFF;
+  --pat-b: #E5DFFF;
+  --pat-c: #DAD2FA;
+  --card: #FFFFFF;
+  --card-2: #F5F2FF;
+  --line: #E1DBF6;
+  --ink: #1B1740;
+  --muted: #655F91;
+  --accent: #FFCF3D;
+  --accent-deep: #D9A40F;
+  --accent-ink: #1B1740;
+  --focus: #3D46D6;
+  --shadow: rgba(48, 36, 130, 0.14);
+  --shadow-strong: rgba(48, 36, 130, 0.28);
+  --scrim: rgba(244, 241, 255, 0.8);
+  --veil: rgba(27, 23, 64, 0.42);
+  --ok: #129460;
+  --warn: #D33B30;
+  --glow: 0.42;
+
+  /* Colores fijos del puzzle (iguales en ambos temas: es un objeto físico) */
+  --face-top: #FFCF3D;
+  --face-left: #FF5D52;
+  --face-right: #3D46D6;
+  --frame-hi: #2E2A66;
+  --frame-lo: #0E0C24;
+  --tray: #1E1B42;
+  --tray-line: #332F6A;
+  --tray-edge: rgba(0, 0, 0, 0.45);
+  --halo: #FFFFFF;
+  --hl-fill: rgba(255, 255, 255, 0.16);
+  --bevel: rgba(255, 255, 255, 0.4);
+  --sheen: rgba(255, 255, 255, 0.2);
+
+  --f-display: "Unbounded", "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
+  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12102A; --pat-a: #1A1741; --pat-b: #161339; --pat-c: #110F2E;
+    --card: #1B1839; --card-2: #232049; --line: #2F2B5C; --ink: #F2F0FF; --muted: #A6A2CF;
+    --accent: #FFCF3D; --accent-deep: #C8930A; --accent-ink: #1B1740; --focus: #FFCF3D;
+    --shadow: rgba(0, 0, 0, 0.45); --shadow-strong: rgba(0, 0, 0, 0.65); --scrim: rgba(18, 16, 42, 0.8);
+    --veil: rgba(5, 4, 16, 0.6); --ok: #4ED69A; --warn: #FF8A80; --glow: 0.5;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12102A; --pat-a: #1A1741; --pat-b: #161339; --pat-c: #110F2E;
+  --card: #1B1839; --card-2: #232049; --line: #2F2B5C; --ink: #F2F0FF; --muted: #A6A2CF;
+  --accent: #FFCF3D; --accent-deep: #C8930A; --accent-ink: #1B1740; --focus: #FFCF3D;
+  --shadow: rgba(0, 0, 0, 0.45); --shadow-strong: rgba(0, 0, 0, 0.65); --scrim: rgba(18, 16, 42, 0.8);
+  --veil: rgba(5, 4, 16, 0.6); --ok: #4ED69A; --warn: #FF8A80; --glow: 0.5;
+  color-scheme: dark;
+}
+
+[hidden] { display: none !important; }
+*, *::before, *::after { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2.5px solid var(--focus); outline-offset: 2px; }
+
+/* ---------- Fondo de bloques ---------- */
+.bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none;
+  -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, #000 85%);
+          mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, #000 85%); }
+.bg svg { position: absolute; left: 0; top: 0; width: calc(100% + 97px); height: calc(100% + 168px); animation: drift 60s linear infinite; }
+@keyframes drift { to { transform: translate(-48.5px, -84px); } }
+
+/* ---------- Estructura ---------- */
+.app {
+  position: relative; z-index: 1;
+  max-width: 1480px; min-height: 100%;
+  margin: 0 auto;
+  padding-inline: 20px; padding-block: 14px 18px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.main {
+  display: grid; gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "stage" "left" "right";
+}
+.side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.side.left { grid-area: left; }
+.side.right { grid-area: right; }
+.stage { grid-area: stage; display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; }
+.board-wrap { position: relative; width: 100%; max-width: 640px; }
+#board { position: relative; z-index: 1; display: block; width: 100%; height: auto; max-height: 76vh; }
+
+@media (min-width: 720px) {
+  .main { grid-template-columns: minmax(0, 1fr) 300px; grid-template-areas: "stage left" "stage right"; align-items: start; }
+}
+/* Escritorio: todo cabe en una pantalla, sin scroll */
+@media (min-width: 1040px) and (min-height: 600px) {
+  html, body { overflow: hidden; }
+  .app { height: 100%; }
+  .main { flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(250px, 290px) minmax(0, 1fr) minmax(270px, 310px); grid-template-areas: "left stage right"; align-items: stretch; }
+  .side { min-height: 0; overflow-y: auto; scrollbar-width: thin; padding: 2px; margin: -2px; }
+  .stage { min-height: 0; }
+  .board-wrap { flex: 1 1 auto; min-height: 0; max-width: none; }
+  #board { height: 100%; max-height: none; }
+}
+
+/* ---------- Barra superior ---------- */
+.topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo { width: 38px; height: 38px; flex: none; filter: drop-shadow(0 4px 8px var(--shadow)); }
+.logo g { transform-origin: 0 0; animation: turn 3.6s cubic-bezier(.6,-0.3,.3,1.3) infinite; }
+@keyframes turn { 0%, 65% { transform: rotate(0deg); } 100% { transform: rotate(120deg); } }
+.brand h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(20px, 2.1vw, 26px); line-height: 1.05; letter-spacing: -0.03em; margin: 0; }
+.brand h1 .mark {
+  background-image: linear-gradient(90deg, var(--face-top) 0 33.3%, var(--face-left) 33.3% 66.6%, var(--face-right) 66.6% 100%);
+  background-repeat: no-repeat; background-size: 100% 0.16em; background-position: 0 96%;
+}
+.brand p { margin: 2px 0 0; font-family: var(--f-mono); font-weight: 600; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.top-actions { display: flex; align-items: center; gap: 8px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-weight: 600; font-size: 14px; color: var(--ink);
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 999px;
+  padding: 8px 14px; cursor: pointer; box-shadow: 0 4px 12px var(--shadow);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+.pill:hover { transform: translateY(-1px); border-color: var(--muted); }
+.pill:active { transform: translateY(0) scale(0.97); }
+.pill svg { width: 18px; height: 18px; flex: none; }
+.pill.icon { padding: 8px; width: 40px; height: 40px; justify-content: center; }
+.pill[aria-pressed="false"] .snd-on, .pill[aria-pressed="true"] .snd-off { display: none; }
+
+/* ---------- Tablero ---------- */
+.glow {
+  position: absolute; left: 50%; top: 50%; width: min(70%, 62vh); aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; z-index: 0; pointer-events: none;
+  background: conic-gradient(from 30deg, var(--face-top), var(--face-left), var(--face-right), var(--face-top));
+  filter: blur(70px); opacity: var(--glow);
+  animation: spin 28s linear infinite;
+}
+@keyframes spin { to { rotate: 360deg; } }
+#board { touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 24px 30px var(--shadow-strong)); }
+#board.pointer { cursor: pointer; }
+.board-wrap.shake #board { animation: shake 0.32s ease; }
+@keyframes shake { 20% { translate: -6px 0; } 45% { translate: 5px 0; } 70% { translate: -3px 0; } }
+
+.tray { fill: var(--tray); stroke: var(--tray-edge); stroke-width: 5; }
+.grid { fill: none; stroke: var(--tray-line); stroke-width: 1; }
+.sheen { pointer-events: none; }
+.tile polygon { fill: currentColor; stroke: currentColor; stroke-linejoin: round; }
+.tile .bevel { fill: none; stroke: var(--bevel); stroke-linejoin: round; }
+.tile.good polygon:first-child { animation: shine 0.8s ease-out; }
+@keyframes shine { 0%, 15% { fill: #FFFFFF; stroke: #FFFFFF; } }
+.c0 { color: var(--face-left); }
+.c1 { color: var(--face-top); }
+.c2 { color: var(--face-right); }
+.dot { fill: var(--halo); stroke: var(--frame-lo); stroke-width: 1.6; pointer-events: none; animation: dotin 0.35s ease both; transform-box: fill-box; transform-origin: center; }
+@keyframes dotin { from { transform: scale(0); } }
+.hit { fill: transparent; outline: none; pointer-events: none; }
+.hl-poly { fill: var(--hl-fill); stroke: var(--halo); stroke-width: 3; stroke-linejoin: round; }
+.hl-arc { fill: none; stroke: var(--halo); stroke-width: 3.2; stroke-linecap: round; }
+.hl-head { fill: var(--halo); }
+#hlg, #hint { pointer-events: none; }
+#hlg.bad .hl-poly { fill: none; stroke: var(--face-left); stroke-dasharray: 5 6; stroke-width: 3; }
+#hlg.bad .hl-arc, #hlg.bad .hl-head { display: none; }
+#hint .hl-poly { fill: none; stroke: var(--face-top); stroke-width: 4.5; }
+#hint .hl-arc { stroke: var(--face-top); }
+#hint .hl-head { fill: var(--face-top); }
+#hint .hl-poly, #hint .hl-arc, #hint .hl-head { animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: 0.35; } }
+.hint-tag { animation: tagin 0.35s cubic-bezier(.2,1.5,.4,1) both; transform-box: fill-box; transform-origin: center bottom; }
+@keyframes tagin { from { transform: scale(0.6) translateY(6px); opacity: 0; } }
+.hint-tag rect { fill: var(--frame-lo); stroke: var(--face-top); stroke-width: 2; }
+.hint-tag text { fill: var(--halo); font-family: var(--f-body); font-weight: 700; font-size: 14px; }
+
+.intro .tile { animation: drop 0.55s cubic-bezier(.2,1.4,.4,1) var(--dl) both; transform-box: fill-box; transform-origin: center; }
+@keyframes drop { from { opacity: 0.2; transform: translateY(-16px) scale(0.8); } }
+.celebrate .tile { animation: pop 0.7s cubic-bezier(.3,1.6,.5,1) var(--dl) both; transform-box: fill-box; transform-origin: center; }
+@keyframes pop { 45% { transform: scale(1.12); } }
+
+/* ---------- Dock bajo el tablero ---------- */
+.dock {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px;
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 999px;
+  padding: 6px; box-shadow: 0 10px 24px var(--shadow);
+  max-width: 100%; flex: none;
+}
+@media (max-width: 560px) { .dock { border-radius: 20px; } }
+.sep { width: 1.5px; align-self: stretch; background: var(--line); margin: 4px 2px; }
+@media (max-width: 560px) { .sep { display: none; } }
+.tool, .seg button {
+  font-family: var(--f-body); font-weight: 600; font-size: 14px; color: var(--ink);
+  border: 0; background: transparent; border-radius: 999px; padding: 8px 13px;
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.12s ease, opacity 0.15s ease, color 0.15s ease;
+}
+.tool:hover, .seg button:hover { background: var(--card-2); }
+.tool:active, .seg button:active { transform: scale(0.95); }
+.tool:disabled { opacity: 0.38; cursor: not-allowed; background: transparent; transform: none; }
+.tool svg, .seg svg { width: 17px; height: 17px; flex: none; }
+.tool kbd { font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0 4px; }
+.seg { display: inline-flex; gap: 2px; background: var(--card-2); border-radius: 999px; padding: 3px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+
+.switch { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; padding: 6px 12px 6px 8px; cursor: pointer; border-radius: 999px; }
+.switch:hover { background: var(--card-2); }
+.switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.switch .track { width: 34px; height: 20px; border-radius: 99px; background: var(--line); position: relative; transition: background-color 0.2s ease; flex: none; }
+.switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--card); box-shadow: 0 1px 2px var(--shadow); transition: transform 0.2s cubic-bezier(.3,1.5,.5,1); }
+.switch input:checked + .track { background: var(--face-right); }
+.switch input:checked + .track::after { transform: translateX(14px); }
+.switch input:focus-visible + .track { outline: 2.5px solid var(--focus); outline-offset: 2px; }
+
+.status {
+  margin: 0; color: var(--muted); font-size: 14px; text-align: center; max-width: 62ch; text-wrap: balance;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 2.9em; flex: none;
+}
+.status::before { content: ""; width: 9px; height: 9px; flex: none; transform: skewX(-30deg); border-radius: 2px; background: var(--face-top); }
+.status.warn { color: var(--warn); }
+.status.warn::before { background: var(--face-left); }
+.status.good { color: var(--ok); font-weight: 600; }
+.status.good::before { background: var(--ok); }
+.status.flash { animation: statusin 0.35s ease; }
+@keyframes statusin { from { opacity: 0.2; translate: 0 4px; } }
+
+/* ---------- Tarjetas ---------- */
+.card {
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 20px;
+  padding: 16px; display: grid; gap: 12px; box-shadow: 0 8px 22px var(--shadow); min-width: 0;
+  animation: cardin 0.5s cubic-bezier(.2,1.2,.4,1) var(--d, 0ms) both;
+}
+@keyframes cardin { from { opacity: 0.35; translate: 0 10px; } }
+.card h2 { font-family: var(--f-mono); font-weight: 600; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.chip { font-family: var(--f-body); letter-spacing: 0; text-transform: none; font-size: 12px; font-weight: 700; color: var(--ink); background: var(--card-2); border-radius: 99px; padding: 2px 9px; }
+
+.goal { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; background: var(--card-2); border-radius: 14px; padding: 10px 12px; }
+.goal-n { min-width: 54px; height: 54px; padding: 0 8px; display: grid; place-items: center; border-radius: 14px; background: var(--face-right); color: #FFFFFF; font-family: var(--f-display); font-weight: 800; font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; box-shadow: 0 6px 14px var(--shadow); }
+.goal.perfect .goal-n { background: var(--ok); }
+.goal p { margin: 0; font-size: 13px; line-height: 1.35; color: var(--muted); }
+.goal p b { display: block; color: var(--ink); font-size: 14.5px; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 0; }
+.stat { background: var(--card-2); border-radius: 14px; padding: 10px 11px; display: grid; gap: 2px; min-width: 0; }
+.stat dt { font-family: var(--f-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.06em; line-height: 1.25; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 6px; min-height: 2.5em; }
+.stat dt i { width: 10px; height: 7px; flex: none; transform: skewX(-30deg); border-radius: 1.5px; }
+.stat dd { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 23px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; white-space: nowrap; transform-origin: left center; }
+.stat dd small { font-size: 13px; font-weight: 500; color: var(--muted); }
+.stat dd.done { color: var(--ok); }
+.bump { animation: bump 0.35s cubic-bezier(.3,1.8,.5,1); }
+@keyframes bump { 40% { transform: scale(1.18); } }
+.bar { height: 10px; border-radius: 99px; background: var(--card-2); overflow: hidden; }
+.bar span {
+  display: block; height: 100%; width: 0; border-radius: inherit;
+  background: linear-gradient(90deg, var(--face-left), var(--face-top));
+  background-size: 200% 100%;
+  transition: width 0.45s cubic-bezier(.3,1.3,.5,1);
+  position: relative; overflow: hidden;
+}
+.bar span::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%); background-size: 200% 100%; animation: shimmer 2.4s linear infinite; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+.bar span.done { background: var(--ok); }
+.best { margin: 0; font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.best b { color: var(--ink); font-weight: 600; }
+
+.keys { margin: 0; padding: 0; list-style: none; display: grid; gap: 7px; font-size: 13.5px; }
+.keys li { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.keys span { color: var(--muted); }
+kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1px 7px; border: 1px solid var(--line); border-bottom-width: 2.5px; border-radius: 7px; background: var(--card-2); color: var(--ink); white-space: nowrap; }
+
+.modes { display: grid; gap: 8px; }
+.mode {
+  text-align: left; cursor: pointer; border: 1.5px solid var(--line); background: var(--card-2);
+  border-radius: 16px; padding: 11px 12px; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.mode:hover { transform: translateY(-2px); border-color: var(--muted); box-shadow: 0 8px 18px var(--shadow); }
+.mode:hover svg { animation: wiggle 0.5s ease; }
+@keyframes wiggle { 30% { rotate: -14deg; } 65% { rotate: 8deg; } }
+.mode:active { transform: translateY(0) scale(0.98); }
+.mode[data-current="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.mode svg { width: 40px; height: 40px; }
+.mode b { font-family: var(--f-display); font-weight: 700; font-size: 14.5px; letter-spacing: -0.01em; display: block; }
+.mode small { display: block; color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.mode .go { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-weight: 800; box-shadow: 0 2px 0 var(--accent-deep); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+.sizes button { padding: 7px 11px; font-size: 13.5px; }
+.link { border: 0; background: transparent; padding: 4px 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 600; font-size: 13.5px; color: var(--muted); cursor: pointer; }
+.link:hover { color: var(--ink); }
+
+.target { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 14px; align-items: center; }
+.target svg { width: 96px; height: auto; display: block; }
+.facts { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13.5px; }
+.facts b { font-family: var(--f-display); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ---------- Ventanas ---------- */
+.scrim {
+  position: absolute; inset: 0; z-index: 3;
+  display: grid; place-items: center;
+  background: radial-gradient(closest-side, var(--scrim), transparent);
+  animation: fade 0.3s ease 0.4s both;
+}
+.win, .sheet {
+  position: relative; overflow: hidden;
+  background: var(--card); color: var(--ink);
+  border: 1.5px solid var(--line); border-radius: 22px;
+  box-shadow: 0 24px 60px var(--shadow-strong);
+}
+.win {
+  width: min(88%, 360px); padding: 30px 22px 20px;
+  display: grid; gap: 10px; justify-items: center; text-align: center;
+  animation: rise 0.45s cubic-bezier(.2,1.3,.4,1) 0.45s both;
+}
+.win::before, .sheet::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 6px; background: linear-gradient(90deg, var(--face-top) 0 33.3%, var(--face-left) 33.3% 66.6%, var(--face-right) 66.6%); }
+.win .logo { width: 48px; height: 48px; }
+.win h3 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 23px; letter-spacing: -0.02em; text-wrap: balance; }
+.win p { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; text-wrap: balance; }
+.win .rec { color: var(--ok); font-weight: 700; }
+.win .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+.x {
+  position: absolute; top: 12px; right: 10px; width: 34px; height: 34px;
+  border: 0; border-radius: 10px; background: transparent; color: var(--muted);
+  font-size: 22px; line-height: 1; cursor: pointer; display: grid; place-items: center;
+}
+.x:hover { background: var(--card-2); color: var(--ink); }
+@keyframes rise { from { opacity: 0; transform: translateY(16px) scale(0.96); } }
+@keyframes fade { from { opacity: 0; } }
+
+.modal { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; background: var(--veil); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); animation: fade 0.2s ease both; }
+.sheet { width: min(100%, 560px); max-height: calc(100% - 32px); overflow: auto; padding: 28px 24px 22px; display: grid; gap: 16px; animation: rise 0.35s cubic-bezier(.2,1.3,.4,1) both; }
+.sheet h3 { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: 22px; letter-spacing: -0.02em; padding-right: 36px; }
+.sheet p { margin: 0; color: var(--muted); }
+.howto { margin: 0; padding: 0; list-style: none; display: grid; gap: 10px; font-size: 14.5px; }
+.howto li { display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.howto li::before { content: ""; width: 12px; height: 8px; transform: skewX(-30deg); border-radius: 1.5px; background: var(--face-top); }
+.howto li:nth-child(3n+2)::before { background: var(--face-left); }
+.howto li:nth-child(3n)::before { background: var(--face-right); }
+.credit { font-size: 12.5px; color: var(--muted); margin: 0; }
+.credit a { color: inherit; }
+
+.btn {
+  font-family: var(--f-body); font-weight: 700; font-size: 14px;
+  padding: 10px 16px; border-radius: 12px; cursor: pointer;
+  border: 1.5px solid var(--line); background: var(--card-2); color: var(--ink);
+  box-shadow: 0 3px 0 var(--line);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+.btn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.btn.primary { background: var(--accent); border-color: var(--accent-deep); color: var(--accent-ink); box-shadow: 0 3px 0 var(--accent-deep); }
+.btn.primary:active { box-shadow: 0 1px 0 var(--accent-deep); }
+
+/* ---------- Editor: arma tu mezcla ---------- */
+.dock.edit { border-radius: 22px; border: 2px solid var(--face-top); }
+.edit-label { font-family: var(--f-mono); font-weight: 600; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-left: 8px; }
+.swatches { display: inline-flex; gap: 6px; }
+.sw {
+  width: 44px; height: 36px; border-radius: 12px; border: 2px solid transparent; background: var(--card-2);
+  cursor: pointer; display: grid; place-items: center; position: relative; padding: 0;
+  transition: transform 0.12s ease, border-color 0.12s ease;
+}
+.sw::before { content: ""; position: absolute; width: 30px; height: 18px; background: var(--c); transform: skewX(-30deg); border-radius: 3px; box-shadow: 0 2px 4px var(--shadow); }
+.sw span { position: relative; font-family: var(--f-mono); font-weight: 700; font-size: 12px; color: #FFFFFF; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6); }
+.sw:hover { transform: translateY(-2px); }
+.sw[aria-pressed="true"] { border-color: var(--ink); transform: translateY(-2px); }
+.sw.off { box-shadow: inset 0 0 0 2px var(--warn); }
+.tool.go-play { background: var(--accent); color: var(--accent-ink); box-shadow: 0 2px 0 var(--accent-deep); font-weight: 700; }
+.tool.go-play:hover { background: var(--accent); filter: brightness(1.06); }
+#board.paint { cursor: crosshair; touch-action: none; }
+#board.paint .tile:hover .bevel { stroke: #FFFFFF; stroke-width: 3; }
+.tile.painted { animation: paintpop 0.32s cubic-bezier(.3,1.8,.5,1); transform-box: fill-box; transform-origin: center; }
+@keyframes paintpop { 40% { transform: scale(1.14); } }
+.goal.over .goal-n { background: var(--face-left); font-size: 20px; }
+
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg" aria-hidden="true">
+  <svg>
+    <defs>
+      <g id="blk">
+        <polygon points="0,-28 24.25,-14 0,0 -24.25,-14" style="fill:var(--pat-a)"/>
+        <polygon points="-24.25,-14 0,0 0,28 -24.25,14" style="fill:var(--pat-b)"/>
+        <polygon points="0,0 24.25,-14 24.25,14 0,28" style="fill:var(--pat-c)"/>
+      </g>
+      <pattern id="blocks" width="48.5" height="84" patternUnits="userSpaceOnUse">
+        <use href="#blk" x="0" y="0"/><use href="#blk" x="48.5" y="0"/><use href="#blk" x="24.25" y="42"/>
+        <use href="#blk" x="0" y="84"/><use href="#blk" x="48.5" y="84"/>
+      </pattern>
+    </defs>
+    <rect width="100%" height="100%" fill="url(#blocks)"/>
+  </svg>
+</div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <svg class="logo" viewBox="-1.05 -1.05 2.1 2.1" aria-hidden="true"><g>
+        <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
+        <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-left)"/>
+        <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-right)"/>
+      </g></svg>
+      <div>
+        <h1>Rombos de <span class="mark">Propp</span></h1>
+        <p>Todo es plano, pero ves un cubo</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="pill" type="button" id="help-btn">
+        <svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.9 7a2.2 2.2 0 1 1 3.2 2c-.7.4-1.1.8-1.1 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="13.2" r="1" fill="currentColor"/></svg>
+        Cómo se juega
+      </button>
+      <button class="pill icon" type="button" id="sound-btn" aria-pressed="true" aria-label="Sonido" title="Sonido (M)">
+        <svg class="snd-on" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="M12.4 6.2a4 4 0 0 1 0 5.6M14.4 4.2a6.8 6.8 0 0 1 0 9.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <svg class="snd-off" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="m12.5 6.5 4 5m0-5-4 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main">
+    <aside class="side left">
+      <section class="card" style="--d:60ms" aria-label="Tu partida">
+        <h2>Tu partida <span class="chip" id="mode-chip">En pilas · 3×3×3</span></h2>
+        <div class="goal" id="goal" hidden>
+          <span class="goal-n" id="s-par">0</span>
+          <p><b id="s-par-text">Se resuelve en 0 movimientos</b><span id="s-par-sub">Es el mínimo posible.</span></p>
+        </div>
+        <dl class="stats">
+          <div class="stat"><dt><i style="background:var(--face-top)"></i>Jugadas</dt><dd id="s-moves">0</dd></div>
+          <div class="stat"><dt><i style="background:var(--face-left)"></i>Tiempo</dt><dd id="s-time">0:00</dd></div>
+          <div class="stat"><dt><i style="background:var(--face-right)"></i>En su sitio</dt><dd id="s-ok">0<small>/27</small></dd></div>
+        </dl>
+        <div class="bar" role="progressbar" aria-label="Rombos en su sitio" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="s-barwrap"><span id="s-bar"></span></div>
+        <p class="best" id="s-best">Aún no tienes récord en 3×3×3.</p>
+      </section>
+
+      <section class="card" style="--d:140ms">
+        <h2>Atajos de teclado</h2>
+        <ul class="keys">
+          <li><span>Pista</span><kbd>H</kbd></li>
+          <li><span>Deshacer</span><kbd>Z</kbd></li>
+          <li><span>Cambiar sentido de giro</span><kbd>R</kbd></li>
+          <li><span>Girar al revés</span><kbd>Shift + clic</kbd></li>
+          <li><span>Mezclar en pilas / caos</span><kbd>N</kbd> <kbd>C</kbd></li>
+          <li><span>Arma tu mezcla</span><kbd>E</kbd></li>
+          <li><span>Sonido</span><kbd>M</kbd></li>
+        </ul>
+      </section>
+    </aside>
+
+    <section class="stage" aria-label="Tablero">
+      <div class="board-wrap" id="board-wrap">
+        <div class="glow" aria-hidden="true"></div>
+        <svg id="board" role="application" aria-label="Tablero hexagonal con rombos" aria-describedby="status"></svg>
+        <div class="scrim" id="win" hidden>
+          <div class="win" role="dialog" aria-modal="true" aria-labelledby="win-title">
+            <button class="x" id="win-x" type="button" aria-label="Cerrar">×</button>
+            <svg class="logo" viewBox="-1.05 -1.05 2.1 2.1" aria-hidden="true"><g>
+              <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
+              <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-left)"/>
+              <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-right)"/>
+            </g></svg>
+            <h3 id="win-title">¡Cubo restaurado!</h3>
+            <p id="win-line"></p>
+            <p class="rec" id="win-rec" hidden>Nuevo récord en este tamaño</p>
+            <div class="actions">
+              <button class="btn primary" id="win-again" type="button">Mezclar otra vez</button>
+              <button class="btn" id="win-close" type="button">Seguir jugando</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="dock edit" id="edit-dock" hidden>
+        <div class="seg" role="group" aria-label="Herramienta">
+          <button type="button" id="tool-paint" aria-pressed="true" title="Toca o arrastra sobre los rombos para pintarlos">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5 13.5 5.5 7 12H4V9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M2.5 14h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+            Pintar
+          </button>
+          <button type="button" id="tool-rotate" aria-pressed="false" title="Toca los puntos blancos para mover grupos de tres">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12.6 1.6v3.3H9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Girar
+          </button>
+        </div>
+        <div class="swatches" role="group" aria-label="Color para pintar">
+          <button type="button" class="sw" data-color="1" aria-pressed="true" style="--c:var(--face-top)" title="Amarillo (1)"><span id="cnt-1">9</span></button>
+          <button type="button" class="sw" data-color="0" aria-pressed="false" style="--c:var(--face-left)" title="Rojo (2)"><span id="cnt-0">9</span></button>
+          <button type="button" class="sw" data-color="2" aria-pressed="false" style="--c:var(--face-right)" title="Azul (3)"><span id="cnt-2">9</span></button>
+        </div>
+        <span class="sep" aria-hidden="true"></span>
+        <button class="tool" type="button" id="edit-random" title="Acomoda todo al azar">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="5.5" r="1.2" fill="currentColor"/><circle cx="10.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/></svg>
+          Al azar
+        </button>
+        <button class="tool" type="button" id="edit-clear" title="Vuelve al cubo armado">Reiniciar</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button class="tool" type="button" id="edit-cancel">Cancelar</button>
+        <button class="tool go-play" type="button" id="edit-play">Jugar desde aquí ▶</button>
+      </div>
+
+      <div class="dock" id="play-dock">
+        <div class="seg" role="group" aria-label="Sentido del giro">
+          <button type="button" id="dir-cw" aria-pressed="true" title="Cada toque gira 60° en sentido horario (R)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12.6 1.6v3.3H9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Horario
+          </button>
+          <button type="button" id="dir-ccw" aria-pressed="false" title="Cada toque gira 60° en sentido antihorario (R)">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 1.6v3.3h3.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Antihorario
+          </button>
+        </div>
+        <span class="sep" aria-hidden="true"></span>
+        <button class="tool" type="button" id="undo" title="Deshacer el último movimiento (Z)">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Deshacer
+        </button>
+        <button class="tool" type="button" id="hint-btn" title="Marca el siguiente giro del camino más corto (H)">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Pista
+        </button>
+        <span class="sep" aria-hidden="true"></span>
+        <label class="switch" title="Muestra los puntos donde se puede girar"><input type="checkbox" id="show-dots" checked><span class="track"></span>Puntos</label>
+      </div>
+      <p class="status" id="status" aria-live="polite">Toca un punto blanco para girar ese grupo de tres rombos.</p>
+    </section>
+
+    <aside class="side right">
+      <section class="card" style="--d:100ms">
+        <h2>Nueva partida</h2>
+        <div class="modes">
+          <button class="mode" type="button" id="mix-pile" data-current="true">
+            <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
+              <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
+              <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-left)"/>
+              <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-right)"/>
+            </svg>
+            <span><b>En pilas</b><small>Giros de 180°. Siempre verás cubitos apilados.</small></span>
+            <span class="go" aria-hidden="true">→</span>
+          </button>
+          <button class="mode" type="button" id="mix-chaos" data-current="false">
+            <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
+              <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-right)"/>
+              <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-top)"/>
+              <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-left)"/>
+            </svg>
+            <span><b>Caos total</b><small>Giros de 60°. Colores y orientaciones revueltos.</small></span>
+            <span class="go" aria-hidden="true">→</span>
+          </button>
+          <button class="mode" type="button" id="mix-custom" data-current="false">
+            <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
+              <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
+              <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:none;stroke:var(--muted);stroke-width:0.08;stroke-dasharray:0.14 0.1"/>
+              <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-left)"/>
+            </svg>
+            <span><b>Arma tu mezcla</b><small>Pinta y acomoda los rombos como quieras, y juega desde ahí.</small></span>
+            <span class="go" aria-hidden="true">→</span>
+          </button>
+        </div>
+        <div class="row">
+          <div class="seg sizes" role="group" aria-label="Tamaño del hexágono">
+            <button type="button" data-size="2" aria-pressed="false">2×2×2</button>
+            <button type="button" data-size="3" aria-pressed="true">3×3×3</button>
+            <button type="button" data-size="4" aria-pressed="false">4×4×4</button>
+          </div>
+          <button class="link" type="button" id="reset">Ver el cubo armado</button>
+        </div>
+      </section>
+
+      <section class="card" style="--d:180ms">
+        <h2>Objetivo</h2>
+        <div class="target">
+          <svg id="target" aria-label="Cubo armado"></svg>
+          <ul class="facts">
+            <li><b id="f-tiles">27</b> rombos, <b id="f-each">9</b> de cada color.</li>
+            <li>Hay <b id="f-tilings">980</b> formas distintas de cubrir este hexágono con rombos.</li>
+          </ul>
+        </div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<div class="modal" id="help" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <button class="x" id="help-x" type="button" aria-label="Cerrar">×</button>
+    <h3 id="help-title">Cómo se juega</h3>
+    <p>El tablero tiene rombos de tres colores que forman la ilusión de un cubo. Tu meta es volver a dejar el cubo armado, como en la imagen de Objetivo.</p>
+    <ul class="howto">
+      <li><span>Solo se levantan los <b>puntos blancos</b>, donde tres rombos forman un hexágono pequeño. Al pasar el cursor, la flecha indica hacia dónde girará.</span></li>
+      <li><span>Cada toque gira el grupo 60°. Con <kbd>Shift</kbd> o clic derecho gira al revés.</span></li>
+      <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
+      <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
+      <li><span>Cada mezcla te dice el <b>mínimo de movimientos</b> para resolverla. Lograrlo justo en ese número es una partida perfecta.</span></li>
+      <li><span><b>Arma tu mezcla:</b> elige un color y toca o arrastra sobre los rombos para pintarlos; con “Girar” mueves grupos de tres a otra posición. Necesitas la misma cantidad de cada color. Luego presiona “Jugar desde aquí”.</span></li>
+      <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
+    </ul>
+    <p class="credit">Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" type="button" id="help-ok">Entendido</button></div>
+  </div>
+</div>
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script>
+/*CORE*/
+const Core = (() => {
+  const SQ3 = Math.sqrt(3);
+  const mod3 = (x) => ((x % 3) + 3) % 3;
+  const k2 = (s) => s[0] + "," + s[1];
+  // Cada triángulo se identifica por la suma de sus tres vértices (coordenadas axiales enteras).
+  const isUp = (s) => mod3(s[0]) === 1;
+  const upSum = (a, b) => [3 * a + 1, 3 * b + 1];
+  const downSum = (a, b) => [3 * a + 2, 3 * b + 2];
+
+  function triVerts(s) {
+    if (isUp(s)) { const a = (s[0] - 1) / 3, b = (s[1] - 1) / 3; return [[a, b], [a + 1, b], [a, b + 1]]; }
+    const a = (s[0] - 2) / 3, b = (s[1] - 2) / 3;
+    return [[a + 1, b], [a, b + 1], [a + 1, b + 1]];
+  }
+
+  function geom(N) {
+    const inside = (a, b) => Math.abs(a) <= N && Math.abs(b) <= N && Math.abs(a + b) <= N;
+    const ups = [], downs = [], interior = [];
+    for (let a = -N; a <= N; a++) for (let b = -N; b <= N; b++) {
+      if (inside(a, b) && inside(a + 1, b) && inside(a, b + 1)) ups.push([a, b]);
+      if (inside(a + 1, b) && inside(a, b + 1) && inside(a + 1, b + 1)) downs.push([a, b]);
+      if (Math.abs(a) < N && Math.abs(b) < N && Math.abs(a + b) < N) interior.push([a, b]);
+    }
+    return { N, ups, downs, interior };
+  }
+
+  // Pantalla: hexágono con punta arriba. Unidades de lado de rombo.
+  const screen = (a, b) => [-(b * SQ3 / 2), -(a + b / 2)];
+
+  const upDown = (t) => (isUp(t.t1) ? [t.t1, t.t2] : [t.t2, t.t1]);
+
+  // 0 = cara izquierda, 1 = cara superior, 2 = cara derecha
+  function type(t) {
+    const [u, d] = upDown(t);
+    const ua = (u[0] - 1) / 3, ub = (u[1] - 1) / 3, da = (d[0] - 2) / 3, db = (d[1] - 2) / 3;
+    if (da === ua && db === ub) return 0;
+    if (da === ua && db === ub - 1) return 1;
+    if (da === ua - 1 && db === ub) return 2;
+    return -1;
+  }
+
+  const rot60 = (v) => [-v[1], v[0] + v[1]]; // 60° antihorario
+  function rotSum(s, v, k) {
+    let r = [s[0] - 3 * v[0], s[1] - 3 * v[1]];
+    for (let i = 0; i < k; i++) r = rot60(r);
+    return [r[0] + 3 * v[0], r[1] + 3 * v[1]];
+  }
+
+  function hexTris(v) {
+    const [a, b] = v;
+    return [upSum(a, b), upSum(a - 1, b), upSum(a, b - 1), downSum(a - 1, b), downSum(a, b - 1), downSum(a - 1, b - 1)];
+  }
+
+  function solvedTiles(g) {
+    return g.ups.map(([a, b], id) => {
+      let cx = 0, cy = 0;
+      for (const [p, q] of triVerts(upSum(a, b))) { const [x, y] = screen(p, q); cx += x; cy += y; }
+      const ang = Math.atan2(-cy, cx) * 180 / Math.PI;
+      const T = ang > 30 && ang < 150 ? 1 : (ang >= 150 || ang < -90) ? 0 : 2;
+      const d = T === 0 ? downSum(a, b) : T === 1 ? downSum(a, b - 1) : downSum(a - 1, b);
+      return { id, c: T, t1: upSum(a, b), t2: d };
+    });
+  }
+
+  function reindex(st) {
+    st.owner = new Map();
+    for (const t of st.tiles) { st.owner.set(k2(t.t1), t.id); st.owner.set(k2(t.t2), t.id); }
+  }
+
+  const copyTiles = (tiles) => tiles.map((t) => ({ id: t.id, c: t.c, t1: [...t.t1], t2: [...t.t2] }));
+
+  function createState(N, tiles) {
+    const g = geom(N);
+    const solved = solvedTiles(g);
+    const st = { N, g, solvedType: new Map(solved.map((t) => [k2(t.t1), t.c])), tiles: copyTiles(tiles || solved) };
+    reindex(st);
+    return st;
+  }
+
+  function clone(st) {
+    const c = { N: st.N, g: st.g, solvedType: st.solvedType, tiles: copyTiles(st.tiles) };
+    reindex(c);
+    return c;
+  }
+
+  function isValid(st) {
+    const nTris = st.g.ups.length + st.g.downs.length;
+    if (st.tiles.length !== st.g.ups.length || st.owner.size !== nTris) return false;
+    if (!st.tiles.every((t, i) => t.id === i && type(t) >= 0 && t.c >= 0 && t.c <= 2)) return false;
+    const valid = new Set([...st.g.ups.map(([a, b]) => k2(upSum(a, b))), ...st.g.downs.map(([a, b]) => k2(downSum(a, b)))]);
+    return [...st.owner.keys()].every((k) => valid.has(k));
+  }
+
+  function isInterior(st, v) { return st.g.interior.some((p) => p[0] === v[0] && p[1] === v[1]); }
+
+  function flippable(st, v) {
+    if (!isInterior(st, v)) return null;
+    const keys = hexTris(v).map(k2);
+    const set = new Set(keys);
+    const ids = new Set();
+    for (const k of keys) { const id = st.owner.get(k); if (id === undefined) return null; ids.add(id); }
+    if (ids.size !== 3) return null;
+    for (const id of ids) { const t = st.tiles[id]; if (!set.has(k2(t.t1)) || !set.has(k2(t.t2))) return null; }
+    return [...ids];
+  }
+
+  function applyMove(st, v, step) {
+    const k = ((step % 6) + 6) % 6;
+    const ids = flippable(st, v);
+    if (!ids) return false;
+    for (const id of ids) { const t = st.tiles[id]; t.t1 = rotSum(t.t1, v, k); t.t2 = rotSum(t.t2, v, k); }
+    reindex(st);
+    return true;
+  }
+
+  function isCorrect(st, t) {
+    const T = type(t);
+    return T === st.solvedType.get(k2(upDown(t)[0])) && t.c === T;
+  }
+  const correctCount = (st) => st.tiles.filter((t) => isCorrect(st, t)).length;
+  const isSolved = (st) => correctCount(st) === st.tiles.length;
+  const movesOf = (st) => st.g.interior.filter((v) => flippable(st, v));
+
+  // ¿Girar 180° en v quita un cubito (la cara superior está arriba del vértice) o lo pone?
+  function cubeDelta(st, v) {
+    const ids = flippable(st, v);
+    const top = ids.map((id) => st.tiles[id]).find((t) => type(t) === 1);
+    const ys = [...triVerts(top.t1), ...triVerts(top.t2)].map(([a, b]) => screen(a, b)[1]);
+    const cy = ys.reduce((s, y) => s + y, 0) / ys.length;
+    return cy < screen(v[0], v[1])[1] ? 1 : -1; // +1 = falta un cubito más
+  }
+
+  /* ---- Solucionador exacto (búsqueda bidireccional, hasta BACK + FWD movimientos) ---- */
+  const BACK = 5, FWD = 3;
+  const solvers = {};
+  function solver(N) {
+    if (solvers[N]) return solvers[N];
+    const g = geom(N);
+    const tris = [], idx = new Map();
+    for (const [a, b] of g.ups) { idx.set(k2(upSum(a, b)), tris.length); tris.push(upSum(a, b)); }
+    const nUp = tris.length;
+    for (const [a, b] of g.downs) { idx.set(k2(downSum(a, b)), tris.length); tris.push(downSum(a, b)); }
+    const nbr = [];
+    for (let i = 0; i < nUp; i++) {
+      const a = (tris[i][0] - 1) / 3, b = (tris[i][1] - 1) / 3;
+      nbr.push([idx.get(k2(downSum(a, b))), idx.get(k2(downSum(a, b - 1))), idx.get(k2(downSum(a - 1, b)))]);
+    }
+    // Anillo de 6 triángulos alrededor de cada vértice, en el orden de un giro de 60°.
+    const rings = g.interior.map((v) => {
+      const ring = []; let t = upSum(v[0], v[1]);
+      for (let i = 0; i < 6; i++) { ring.push(idx.get(k2(t))); t = rotSum(t, v, 1); }
+      return { v, ring };
+    });
+    const encode = (stt) => {
+      const P = new Int16Array(tris.length), C = new Int8Array(tris.length);
+      for (const t of stt.tiles) { const i = idx.get(k2(t.t1)), j = idx.get(k2(t.t2)); P[i] = j; P[j] = i; C[i] = C[j] = t.c; }
+      return { P, C };
+    };
+    const key = (P, C) => { let s = ""; for (let i = 0; i < nUp; i++) s += String.fromCharCode(97 + nbr[i].indexOf(P[i]) * 3 + C[i]); return s; };
+    const can = (P, ring) => { for (let i = 0; i < 6; i++) { const p = P[ring[i]]; if (p !== ring[(i + 1) % 6] && p !== ring[(i + 5) % 6]) return false; } return true; };
+    const turn = (P, C, ring, k) => {
+      const P2 = P.slice(), C2 = C.slice();
+      for (let i = 0; i < 6; i++) {
+        const j = (i + k) % 6, pi = P[ring[i]] === ring[(i + 1) % 6] ? (i + 1) % 6 : (i + 5) % 6;
+        P2[ring[j]] = ring[(pi + k) % 6]; C2[ring[j]] = C[ring[i]];
+      }
+      return { P: P2, C: C2 };
+    };
+    const children = (n, fn) => { for (const r of rings) if (can(n.P, r.ring)) for (let k = 1; k <= 5; k++) fn(turn(n.P, n.C, r.ring, k), r.v, k); };
+    // Bola alrededor del cubo armado: estado -> distancia exacta.
+    const solvedNode = encode(createState(N));
+    const back = new Map([[key(solvedNode.P, solvedNode.C), 0]]);
+    let frontier = [solvedNode];
+    for (let d = 1; d <= BACK; d++) {
+      const next = [];
+      for (const n of frontier) children(n, (c) => { const kk = key(c.P, c.C); if (!back.has(kk)) { back.set(kk, d); next.push(c); } });
+      frontier = next;
+    }
+    return (solvers[N] = { encode, key, children, back });
+  }
+
+  // Distancia mínima exacta al cubo armado (o null si es mayor que BACK + FWD) y el primer giro de un camino óptimo.
+  function solve(st) {
+    const S = solver(st.N);
+    const root = S.encode(st), rk = S.key(root.P, root.C);
+    if (S.back.has(rk)) {
+      const d = S.back.get(rk);
+      let move = null;
+      if (d > 0) S.children(root, (c, v, k) => { if (!move && S.back.get(S.key(c.P, c.C)) === d - 1) move = { v, k }; });
+      return { d, move };
+    }
+    let best = Infinity, bestMove = null;
+    const seen = new Set([rk]);
+    let level = [{ n: root, first: null }];
+    for (let df = 1; df <= FWD && best > df; df++) {
+      const next = [];
+      for (const { n, first } of level) S.children(n, (c, v, k) => {
+        const kk = S.key(c.P, c.C);
+        if (seen.has(kk)) return;
+        seen.add(kk);
+        const f = first || { v, k };
+        const db = S.back.get(kk);
+        if (db !== undefined && df + db < best) { best = df + db; bestMove = f; }
+        next.push({ n: c, first: f });
+      });
+      level = next;
+    }
+    return best === Infinity ? { d: null, move: null } : { d: best, move: bestMove };
+  }
+
+  // Si cada rombo tiene el color de su orientación, el tablero es una pila de cubitos:
+  // el mínimo es el número de cubitos que faltan (cada giro de 180° pone uno).
+  const isPure = (st) => st.tiles.every((t) => t.c === type(t));
+  function analyze(st) {
+    if (isSolved(st)) return { d: 0, move: null };
+    if (isPure(st)) {
+      const c = clone(st);
+      let d = 0, move = null;
+      while (!isSolved(c) && d < 500) {
+        const v = movesOf(c).find((w) => cubeDelta(c, w) === -1);
+        if (!v) break;
+        if (!move) move = { v, k: 3 };
+        applyMove(c, v, 3); d++;
+      }
+      return { d, move };
+    }
+    return solve(st);
+  }
+
+  // Devuelve el mínimo exacto de movimientos para resolver la mezcla.
+  function scramble(st, mode, rand = Math.random) {
+    const total = st.tiles.length;
+    if (mode === "pile") {
+      let n = 8 * st.N * st.N, last = null, guard = 0;
+      while ((n > 0 || correctCount(st) > total * 0.45) && guard++ < 5000) {
+        const cands = movesOf(st).filter((v) => !last || v[0] !== last[0] || v[1] !== last[1]);
+        const pool = cands.length ? cands : movesOf(st);
+        const v = pool[Math.floor(rand() * pool.length)];
+        applyMove(st, v, 3);
+        last = v; n--;
+      }
+      return { par: analyze(st).d };
+    }
+    // Caos: pocos giros de 60°/120°/180°/… elegidos para que el mínimo quede cerca de K y se pueda calcular exacto.
+    const K = st.N === 2 ? 6 : BACK + FWD;
+    const base = copyTiles(st.tiles);
+    let res = null;
+    for (let attempt = 0; attempt < 12; attempt++) {
+      st.tiles = copyTiles(base); reindex(st);
+      const used = [];
+      for (let i = 0; i < K; i++) {
+        const cands = movesOf(st).filter((v) => !used.slice(-2).some((u) => u[0] === v[0] && u[1] === v[1]));
+        const pool = cands.length ? cands : movesOf(st);
+        const v = pool[Math.floor(rand() * pool.length)];
+        applyMove(st, v, 1 + Math.floor(rand() * 5));
+        used.push(v);
+      }
+      res = solve(st);
+      if (res.d >= K - 2 && correctCount(st) <= total * 0.65) break;
+    }
+    return { par: res.d };
+  }
+
+  // Pista: mejor giro mirando dos movimientos hacia adelante.
+  function hint(st, avoid) {
+    let best = null;
+    for (const v of movesOf(st)) for (let k = 1; k <= 5; k++) {
+      if (avoid && avoid.v[0] === v[0] && avoid.v[1] === v[1] && (avoid.k + k) % 6 === 0) continue;
+      const a = clone(st); applyMove(a, v, k);
+      const s1 = correctCount(a);
+      let s2 = s1;
+      if (s1 < a.tiles.length) for (const w of movesOf(a)) {
+        if (w[0] === v[0] && w[1] === v[1]) continue;
+        for (let j = 1; j <= 5; j++) { const b = clone(a); applyMove(b, w, j); s2 = Math.max(s2, correctCount(b)); }
+      }
+      const score = Math.max(s1, s2 - 0.5) + Math.random() * 0.01;
+      if (!best || score > best.score) best = { v, k, score, gain: s1 - correctCount(st) };
+    }
+    return best;
+  }
+
+  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve };
+})();
+/*END CORE*/
+
+/* ---------- Sonido (sintetizado con Web Audio, sin archivos) ---------- */
+const Sound = (() => {
+  const KEY = "rombos-propp-sound";
+  let ctx = null, master = null, noiseBuf = null, unlocked = false, on = true;
+  try { on = localStorage.getItem(KEY) !== "0"; } catch (e) {}
+  function ensure() {
+    if (!on || !unlocked) return null;
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      try { ctx = new AC(); } catch (e) { return null; }
+      master = ctx.createGain(); master.gain.value = 0.55;
+      const comp = ctx.createDynamicsCompressor();
+      master.connect(comp).connect(ctx.destination);
+    }
+    if (ctx.state === "suspended") ctx.resume().catch(() => {});
+    return ctx;
+  }
+  function tone(freq, o = {}) {
+    const c = ensure(); if (!c) return;
+    const { t = 0, dur = 0.15, type = "sine", vol = 0.3, slide = 0, attack = 0.006 } = o;
+    const t0 = c.currentTime + t, osc = c.createOscillator(), g = c.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, t0);
+    if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(30, freq * slide), t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(g).connect(master); osc.start(t0); osc.stop(t0 + dur + 0.03);
+  }
+  function noise(o = {}) {
+    const c = ensure(); if (!c) return;
+    const { t = 0, dur = 0.12, vol = 0.2, freq = 2000, q = 1, sweep = 0 } = o;
+    if (!noiseBuf) {
+      noiseBuf = c.createBuffer(1, Math.floor(c.sampleRate * 0.5), c.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const t0 = c.currentTime + t, src = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain();
+    src.buffer = noiseBuf; f.type = "bandpass"; f.Q.value = q;
+    f.frequency.setValueAtTime(freq, t0);
+    if (sweep) f.frequency.exponentialRampToValueAtTime(freq * sweep, t0 + dur);
+    g.gain.setValueAtTime(0.0001, t0);
+    g.gain.exponentialRampToValueAtTime(vol, t0 + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    src.connect(f).connect(g).connect(master); src.start(t0); src.stop(t0 + dur + 0.03);
+  }
+  const SCALE = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760];
+  return {
+    get on() { return on; },
+    set(v) { on = v; try { localStorage.setItem(KEY, v ? "1" : "0"); } catch (e) {} },
+    unlock() { unlocked = true; ensure(); },
+    lift() { noise({ dur: 0.2, vol: 0.1, freq: 500, sweep: 3.5, q: 0.7 }); tone(240, { dur: 0.1, type: "triangle", vol: 0.07, slide: 1.6 }); },
+    place() { tone(170, { dur: 0.12, vol: 0.28, slide: 0.55 }); tone(1500, { dur: 0.045, type: "square", vol: 0.035 }); noise({ dur: 0.05, vol: 0.12, freq: 3800, q: 2 }); },
+    good(level) { const f = SCALE[Math.max(0, Math.min(SCALE.length - 1, level))]; tone(f, { dur: 0.35, vol: 0.13 }); tone(f * 2, { t: 0.04, dur: 0.25, vol: 0.04 }); },
+    bad() { tone(196, { dur: 0.12, type: "triangle", vol: 0.2 }); tone(146.8, { t: 0.09, dur: 0.18, type: "triangle", vol: 0.2 }); },
+    hint() { tone(880, { dur: 0.2, vol: 0.12 }); tone(1318.5, { t: 0.1, dur: 0.35, vol: 0.1 }); },
+    tick() { tone(1900, { dur: 0.03, vol: 0.05 }); },
+    tickAt(f) { tone(f, { dur: 0.12, vol: 0.1 }); tone(f * 1.5, { t: 0.02, dur: 0.08, vol: 0.03 }); },
+    toggle(onNow) { tone(onNow ? 660 : 440, { dur: 0.08, vol: 0.1 }); tone(onNow ? 990 : 330, { t: 0.07, dur: 0.12, vol: 0.1 }); },
+    undo() { noise({ dur: 0.16, vol: 0.09, freq: 2000, sweep: 0.3, q: 0.8 }); tone(500, { dur: 0.12, type: "triangle", vol: 0.06, slide: 0.6 }); },
+    shuffle() {
+      for (let i = 0; i < 16; i++) noise({ t: i * 0.032 + Math.random() * 0.01, dur: 0.03, vol: 0.1, freq: 2200 + Math.random() * 3000, q: 3 });
+      tone(330, { t: 0.55, dur: 0.14, type: "triangle", vol: 0.12, slide: 1.5 });
+    },
+    win() {
+      [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => tone(f, { t: i * 0.09, dur: 0.55, type: "triangle", vol: 0.15 }));
+      [1567.98, 2093, 2637].forEach((f, i) => tone(f, { t: 0.52 + i * 0.07, dur: 0.4, vol: 0.06 }));
+    },
+  };
+})();
+
+(() => {
+  const $ = (s) => document.querySelector(s);
+  const SQ3 = Core.SQ3;
+  const R = 200, M = 34;
+  const STORE = "rombos-propp-v1", BEST = "rombos-propp-best-v1";
+  const TILINGS = { 2: "20", 3: "980", 4: "232 848" };
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const svg = $("#board");
+  const wrap = $("#board-wrap");
+  const winEl = $("#win");
+  const helpEl = $("#help");
+
+  let st, S;
+  let hist = [];          // [{v:[a,b], k:1..5}] pasos antihorarios netos
+  let phase = "playing";  // playing | won | free
+  let mode = "pile";
+  let elapsed = 0, startedAt = null, tick = null;
+  let dir = -1;           // -1 horario, +1 antihorario
+  let showDots = true;
+  let hover = null, focusKey = null, hintMove = null, hintsUsed = 0;
+  let par = null;         // mínimo exacto de la mezcla actual
+  let parOver = false;    // true si el mínimo es mayor que lo que se calcula al instante
+  let tool = "paint", paintColor = 1, painting = false, editBackup = null;
+  const COLOR_NAMES = { 1: ["amarillo", "amarillos"], 0: ["rojo", "rojos"], 2: ["azul", "azules"] };
+  let layers = {};
+  let lastShown = { moves: null, ok: null };
+
+  const movs = (n) => `${n} ${n === 1 ? "movimiento" : "movimientos"}`;
+  const P = (a, b) => { const [x, y] = Core.screen(a, b); return [x * S, y * S]; };
+  const pts = (arr) => arr.map((p) => p[0].toFixed(2) + "," + p[1].toFixed(2)).join(" ");
+  const hexPts = (r) => [[0, -r], [r * SQ3 / 2, -r / 2], [r * SQ3 / 2, r / 2], [0, r], [-r * SQ3 / 2, r / 2], [-r * SQ3 / 2, -r / 2]];
+  const NB = [[1, 0], [0, 1], [-1, 1], [-1, 0], [0, -1], [1, -1]];
+  const vkey = (v) => v[0] + ":" + v[1];
+  const sameV = (a, b) => a && b && a[0] === b[0] && a[1] === b[1];
+  const sizeName = (N) => `${N}×${N}×${N}`;
+  const restart = (el, cls) => { if (!el || reduceMotion) return; el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
+
+  /* ---------- Dibujo ---------- */
+  function tileShape(t) {
+    const v1 = Core.triVerts(t.t1), v2 = Core.triVerts(t.t2);
+    const has = (arr, p) => arr.some((q) => q[0] === p[0] && q[1] === p[1]);
+    const sh = v1.filter((p) => has(v2, p));
+    const a1 = v1.find((p) => !has(v2, p)), a2 = v2.find((p) => !has(v1, p));
+    const corners = [a1, sh[0], a2, sh[1]].map(([a, b]) => P(a, b));
+    const cx = corners.reduce((s, p) => s + p[0], 0) / 4, cy = corners.reduce((s, p) => s + p[1], 0) / 4;
+    const sw = S * 0.08, gap = S * 0.035 + sw / 2, f = 1 - gap / (S * SQ3 / 4);
+    return { poly: corners.map(([x, y]) => [cx + (x - cx) * f, cy + (y - cy) * f]), cx, cy, sw };
+  }
+
+  function tileSVG(t) {
+    const s = tileShape(t);
+    const dl = Math.round(Math.hypot(s.cx, s.cy) / R * 320);
+    const p = pts(s.poly);
+    return `<g class="tile c${t.c}" data-id="${t.id}" style="--dl:${dl}ms">` +
+      `<polygon points="${p}" stroke-width="${s.sw.toFixed(2)}"/>` +
+      `<polygon class="bevel" points="${p}" stroke-width="${(S * 0.022).toFixed(2)}"/></g>`;
+  }
+
+  const DEFS = `<defs>
+    <linearGradient id="g-frame" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" style="stop-color:var(--frame-hi)"/><stop offset="1" style="stop-color:var(--frame-lo)"/></linearGradient>
+    <radialGradient id="g-sheen" cx="0.28" cy="0.12" r="0.85"><stop offset="0" style="stop-color:var(--sheen)"/><stop offset="1" style="stop-color:#fff;stop-opacity:0"/></radialGradient>
+    <filter id="f-lift" x="-30%" y="-30%" width="160%" height="170%"><feDropShadow dx="0" dy="10" stdDeviation="7" flood-color="#000" flood-opacity="0.38"/></filter>
+    <filter id="f-glow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="0" stdDeviation="1.6" flood-color="#000" flood-opacity="0.65"/></filter>
+  </defs>`;
+
+  function boardMarkup(N, tiles, main) {
+    const g = Core.createState(N).g;
+    const grid = g.ups.map(([a, b]) => {
+      const p = Core.triVerts([3 * a + 1, 3 * b + 1]).map(([x, y]) => P(x, y));
+      return `M${p[0][0].toFixed(2)},${p[0][1].toFixed(2)}L${p[1][0].toFixed(2)},${p[1][1].toFixed(2)}L${p[2][0].toFixed(2)},${p[2][1].toFixed(2)}Z`;
+    }).join("");
+    return (main ? DEFS : "") +
+      `<polygon points="${pts(hexPts(R + 15))}" fill="url(#g-frame)" stroke="url(#g-frame)" stroke-width="22" stroke-linejoin="round"/>` +
+      `<polygon class="tray" points="${pts(hexPts(R + 3))}" stroke-linejoin="round"/>` +
+      `<path class="grid" d="${grid}"/>` +
+      `<g${main ? ' id="tiles"' : ""}>${tiles.map(tileSVG).join("")}</g>` +
+      `<polygon class="sheen" points="${pts(hexPts(R + 3))}" fill="url(#g-sheen)"/>` +
+      (main ? `<g id="dots"></g><g id="hits"></g><g id="hint" visibility="hidden" filter="url(#f-glow)"></g><g id="hlg" visibility="hidden" filter="url(#f-glow)"></g><g id="lift" filter="url(#f-lift)"></g>` : "");
+  }
+
+  function buildBoard() {
+    S = R / st.N;
+    const hw = R * SQ3 / 2 + M, hh = R + M;
+    const vb = `${-hw} ${-hh} ${2 * hw} ${2 * hh}`;
+    svg.setAttribute("viewBox", vb);
+    svg.innerHTML = boardMarkup(st.N, st.tiles, true);
+    layers = { tiles: $("#tiles"), dots: $("#dots"), hits: $("#hits"), hlg: $("#hlg"), hint: $("#hint"), lift: $("#lift") };
+    const target = $("#target");
+    target.setAttribute("viewBox", vb);
+    target.innerHTML = boardMarkup(st.N, Core.createState(st.N).tiles, false);
+    const n = st.tiles.length;
+    $("#f-tiles").textContent = n;
+    $("#f-each").textContent = n / 3;
+    $("#f-tilings").textContent = TILINGS[st.N];
+    document.querySelectorAll("[data-size]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.size === st.N)));
+    $("#mix-pile").dataset.current = String(mode === "pile");
+    $("#mix-chaos").dataset.current = String(mode === "chaos" && phase !== "edit");
+    $("#mix-custom").dataset.current = String(mode === "custom" || phase === "edit");
+    if (phase === "edit") $("#mix-pile").dataset.current = "false";
+    const label = phase === "edit" ? "Armando" : mode === "pile" ? "En pilas" : mode === "chaos" ? "Caos total" : "Tu mezcla";
+    $("#mode-chip").textContent = `${label} · ${sizeName(st.N)}`;
+    syncEditUI();
+    lastShown = { moves: null, ok: null };
+    render();
+  }
+
+  function playIntro() {
+    if (!layers.tiles) return;
+    restart(layers.tiles, "intro");
+    clearTimeout(playIntro.t);
+    playIntro.t = setTimeout(() => layers.tiles && layers.tiles.classList.remove("intro"), 1100);
+  }
+
+  function render(goodIds, paintedId) {
+    layers.tiles.innerHTML = st.tiles.map(tileSVG).join("");
+    if (paintedId !== undefined && !reduceMotion) {
+      const el = layers.tiles.querySelector(`[data-id="${paintedId}"]`);
+      if (el) el.classList.add("painted");
+    }
+    layers.lift.innerHTML = "";
+    layers.lift.removeAttribute("transform");
+    if (goodIds && !reduceMotion) for (const id of goodIds) {
+      const el = layers.tiles.querySelector(`[data-id="${id}"]`);
+      if (el) el.classList.add("good");
+    }
+    let dots = "", hits = "";
+    for (const v of Core.movesOf(st)) {
+      const [x, y] = P(v[0], v[1]);
+      if (showDots && !(phase === "edit" && tool === "paint")) dots += `<circle class="dot" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(S * 0.07).toFixed(2)}"/>`;
+      hits += `<circle class="hit" tabindex="0" role="button" aria-label="Girar el grupo de tres rombos" data-v="${vkey(v)}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(S * 0.5).toFixed(2)}"/>`;
+    }
+    layers.dots.innerHTML = dots;
+    layers.hits.innerHTML = hits;
+    if (focusKey) {
+      const el = layers.hits.querySelector(`[data-v="${focusKey}"]`);
+      if (el) el.focus({ preventScroll: true });
+    }
+    drawHint();
+    drawHover();
+    updateStats();
+  }
+
+  // Flecha circular alrededor del vértice: cw = sentido horario en pantalla.
+  function arrowMarkup(cx, cy, cw) {
+    const r = S * 0.34, span = 240, a0 = cw ? -200 : 20, a1 = cw ? a0 + span : a0 - span;
+    const rad = (d) => d * Math.PI / 180;
+    const p = (a) => [cx + r * Math.cos(rad(a)), cy + r * Math.sin(rad(a))];
+    const [x0, y0] = p(a0), [x1, y1] = p(a1);
+    const s = cw ? 1 : -1;
+    const tx = -Math.sin(rad(a1)) * s, ty = Math.cos(rad(a1)) * s;
+    const nx = Math.cos(rad(a1)), ny = Math.sin(rad(a1));
+    const h = r * 0.62, w = r * 0.34;
+    const tip = [x1 + tx * h * 0.7, y1 + ty * h * 0.7], bx = x1 - tx * h * 0.3, by = y1 - ty * h * 0.3;
+    const c1 = [bx + nx * w, by + ny * w], c2 = [bx - nx * w, by - ny * w];
+    return `<path class="hl-arc" d="M${x0.toFixed(2)},${y0.toFixed(2)}A${r.toFixed(2)},${r.toFixed(2)} 0 1 ${cw ? 1 : 0} ${x1.toFixed(2)},${y1.toFixed(2)}"/>` +
+      `<path class="hl-head" d="M${pts([tip, c1, c2]).replace(/ /g, "L")}Z"/>`;
+  }
+
+  function hexOutline(v) {
+    return `<polygon class="hl-poly" points="${pts(NB.map(([da, db]) => P(v[0] + da, v[1] + db)))}"/>`;
+  }
+
+  function drawHover() {
+    const g = layers.hlg;
+    if (!hover) { g.setAttribute("visibility", "hidden"); svg.classList.remove("pointer"); return; }
+    const ok = !!Core.flippable(st, hover);
+    const [cx, cy] = P(hover[0], hover[1]);
+    const onHint = hintMove && sameV(hintMove.v, hover);
+    g.innerHTML = hexOutline(hover) + (ok && !onHint ? arrowMarkup(cx, cy, dir === -1) : "");
+    g.setAttribute("class", ok ? "" : "bad");
+    g.setAttribute("visibility", "visible");
+    svg.classList.toggle("pointer", ok);
+  }
+
+  function drawHint() {
+    const g = layers.hint;
+    if (!hintMove || !Core.flippable(st, hintMove.v)) { hintMove = null; g.setAttribute("visibility", "hidden"); g.innerHTML = ""; return; }
+    const [cx, cy] = P(hintMove.v[0], hintMove.v[1]);
+    // Etiqueta arriba del grupo; si no cabe, abajo.
+    const above = cy - S - 38, tagY = above < -(R + M) + 2 ? cy + S + 10 : above;
+    g.innerHTML = hexOutline(hintMove.v) + arrowMarkup(cx, cy, hintStep(hintMove) < 0) +
+      `<g class="hint-tag"><rect x="${(cx - 50).toFixed(2)}" y="${tagY.toFixed(2)}" width="100" height="28" rx="14"/>` +
+      `<text x="${cx.toFixed(2)}" y="${(tagY + 19).toFixed(2)}" text-anchor="middle">Toca aquí</text></g>`;
+    g.setAttribute("visibility", "visible");
+  }
+
+  // Pasos con signo para ejecutar la pista de una vez (+ antihorario, − horario).
+  function hintStep(h) {
+    if (h.k === 3) return dir === -1 ? -3 : 3;
+    return h.k < 3 ? h.k : h.k - 6;
+  }
+
+  function setHover(v) {
+    if ((v && hover && sameV(v, hover)) || (!v && !hover)) return;
+    hover = v;
+    drawHover();
+  }
+
+  /* ---------- Estado y estadísticas ---------- */
+  const fmt = (ms) => { const s = Math.floor(ms / 1000); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
+  const nowElapsed = () => elapsed + (startedAt ? Date.now() - startedAt : 0);
+  function readBest() { try { return JSON.parse(localStorage.getItem(BEST) || "{}") || {}; } catch (e) { return {}; } }
+
+  function updateStats() {
+    const movesEl = $("#s-moves");
+    movesEl.innerHTML = par !== null ? `${hist.length}<small>/${par}</small>` : String(hist.length);
+    if (lastShown.moves !== null && lastShown.moves !== hist.length) restart(movesEl, "bump");
+    lastShown.moves = hist.length;
+    $("#s-time").textContent = fmt(nowElapsed());
+    const ok = Core.correctCount(st), n = st.tiles.length, pct = Math.round(ok / n * 100);
+    const dd = $("#s-ok");
+    dd.innerHTML = `${ok}<small>/${n}</small>`;
+    dd.classList.toggle("done", ok === n);
+    if (lastShown.ok !== null && lastShown.ok !== ok) restart(dd, "bump");
+    lastShown.ok = ok;
+    const bar = $("#s-bar");
+    bar.style.width = pct + "%";
+    bar.classList.toggle("done", ok === n);
+    $("#s-barwrap").setAttribute("aria-valuenow", String(pct));
+
+    const goal = $("#goal");
+    goal.hidden = par === null && !parOver;
+    goal.classList.toggle("over", par === null && parOver);
+    if (par === null && parOver) {
+      $("#s-par").textContent = "8+";
+      $("#s-par-text").textContent = "Más de 8 movimientos";
+      $("#s-par-sub").textContent = Core.isSolved(st) ? "¡Resuelto! Era una mezcla difícil." : "Está tan lejos del cubo que el mínimo exacto no se calcula al instante.";
+    }
+    if (par !== null) {
+      $("#s-par").textContent = par;
+      $("#s-par-text").textContent = `Se resuelve en ${movs(par)}`;
+      const left = par - hist.length, solved = Core.isSolved(st);
+      goal.classList.toggle("perfect", solved && hist.length <= par);
+      $("#s-par-sub").textContent = solved ? (hist.length <= par ? "¡Partida perfecta! Lo hiciste en el mínimo." : "Resuelto. Ese era el mínimo posible.")
+        : left > 0 ? `Es el mínimo posible. Te quedan ${left} para una partida perfecta.`
+        : "Ya pasaste el mínimo, pero todavía puedes resolverlo.";
+    }
+    const b = readBest()[st.N];
+    $("#s-best").innerHTML = b
+      ? `Récord en ${sizeName(st.N)}: <b>${movs(b.moves)}</b> · ${fmt(b.ms)}`
+      : `Aún no tienes récord en ${sizeName(st.N)}.`;
+    $("#undo").disabled = hist.length === 0;
+    $("#hint-btn").disabled = ok === n;
+    if (phase === "edit") {
+      const cnt = colorCounts(), need = n / 3;
+      for (const c of [0, 1, 2]) {
+        $(`#cnt-${c}`).textContent = cnt[c];
+        const sw = document.querySelector(`.sw[data-color="${c}"]`);
+        sw.classList.toggle("off", cnt[c] !== need);
+        sw.setAttribute("aria-label", `${COLOR_NAMES[c][0]}: ${cnt[c]} de ${need}`);
+      }
+    }
+  }
+
+  function startTimer() {
+    if (startedAt !== null) return;
+    startedAt = Date.now();
+    clearInterval(tick);
+    tick = setInterval(() => { $("#s-time").textContent = fmt(nowElapsed()); }, 250);
+  }
+  function stopTimer() {
+    if (startedAt !== null) { elapsed += Date.now() - startedAt; startedAt = null; }
+    clearInterval(tick);
+  }
+
+  function say(msg, tone) {
+    const el = $("#status");
+    if (el.textContent === msg) return;
+    el.textContent = msg;
+    el.classList.toggle("warn", tone === "warn");
+    el.classList.toggle("good", tone === "good");
+    restart(el, "flash");
+  }
+  const IDLE = "Toca un punto blanco para girar ese grupo de tres rombos.";
+
+  function pushHist(v, step) {
+    const last = hist[hist.length - 1];
+    if (last && sameV(last.v, v)) {
+      last.k = (((last.k + step) % 6) + 6) % 6;
+      if (last.k === 0) hist.pop();
+    } else {
+      const k = ((step % 6) + 6) % 6;
+      if (k) hist.push({ v: [...v], k });
+    }
+  }
+
+  /* ---------- Animación y giros ---------- */
+  let queue = [], busy = false;
+  function enqueue(fn) {
+    if (queue.length > 4) return;
+    queue.push(fn);
+    if (!busy) pump();
+  }
+  async function pump() {
+    busy = true;
+    while (queue.length) {
+      try { await queue.shift()(); } catch (e) { console.error(e); }
+    }
+    busy = false;
+  }
+
+  function animate(ids, v, step) {
+    if (reduceMotion) return Promise.resolve();
+    const [cx, cy] = P(v[0], v[1]);
+    const lift = layers.lift;
+    for (const id of ids) {
+      const el = layers.tiles.querySelector(`[data-id="${id}"]`);
+      if (el) lift.appendChild(el);
+    }
+    layers.hlg.setAttribute("visibility", "hidden");
+    layers.hint.setAttribute("visibility", "hidden");
+    const target = -60 * step, dur = 170 + 80 * Math.abs(step);
+    return new Promise((res) => {
+      const t0 = performance.now();
+      let done = false;
+      const finish = () => { if (!done) { done = true; res(); } };
+      // Si la pestaña está en segundo plano y no hay cuadros de animación, el giro se completa igual.
+      setTimeout(finish, dur + 150);
+      const frame = (now) => {
+        if (done) return;
+        const t = Math.min(1, (now - t0) / dur);
+        const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const sc = 1 + 0.09 * Math.sin(Math.PI * t);
+        lift.setAttribute("transform", `translate(${cx} ${cy}) rotate(${target * e}) scale(${sc}) translate(${-cx} ${-cy})`);
+        if (t < 1) requestAnimationFrame(frame); else finish();
+      };
+      requestAnimationFrame(frame);
+    });
+  }
+
+  function closeWin() {
+    if (winEl.hidden) return;
+    winEl.hidden = true;
+    if (phase === "won") phase = "free";
+    save();
+  }
+
+  function rotate(v, step, record = true) {
+    enqueue(async () => {
+      const ids = Core.flippable(st, v);
+      if (!ids) {
+        Sound.bad();
+        restart(wrap, "shake");
+        say("Ahí no se puede levantar: esos rombos no forman un grupo de tres. Busca un punto blanco.", "warn");
+        return;
+      }
+      if (phase === "won") { phase = "free"; winEl.hidden = true; }
+      const editing = phase === "edit";
+      if (record && phase === "playing") startTimer();
+      const before = new Set(st.tiles.filter((t) => Core.isCorrect(st, t)).map((t) => t.id));
+      if (record || editing) Sound.lift(); else Sound.undo();
+      await animate(ids, v, step);
+      Core.applyMove(st, v, step);
+      if (record && !editing) pushHist(v, step);
+      if (hintMove && !sameV(hintMove.v, v)) hintMove = null;
+      else if (hintMove) { hintMove.k = (((hintMove.k - step) % 6) + 6) % 6; if (hintMove.k === 0) hintMove = null; }
+      const goodIds = ids.filter((id) => !before.has(id) && Core.isCorrect(st, st.tiles[id]));
+      render(goodIds);
+      Sound.place();
+      const okNow = Core.correctCount(st);
+      if (okNow > before.size && !Core.isSolved(st)) setTimeout(() => Sound.good(Math.round(okNow / st.tiles.length * 9)), 70);
+      afterChange();
+    });
+  }
+
+  function afterChange() {
+    if (phase === "edit") { sayEdit(); save(); return; }
+    if (phase === "playing" && Core.isSolved(st)) { win(); }
+    else if (phase === "playing") {
+      const left = st.tiles.length - Core.correctCount(st);
+      say(left <= 3 ? `Ya casi: ${left === 1 ? "falta 1 rombo" : `faltan ${left} rombos`}.` : IDLE);
+    } else if (Core.isSolved(st)) say("El cubo está armado. Elige una mezcla para jugar.", "good");
+    else say(IDLE);
+    save();
+  }
+
+  /* ---------- Confeti de rombos ---------- */
+  function confetti() {
+    if (reduceMotion) return;
+    const cv = $("#confetti"), ctx = cv.getContext("2d");
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    const W = innerWidth, H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const css = getComputedStyle(document.documentElement);
+    const cols = ["--face-top", "--face-left", "--face-right"].map((c) => css.getPropertyValue(c).trim());
+    const box = svg.getBoundingClientRect();
+    const ox = box.left + box.width / 2, oy = box.top + box.height * 0.42;
+    const parts = Array.from({ length: 160 }, () => {
+      const a = Math.random() * Math.PI * 2, sp = 4 + Math.random() * 10;
+      return { x: ox, y: oy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 5, r: Math.random() * 6, vr: (Math.random() - 0.5) * 0.3, s: 6 + Math.random() * 9, c: cols[Math.floor(Math.random() * 3)] };
+    });
+    const t0 = performance.now();
+    const step = (now) => {
+      const t = (now - t0) / 1000;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalAlpha = Math.max(0, 1 - Math.max(0, t - 1.6) / 1.2);
+      for (const p of parts) {
+        p.vy += 0.32; p.vx *= 0.985; p.vy *= 0.985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+        const h = p.s * 0.58;
+        ctx.beginPath(); ctx.moveTo(0, -h); ctx.lineTo(p.s / 2, 0); ctx.lineTo(0, h); ctx.lineTo(-p.s / 2, 0); ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+      if (t < 2.8) requestAnimationFrame(step); else ctx.clearRect(0, 0, W, H);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function win() {
+    stopTimer();
+    phase = "won";
+    hintMove = null;
+    const moves = hist.length, ms = elapsed;
+    const best = readBest();
+    const prev = best[st.N];
+    const isRecord = !prev || moves < prev.moves || (moves === prev.moves && ms < prev.ms);
+    if (isRecord) { best[st.N] = { moves, ms }; try { localStorage.setItem(BEST, JSON.stringify(best)); } catch (e) {} }
+    const perfect = par !== null && moves <= par;
+    $("#win-title").textContent = perfect ? "¡Partida perfecta!" : "¡Cubo restaurado!";
+    let line = `${movs(moves)} · ${fmt(ms)}`;
+    if (par !== null) line = perfect ? `Lo hiciste en el mínimo posible: ${line}` : `El mínimo era ${par}. Tú: ${line}`;
+    if (hintsUsed) line += ` · ${hintsUsed} ${hintsUsed === 1 ? "pista" : "pistas"}`;
+    $("#win-line").textContent = line;
+    $("#win-rec").hidden = !(isRecord && prev);
+    winEl.hidden = false;
+    say(perfect ? "¡Perfecto! Resuelto en el mínimo de movimientos." : "¡Resuelto! Puedes seguir girando libremente o mezclar otra vez.", "good");
+    if (layers.tiles) {
+      restart(layers.tiles, "celebrate");
+      setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400);
+    }
+    Sound.win();
+    confetti();
+    updateStats();
+    setTimeout(() => { if (!winEl.hidden) $("#win-again").focus({ preventScroll: true }); }, 500);
+  }
+
+  function resetSession(newPhase) {
+    hist = []; phase = newPhase; elapsed = 0; startedAt = null; clearInterval(tick);
+    winEl.hidden = true;
+    hover = null; focusKey = null; hintMove = null; hintsUsed = 0;
+    queue = [];
+  }
+
+  function newGame(N, m, quiet) {
+    mode = m;
+    st = Core.createState(N);
+    const r = Core.scramble(st, m);
+    resetSession("playing");
+    par = r.par; parOver = false;
+    buildBoard();
+    playIntro();
+    if (!quiet) Sound.shuffle();
+    say(`${m === "pile" ? "Mezclado en pilas" : "Caos total"}: se puede resolver en ${movs(par)}. Tu primer giro arranca el reloj.`);
+    save();
+  }
+
+  function resetToCube() {
+    st = Core.createState(st.N);
+    resetSession("free");
+    par = null; parOver = false;
+    buildBoard();
+    playIntro();
+    Sound.place();
+    say("Este es el cubo armado. Solo el punto del centro se puede girar: equivale a quitar la esquina.", "good");
+    save();
+  }
+
+  function undo() {
+    if (busy || phase === "edit") return;
+    const last = hist.pop();
+    if (!last) return;
+    if (phase === "won") { phase = "free"; winEl.hidden = true; }
+    rotate(last.v, last.k <= 3 ? -last.k : 6 - last.k, false);
+  }
+
+  function showHint() {
+    if (busy || phase === "edit" || Core.isSolved(st)) return;
+    // Primero el camino más corto exacto; si está demasiado lejos para calcularlo, una pista aproximada.
+    const a = Core.analyze(st);
+    const h = a.move ? { v: a.move.v, k: a.move.k, left: a.d - 1 } : Core.hint(st, hist[hist.length - 1]);
+    if (!h) { say("No hay ningún grupo que se pueda girar.", "warn"); return; }
+    hintMove = { v: h.v, k: h.k };
+    hintsUsed++;
+    drawHint();
+    Sound.hint();
+    const stp = hintStep(hintMove);
+    const turn = Math.abs(stp) === 3 ? "media vuelta (180°)" : `${Math.abs(stp) * 60}° en sentido ${stp < 0 ? "horario" : "antihorario"}`;
+    const extra = h.left !== undefined
+      ? (h.left === 0 ? " y quedará resuelto." : `. Es el camino más corto: después te faltarán ${movs(h.left)}.`)
+      : (h.gain > 0 ? ` y pondrá ${h.gain} ${h.gain === 1 ? "rombo" : "rombos"} en su sitio.` : " y te dejará listo para la siguiente jugada.");
+    say(`Pista: toca una vez el grupo amarillo que dice “Toca aquí”. Girará ${turn}${extra}`);
+  }
+
+  /* ---------- Editor: arma tu mezcla ---------- */
+  function colorCounts() {
+    const cnt = [0, 0, 0];
+    for (const t of st.tiles) cnt[t.c]++;
+    return cnt;
+  }
+
+  function sayEdit() {
+    const cnt = colorCounts(), need = st.tiles.length / 3;
+    const off = [1, 0, 2].filter((c) => cnt[c] !== need);
+    if (off.length) {
+      const parts = [1, 0, 2].map((c) => `${cnt[c]} ${COLOR_NAMES[c][cnt[c] === 1 ? 0 : 1]}`);
+      say(`Necesitas ${need} de cada color para jugar. Ahora tienes ${parts[0]}, ${parts[1]} y ${parts[2]}.`, "warn");
+    } else if (tool === "paint") {
+      say("Elige un color y toca o arrastra sobre los rombos para pintarlos. Con “Girar” los cambias de posición.");
+    } else {
+      say("Toca los puntos blancos para mover grupos de tres rombos. Con “Pintar” les cambias el color.");
+    }
+  }
+
+  function syncEditUI() {
+    const editing = phase === "edit";
+    $("#edit-dock").hidden = !editing;
+    $("#play-dock").hidden = editing;
+    svg.classList.toggle("paint", editing && tool === "paint");
+    $("#tool-paint").setAttribute("aria-pressed", String(tool === "paint"));
+    $("#tool-rotate").setAttribute("aria-pressed", String(tool === "rotate"));
+    document.querySelectorAll(".sw").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.color === paintColor)));
+  }
+
+  function enterEditor(N) {
+    if (phase !== "edit") editBackup = serialize();
+    stopTimer();
+    if (N && N !== st.N) st = Core.createState(N);
+    resetSession("edit");
+    par = null; parOver = false;
+    tool = "paint";
+    buildBoard();
+    Sound.tick();
+    sayEdit();
+    save();
+  }
+
+  function cancelEditor() {
+    if (editBackup && restore(editBackup)) { buildBoard(); setDir(dir, true); afterChange(); }
+    else newGame(st.N, "pile");
+    editBackup = null;
+    Sound.undo();
+  }
+
+  function setTool(t) { tool = t; hover = null; Sound.tick(); syncEditUI(); render(); sayEdit(); }
+  function setPaintColor(c) { paintColor = c; if (tool !== "paint") tool = "paint"; Sound.tick(); syncEditUI(); render(); sayEdit(); }
+
+  const PAINT_NOTE = { 1: 1046.5, 0: 784, 2: 587.3 };
+  function paintAt(e) {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const g = el && el.closest ? el.closest(".tile") : null;
+    if (!g || !svg.contains(g)) return;
+    const t = st.tiles[+g.dataset.id];
+    if (!t || t.c === paintColor) return;
+    t.c = paintColor;
+    render(null, t.id);
+    Sound.tickAt(PAINT_NOTE[paintColor]);
+    sayEdit();
+    save();
+  }
+
+  function editRandom() {
+    for (let i = 0; i < 30 * st.N; i++) {
+      const m = Core.movesOf(st);
+      Core.applyMove(st, m[Math.floor(Math.random() * m.length)], 1 + Math.floor(Math.random() * 5));
+    }
+    render(); playIntro(); Sound.shuffle(); sayEdit(); save();
+  }
+  function editClear() {
+    st = Core.createState(st.N);
+    render(); playIntro(); Sound.place(); sayEdit(); save();
+  }
+
+  function playFromEditor() {
+    const cnt = colorCounts(), need = st.tiles.length / 3;
+    if (cnt.some((c) => c !== need)) { Sound.bad(); restart(wrap, "shake"); sayEdit(); return; }
+    if (Core.isSolved(st)) { Sound.bad(); restart(wrap, "shake"); say("Así ya es el cubo armado. Pinta o gira algunos rombos antes de jugar.", "warn"); return; }
+    say("Calculando el mínimo de movimientos…");
+    const a = Core.analyze(st);
+    mode = "custom";
+    resetSession("playing");
+    par = a.d; parOver = a.d === null;
+    editBackup = null;
+    buildBoard();
+    playIntro();
+    Sound.shuffle();
+    say(par !== null
+      ? `¡Listo! Tu mezcla se puede resolver en ${movs(par)}. Tu primer giro arranca el reloj.`
+      : "¡Listo! Tu mezcla necesita más de 8 movimientos. Tu primer giro arranca el reloj.");
+    save();
+  }
+
+  /* ---------- Persistencia ---------- */
+  function serialize() {
+    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver };
+  }
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(serialize())); } catch (e) {}
+  }
+  function restore(snap) {
+    if (!snap || ![2, 3, 4].includes(snap.N) || !Array.isArray(snap.tiles)) return false;
+    try {
+      const s = Core.createState(snap.N, snap.tiles);
+      if (!Core.isValid(s)) return false;
+      st = s;
+      hist = Array.isArray(snap.hist) ? snap.hist.filter((h) => h && Array.isArray(h.v) && h.k >= 1 && h.k <= 5) : [];
+      phase = snap.phase === "playing" ? "playing" : snap.phase === "edit" ? "edit" : "free";
+      if (phase === "playing" && Core.isSolved(st)) phase = "free";
+      mode = ["chaos", "custom"].includes(snap.mode) ? snap.mode : "pile";
+      elapsed = +snap.elapsed || 0; startedAt = null;
+      dir = snap.dir === 1 ? 1 : -1;
+      showDots = snap.showDots !== false;
+      hintsUsed = +snap.hintsUsed || 0;
+      par = Number.isInteger(snap.par) && snap.par > 0 ? snap.par : null;
+      parOver = !!snap.parOver && par === null;
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- Entrada ---------- */
+  function pick(e) {
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return null;
+    const pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const p = pt.matrixTransform(ctm.inverse());
+    const my = -p.x / S, mx = -p.y / S;
+    const b = my * 2 / SQ3, a = mx - b / 2, c = -a - b;
+    let ra = Math.round(a), rb = Math.round(b);
+    const rc = Math.round(c);
+    const da = Math.abs(ra - a), db = Math.abs(rb - b), dc = Math.abs(rc - c);
+    if (da > db && da > dc) ra = -rb - rc; else if (db > dc) rb = -ra - rc;
+    const v = [ra, rb];
+    return st.g.interior.some((q) => sameV(q, v)) ? v : null;
+  }
+
+  // Un toque normal gira 60°; si el grupo tiene la pista, hace el giro completo de la pista.
+  function tap(v, reverse) {
+    if (hintMove && sameV(hintMove.v, v)) rotate(v, hintStep(hintMove));
+    else rotate(v, reverse ? -dir : dir);
+  }
+
+  const painting_ = () => phase === "edit" && tool === "paint";
+  svg.addEventListener("pointerdown", (e) => {
+    if (!painting_() || (e.button !== undefined && e.button > 0)) return;
+    e.preventDefault();
+    painting = true;
+    paintAt(e);
+  });
+  window.addEventListener("pointerup", () => { painting = false; });
+  window.addEventListener("pointercancel", () => { painting = false; });
+  svg.addEventListener("pointermove", (e) => {
+    if (painting_()) { if (painting) paintAt(e); return; }
+    if (e.pointerType === "mouse") setHover(pick(e));
+  });
+  svg.addEventListener("pointerleave", () => setHover(null));
+  svg.addEventListener("click", (e) => {
+    if (painting_()) return;
+    const v = pick(e);
+    if (!v) return;
+    focusKey = null;
+    tap(v, e.shiftKey);
+  });
+  svg.addEventListener("contextmenu", (e) => {
+    e.preventDefault();
+    if (painting_()) return;
+    const v = pick(e);
+    if (v) { focusKey = null; rotate(v, -dir); }
+  });
+  svg.addEventListener("focusin", (e) => {
+    const k = e.target.dataset && e.target.dataset.v;
+    if (k) { focusKey = k; setHover(k.split(":").map(Number)); }
+  });
+  svg.addEventListener("focusout", () => setHover(null));
+  svg.addEventListener("keydown", (e) => {
+    const k = e.target.dataset && e.target.dataset.v;
+    if (!k || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault();
+    focusKey = k;
+    tap(k.split(":").map(Number), e.shiftKey);
+  });
+
+  function setDir(d, quiet) {
+    dir = d;
+    $("#dir-cw").setAttribute("aria-pressed", String(d === -1));
+    $("#dir-ccw").setAttribute("aria-pressed", String(d === 1));
+    if (layers.hlg) { drawHover(); drawHint(); }
+    if (!quiet) { Sound.tick(); say(d === -1 ? "Cada toque girará 60° en sentido horario." : "Cada toque girará 60° en sentido antihorario."); }
+    save();
+  }
+  function setSound(onNow) {
+    Sound.set(onNow);
+    $("#sound-btn").setAttribute("aria-pressed", String(onNow));
+    if (onNow) { Sound.unlock(); Sound.toggle(true); }
+  }
+  function openHelp() { helpEl.hidden = false; Sound.tick(); setTimeout(() => $("#help-ok").focus({ preventScroll: true }), 50); }
+  function closeHelp() { if (!helpEl.hidden) { helpEl.hidden = true; $("#help-btn").focus({ preventScroll: true }); } }
+
+  $("#dir-cw").addEventListener("click", () => setDir(-1));
+  $("#dir-ccw").addEventListener("click", () => setDir(1));
+  $("#undo").addEventListener("click", undo);
+  $("#hint-btn").addEventListener("click", showHint);
+  $("#show-dots").addEventListener("change", (e) => { showDots = e.target.checked; Sound.tick(); render(); save(); });
+  $("#mix-pile").addEventListener("click", () => newGame(st.N, "pile"));
+  $("#mix-chaos").addEventListener("click", () => newGame(st.N, "chaos"));
+  $("#win-again").addEventListener("click", () => (mode === "custom" ? enterEditor() : newGame(st.N, mode)));
+  $("#mix-custom").addEventListener("click", () => enterEditor());
+  $("#tool-paint").addEventListener("click", () => setTool("paint"));
+  $("#tool-rotate").addEventListener("click", () => setTool("rotate"));
+  document.querySelectorAll(".sw").forEach((b) => b.addEventListener("click", () => setPaintColor(+b.dataset.color)));
+  $("#edit-random").addEventListener("click", editRandom);
+  $("#edit-clear").addEventListener("click", editClear);
+  $("#edit-cancel").addEventListener("click", cancelEditor);
+  $("#edit-play").addEventListener("click", playFromEditor);
+  $("#win-close").addEventListener("click", closeWin);
+  $("#win-x").addEventListener("click", closeWin);
+  winEl.addEventListener("click", (e) => { if (e.target === winEl) closeWin(); });
+  $("#reset").addEventListener("click", resetToCube);
+  $("#sound-btn").addEventListener("click", () => setSound(!Sound.on));
+  $("#help-btn").addEventListener("click", openHelp);
+  $("#help-x").addEventListener("click", closeHelp);
+  $("#help-ok").addEventListener("click", closeHelp);
+  helpEl.addEventListener("click", (e) => { if (e.target === helpEl) closeHelp(); });
+  document.querySelectorAll("[data-size]").forEach((b) => b.addEventListener("click", () => {
+    const N = +b.dataset.size;
+    if (phase === "edit" || mode === "custom") enterEditor(N); else newGame(N, mode);
+  }));
+
+  // El audio del navegador solo arranca después de una interacción.
+  const unlock = () => Sound.unlock();
+  document.addEventListener("pointerdown", unlock, { capture: true });
+  document.addEventListener("keydown", unlock, { capture: true });
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { closeHelp(); closeWin(); return; }
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
+    if (e.metaKey || e.ctrlKey || e.altKey || !helpEl.hidden) return;
+    if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    const k = e.key.toLowerCase();
+    if (k === "h") showHint();
+    else if (k === "z") undo();
+    else if (k === "r") setDir(-dir);
+    else if (k === "m") setSound(!Sound.on);
+    else if (k === "n") newGame(st.N, "pile");
+    else if (k === "c") newGame(st.N, "chaos");
+    else if (k === "e") enterEditor();
+    else if (phase === "edit" && (k === "1" || k === "2" || k === "3")) setPaintColor({ 1: 1, 2: 0, 3: 2 }[k]);
+    else if (phase === "edit" && k === "enter" && e.target === document.body) playFromEditor();
+  });
+
+  /* ---------- Arranque ---------- */
+  function start(data) {
+    $("#sound-btn").setAttribute("aria-pressed", String(Sound.on));
+    let snap = data && data.tiles ? data : null;
+    if (!snap) { try { snap = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { snap = null; } }
+    if (restore(snap)) {
+      winEl.hidden = true;
+      buildBoard();
+      playIntro();
+      setDir(dir, true);
+      $("#show-dots").checked = showDots;
+      if (phase === "playing" && hist.length) startTimer();
+      afterChange();
+    } else {
+      newGame(3, "pile", true);
+    }
+  }
+  if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === "function") {
+    window.claude.hot.snapshot(() => serialize());
+  }
+  window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+})();
+</script>
+</body>
+</html>
