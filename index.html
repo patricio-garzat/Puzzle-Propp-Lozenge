@@ -590,8 +590,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         <h2>Nueva partida</h2>
         <div class="levels" role="group" aria-label="Dificultad">
           <button type="button" data-level="easy" aria-pressed="true"><b>Fácil</b><small id="lv-easy">6–9</small></button>
-          <button type="button" data-level="mid" aria-pressed="false"><b>Intermedio</b><small id="lv-mid">10–15</small></button>
-          <button type="button" data-level="hard" aria-pressed="false"><b>Difícil</b><small id="lv-hard">16–21</small></button>
+          <button type="button" data-level="mid" aria-pressed="false"><b>Intermedio</b><small id="lv-mid">15–20</small></button>
+          <button type="button" data-level="hard" aria-pressed="false"><b>Difícil</b><small id="lv-hard">30–35</small></button>
         </div>
         <p class="level-note" id="level-note">Movimientos para resolver la mezcla.</p>
         <div class="modes">
@@ -657,7 +657,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       <li><span>Cada toque gira el grupo 60°. Con <kbd>Shift</kbd> o clic derecho gira al revés.</span></li>
       <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
       <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
-      <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (10–15) o Difícil (16–21). En 2×2×2 hay menos posibilidades: en pilas el máximo es 8 y en caos, 14.</span></li>
+      <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). Los tableros chicos no dan para tanto: en 2×2×2 solo hay Fácil (en pilas el máximo es 8 y en caos, 14), y en 3×3×3 en pilas el máximo es 27, así que Difícil solo existe en caos.</span></li>
       <li><span>Cada mezcla te dice en cuántos movimientos se puede resolver. Cuando dice “mínimo”, es el mínimo exacto. En caos Intermedio y Difícil de 3×3×3 y 4×4×4 es una meta segura: seguro se puede en esa cantidad, aunque quizá exista un camino un poco más corto. Lograrlo en ese número o menos es una partida perfecta.</span></li>
       <li><span><b>Arma tu mezcla:</b> elige un color y toca o arrastra sobre los rombos para pintarlos; con “Girar” mueves grupos de tres a otra posición. Necesitas la misma cantidad de cada color. Luego presiona “Jugar desde aquí”.</span></li>
       <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
@@ -902,7 +902,7 @@ const Core = (() => {
   }
 
   /* ---- Mezclas por dificultad ---- */
-  const RANGES = { easy: [6, 9], mid: [10, 15], hard: [16, 21] };
+  const RANGES = { easy: [6, 9], mid: [15, 20], hard: [30, 35] };
   // Mayor mínimo posible: en pilas, los cubitos de la caja; en caos, 14 para 2×2×2.
   const maxFor = (N, mode) => (mode === "pile" ? N * N * N : N === 2 ? 14 : Infinity);
   function rangeFor(N, mode, level) {
@@ -933,8 +933,9 @@ const Core = (() => {
   // Devuelve { par, exact, route, level }: par es el mínimo exacto (exact) o una meta segura,
   // y route es una solución conocida de esa longitud (para las pistas).
   function scramble(st, mode, level = "easy", rand = Math.random) {
+    // Si el nivel no cabe en este tamaño, se usa el más alto que sí cabe.
     let range = rangeFor(st.N, mode, level);
-    if (!range) { level = "easy"; range = rangeFor(st.N, mode, level); }
+    for (const lv of ["mid", "easy"]) if (!range && lv !== level) { const r = rangeFor(st.N, mode, lv); if (r && (lv === "easy" || level === "hard")) { level = lv; range = r; } }
     const [lo, hi] = range;
     const pick = () => lo + Math.floor(rand() * (hi - lo + 1));
     const base = copyTiles(createState(st.N).tiles);
@@ -1545,7 +1546,7 @@ const Sound = (() => {
         playIntro();
         if (!quiet) Sound.shuffle();
         const name = `${m === "pile" ? "En pilas" : "Caos total"}, ${LEVEL_NAMES[level].toLowerCase()}`;
-        const note = want !== level ? ` (En ${sizeName(N)} ${m === "pile" ? "en pilas el máximo es 8" : "en caos el máximo es 14"}, así que usé ${LEVEL_NAMES[level]}.)` : "";
+        const note = want !== level ? ` (En ${sizeName(N)} ${m === "pile" ? "en pilas" : "en caos"} el máximo es ${Core.maxFor(N, m)}, así que usé ${LEVEL_NAMES[level]}.)` : "";
         say(`${name}: ${parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.${note}`);
         save();
       } finally {
@@ -1575,8 +1576,9 @@ const Sound = (() => {
       b.setAttribute("aria-pressed", String(lv === level));
       $(`#lv-${lv}`).textContent = r ? (r[0] === r[1] ? `${r[0]}` : `${r[0]}–${r[1]}`) : "—";
     }
-    $("#level-note").textContent = st.N === 2
-      ? (m === "pile" ? "En 2×2×2 en pilas el máximo es 8 movimientos." : "En 2×2×2 en caos el máximo es 14 movimientos.")
+    const max = Core.maxFor(st.N, m);
+    $("#level-note").textContent = max < 35
+      ? `En ${sizeName(st.N)} ${m === "pile" ? "en pilas" : "en caos"} el máximo es ${max} movimientos.`
       : "Movimientos para resolver la mezcla.";
   }
 
