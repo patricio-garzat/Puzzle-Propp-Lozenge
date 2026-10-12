@@ -406,6 +406,16 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .busy-board #tiles { opacity: 0.55; transition: opacity 0.2s ease; }
 
 /* ---------- Editor: arma tu mezcla (estilos) ---------- */
+/* Rombos sin pintar: blancos, con un sombreado leve por orientación para que se siga viendo el cubo */
+.tile.blank.o1 { color: #F7F6FD; }
+.tile.blank.o0 { color: #DEDBEC; }
+.tile.blank.o2 { color: #C7C3DA; }
+.tile.blank .bevel { stroke: rgba(255, 255, 255, 0.9); }
+.sw.done { opacity: 0.45; }
+.sw.done span { font-size: 15px; }
+.tool.go-play.locked { filter: grayscale(0.7); opacity: 0.6; }
+.tile.nope { animation: nope 0.3s ease; transform-box: fill-box; transform-origin: center; }
+@keyframes nope { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .dock.edit { border-radius: 22px; border: 2px solid var(--face-top); }
 .edit-label { font-family: var(--f-mono); font-weight: 600; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-left: 8px; }
 .swatches { display: inline-flex; gap: 6px; }
@@ -659,7 +669,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
       <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). Los tableros chicos no dan para tanto: en 2×2×2 solo hay Fácil (en pilas el máximo es 8 y en caos, 14), y en 3×3×3 en pilas el máximo es 27, así que Difícil solo existe en caos.</span></li>
       <li><span>Cada mezcla te dice en cuántos movimientos se puede resolver. Cuando dice “mínimo”, es el mínimo exacto. En caos Intermedio y Difícil de 3×3×3 y 4×4×4 es una meta segura: seguro se puede en esa cantidad, aunque quizá exista un camino un poco más corto. Lograrlo en ese número o menos es una partida perfecta.</span></li>
-      <li><span><b>Arma tu mezcla:</b> elige un color y toca o arrastra sobre los rombos para pintarlos; con “Girar” mueves grupos de tres a otra posición. Necesitas la misma cantidad de cada color. Luego presiona “Jugar desde aquí”.</span></li>
+      <li><span><b>Arma tu mezcla:</b> el cubo empieza en blanco. Elige un color y toca o arrastra sobre los rombos para pintarlos: cada color tiene un cupo (9 en 3×3×3) y no puedes poner más. Cuando se acaba uno, pasa solo al siguiente. Toca un rombo de su mismo color para quitarlo. Con “Girar” mueves grupos de tres. Cuando todo esté pintado, presiona “Jugar desde aquí”.</span></li>
       <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
     </ul>
     <p class="credit">Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
@@ -758,7 +768,7 @@ const Core = (() => {
   function isValid(st) {
     const nTris = st.g.ups.length + st.g.downs.length;
     if (st.tiles.length !== st.g.ups.length || st.owner.size !== nTris) return false;
-    if (!st.tiles.every((t, i) => t.id === i && type(t) >= 0 && t.c >= 0 && t.c <= 2)) return false;
+    if (!st.tiles.every((t, i) => t.id === i && type(t) >= 0 && t.c >= -1 && t.c <= 2)) return false;
     const valid = new Set([...st.g.ups.map(([a, b]) => k2(upSum(a, b))), ...st.g.downs.map(([a, b]) => k2(downSum(a, b)))]);
     return [...st.owner.keys()].every((k) => valid.has(k));
   }
@@ -1131,7 +1141,8 @@ const Sound = (() => {
     const s = tileShape(t);
     const dl = Math.round(Math.hypot(s.cx, s.cy) / R * 320);
     const p = pts(s.poly);
-    return `<g class="tile c${t.c}" data-id="${t.id}" style="--dl:${dl}ms">` +
+    const cls = t.c < 0 ? `blank o${Core.type(t)}` : `c${t.c}`;
+    return `<g class="tile ${cls}" data-id="${t.id}" style="--dl:${dl}ms">` +
       `<polygon points="${p}" stroke-width="${s.sw.toFixed(2)}"/>` +
       `<polygon class="bevel" points="${p}" stroke-width="${(S * 0.022).toFixed(2)}"/></g>`;
   }
@@ -1327,11 +1338,15 @@ const Sound = (() => {
     if (phase === "edit") {
       const cnt = colorCounts(), need = n / 3;
       for (const c of [0, 1, 2]) {
-        $(`#cnt-${c}`).textContent = cnt[c];
+        const left = need - cnt[c];
+        $(`#cnt-${c}`).textContent = left > 0 ? left : "✓";
         const sw = document.querySelector(`.sw[data-color="${c}"]`);
-        sw.classList.toggle("off", cnt[c] !== need);
-        sw.setAttribute("aria-label", `${COLOR_NAMES[c][0]}: ${cnt[c]} de ${need}`);
+        sw.classList.toggle("done", left <= 0);
+        sw.classList.remove("off");
+        sw.title = left > 0 ? `${COLOR_NAMES[c][0][0].toUpperCase() + COLOR_NAMES[c][0].slice(1)}: quedan ${left} por poner` : `Ya pusiste los ${need} ${COLOR_NAMES[c][1]}`;
+        sw.setAttribute("aria-label", sw.title);
       }
+      $("#edit-play").classList.toggle("locked", blanks() > 0);
     }
   }
 
@@ -1636,17 +1651,28 @@ const Sound = (() => {
     return cnt;
   }
 
+  const blanks = () => st.tiles.filter((t) => t.c < 0).length;
+  const leftOf = (c) => st.tiles.length / 3 - colorCounts()[c];
+  const colorName = (c, n) => COLOR_NAMES[c][n === 1 ? 0 : 1];
+
   function sayEdit() {
-    const cnt = colorCounts(), need = st.tiles.length / 3;
-    const off = [1, 0, 2].filter((c) => cnt[c] !== need);
-    if (off.length) {
-      const parts = [1, 0, 2].map((c) => `${cnt[c]} ${COLOR_NAMES[c][cnt[c] === 1 ? 0 : 1]}`);
-      say(`Necesitas ${need} de cada color para jugar. Ahora tienes ${parts[0]}, ${parts[1]} y ${parts[2]}.`, "warn");
+    if (blanks() > 0) {
+      const parts = [1, 0, 2].filter((c) => leftOf(c) > 0).map((c) => `${leftOf(c)} ${colorName(c, leftOf(c))}`);
+      const list = parts.length > 1 ? parts.slice(0, -1).join(", ") + " y " + parts[parts.length - 1] : parts[0];
+      if (tool === "rotate") say(`Toca los puntos blancos para mover grupos de tres. Te faltan por pintar: ${list}.`);
+      else say(`Pintando con ${colorName(paintColor, 1)}: toca o arrastra sobre los rombos blancos. Te faltan ${list}.`);
     } else if (tool === "paint") {
-      say("Elige un color y toca o arrastra sobre los rombos para pintarlos. Con “Girar” los cambias de posición.");
+      say("¡Ya pusiste todos los colores! Toca un rombo de su mismo color para quitarlo, usa “Girar” para moverlos o presiona “Jugar desde aquí”.", "good");
     } else {
-      say("Toca los puntos blancos para mover grupos de tres rombos. Con “Pintar” les cambias el color.");
+      say("Toca los puntos blancos para mover grupos de tres rombos. Cuando quieras, presiona “Jugar desde aquí”.", "good");
     }
+  }
+
+  // Cubo en blanco: la forma del cubo armado, sin colores.
+  function blankBoard(N) {
+    const b = Core.createState(N);
+    for (const t of b.tiles) t.c = -1;
+    return b;
   }
 
   function syncEditUI() {
@@ -1662,10 +1688,10 @@ const Sound = (() => {
   function enterEditor(N) {
     if (phase !== "edit") editBackup = serialize();
     stopTimer();
-    if (N && N !== st.N) st = Core.createState(N);
+    st = blankBoard(N || st.N);
     resetSession("edit");
     par = null; parOver = false; route = null; editGen = null;
-    tool = "paint";
+    tool = "paint"; paintColor = 1;
     buildBoard();
     Sound.tick();
     sayEdit();
@@ -1683,17 +1709,46 @@ const Sound = (() => {
   function setPaintColor(c) { paintColor = c; if (tool !== "paint") tool = "paint"; Sound.tick(); syncEditUI(); render(); sayEdit(); }
 
   const PAINT_NOTE = { 1: 1046.5, 0: 784, 2: 587.3 };
-  function paintAt(e) {
+  // Al tocar: un rombo de otro color o blanco se pinta (si queda cupo); uno del mismo color se borra.
+  // Al arrastrar se mantiene la acción del primer rombo tocado.
+  let dragAction = null, lastPainted = null;
+  function paintAt(e, first) {
     const el = document.elementFromPoint(e.clientX, e.clientY);
     const g = el && el.closest ? el.closest(".tile") : null;
     if (!g || !svg.contains(g)) return;
     const t = st.tiles[+g.dataset.id];
-    if (!t || t.c === paintColor) return;
-    t.c = paintColor;
+    if (!t || (!first && lastPainted === t.id)) return;
+    if (first) dragAction = t.c === paintColor ? "erase" : "paint";
+    lastPainted = t.id;
+    if (dragAction === "erase") {
+      if (t.c !== paintColor) return;
+      t.c = -1;
+      Sound.tickAt(PAINT_NOTE[paintColor] / 2);
+    } else {
+      if (t.c === paintColor) return;
+      if (leftOf(paintColor) <= 0) {
+        if (first || t.c < 0) {
+          Sound.bad();
+          g.classList.remove("nope"); void g.getBoundingClientRect(); g.classList.add("nope");
+          say(`Ya pusiste los ${st.tiles.length / 3} ${colorName(paintColor, 2)}. Toca uno de ellos para quitarlo o elige otro color.`, "warn");
+        }
+        return;
+      }
+      t.c = paintColor;
+      Sound.tickAt(PAINT_NOTE[paintColor]);
+    }
     editGen = null;
+    // Si se acabó este color, pasa solo al siguiente que todavía tenga cupo.
+    let advanced = false;
+    if (dragAction === "paint" && leftOf(paintColor) <= 0) {
+      const next = [1, 0, 2].find((c) => leftOf(c) > 0);
+      if (next !== undefined) { paintColor = next; advanced = true; dragAction = null; painting = false; syncEditUI(); }
+    }
     render(null, t.id);
-    Sound.tickAt(PAINT_NOTE[paintColor]);
-    sayEdit();
+    if (advanced) {
+      Sound.toggle(true);
+      say(`¡Listo con ese color! Ahora sigue el ${colorName(paintColor, 1)}: te faltan ${leftOf(paintColor)}.`);
+    } else sayEdit();
     save();
   }
 
@@ -1713,13 +1768,20 @@ const Sound = (() => {
     }, 30);
   }
   function editClear() {
-    st = Core.createState(st.N);
+    st = blankBoard(st.N);
+    paintColor = 1;
+    syncEditUI();
     editGen = null;
     render(); playIntro(); Sound.place(); sayEdit(); save();
   }
 
   function playFromEditor() {
     const cnt = colorCounts(), need = st.tiles.length / 3;
+    if (blanks() > 0) {
+      Sound.bad(); restart(wrap, "shake");
+      say(`Todavía hay ${blanks()} ${blanks() === 1 ? "rombo blanco" : "rombos blancos"}. Píntalos todos para empezar a jugar.`, "warn");
+      return;
+    }
     if (cnt.some((c) => c !== need)) { Sound.bad(); restart(wrap, "shake"); sayEdit(); return; }
     if (Core.isSolved(st)) { Sound.bad(); restart(wrap, "shake"); say("Así ya es el cubo armado. Pinta o gira algunos rombos antes de jugar.", "warn"); return; }
     say("Calculando el mínimo de movimientos…");
@@ -1752,6 +1814,7 @@ const Sound = (() => {
     try {
       const s = Core.createState(snap.N, snap.tiles);
       if (!Core.isValid(s)) return false;
+      if (snap.phase !== "edit" && s.tiles.some((t) => t.c < 0)) return false;
       st = s;
       hist = Array.isArray(snap.hist) ? snap.hist.filter((h) => h && Array.isArray(h.v) && h.k >= 1 && h.k <= 5) : [];
       phase = snap.phase === "playing" ? "playing" : snap.phase === "edit" ? "edit" : "free";
@@ -1800,7 +1863,8 @@ const Sound = (() => {
     if (!painting_() || (e.button !== undefined && e.button > 0)) return;
     e.preventDefault();
     painting = true;
-    paintAt(e);
+    lastPainted = null;
+    paintAt(e, true);
   });
   window.addEventListener("pointerup", () => { painting = false; });
   window.addEventListener("pointercancel", () => { painting = false; });
