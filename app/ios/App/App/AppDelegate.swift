@@ -27,6 +27,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        disableZoom()
+    }
+
+    /// Cube Swipe nunca hace zoom: ni con pellizco ni con doble toque.
+    private func disableZoom() {
+        guard let bridge = window?.rootViewController as? CAPBridgeViewController,
+              let scrollView = bridge.webView?.scrollView else { return }
+        scrollView.minimumZoomScale = 1
+        scrollView.maximumZoomScale = 1
+        scrollView.setZoomScale(1, animated: false)
+        scrollView.pinchGestureRecognizer?.isEnabled = false
+        scrollView.bouncesZoom = false
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

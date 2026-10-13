@@ -43,6 +43,21 @@ for tag in (
     assert tag in html, tag
     html = html.replace(tag, "")
 
+# Sin zoom en la app: ni pellizco ni doble toque
+vp_old = '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">'
+assert vp_old in html, "no encontré el viewport"
+html = html.replace(vp_old, '<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">')
+no_zoom = """<style>html, body { touch-action: manipulation; -webkit-text-size-adjust: 100%; }</style>
+<script>
+  // Bloquea el pellizco (gestos de Safari/WebKit) y el doble toque para hacer zoom
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) => document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+  document.addEventListener("touchmove", (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  let lastTouchEnd = 0;
+  document.addEventListener("touchend", (e) => { const now = Date.now(); if (now - lastTouchEnd < 300 && !e.target.closest("#board, .ill-swipe")) e.preventDefault(); lastTouchEnd = now; }, { passive: false });
+</script>
+"""
+html = html.replace("</head>", no_zoom + "</head>", 1)
+
 # Versión de la app (Ajustes → Acerca de): la misma del proyecto de Xcode que sube release.sh
 pbx = open(os.path.join(HERE, "ios", "App", "App.xcodeproj", "project.pbxproj"), encoding="utf-8").read()
 version = re.search(r"MARKETING_VERSION = ([0-9.]+);", pbx).group(1)
