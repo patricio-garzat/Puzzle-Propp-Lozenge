@@ -21,35 +21,37 @@
 <style>
 /* Layout: consola de juego a pantalla completa. Barra superior; tres columnas en escritorio (tu partida · tablero · nueva partida); en móvil se apila y hace scroll */
 :root {
-  --bg: #F4F1FF;
-  --pat-a: #EEEAFF;
-  --pat-b: #E5DFFF;
-  --pat-c: #DAD2FA;
+  --bg: #F3F4F6;
+  --pat-a: #F0F1F4;
+  --pat-b: #ECEEF1;
+  --pat-c: #E8EAEE;
   --card: #FFFFFF;
-  --card-2: #F5F2FF;
-  --line: #D9D1F3;
-  --ink: #17133A;
-  --muted: #554E80;
-  --accent: #FFCF3D;
-  --accent-deep: #D9A40F;
-  --accent-ink: #1B1740;
-  --focus: #3D46D6;
-  --shadow: rgba(48, 36, 130, 0.14);
-  --shadow-strong: rgba(48, 36, 130, 0.28);
-  --scrim: rgba(244, 241, 255, 0.8);
-  --veil: rgba(27, 23, 64, 0.42);
-  --ok: #129460;
-  --warn: #D33B30;
-  --glow: 0.42;
+  --card-2: #F2F3F6;
+  --line: #E1E4EA;
+  --ink: #1B1E2C;
+  --muted: #5D6375;
+  --accent: #F8C53A;
+  --accent-deep: #D9A21C;
+  --accent-ink: #1B1E2C;
+  --focus: #3B44C4;
+  --shadow: rgba(22, 26, 44, 0.08);
+  --shadow-strong: rgba(22, 26, 44, 0.18);
+  --scrim: rgba(243, 244, 246, 0.85);
+  --veil: rgba(22, 24, 36, 0.32);
+  --ok: #16885A;
+  --warn: #C9392F;
+  --glow: 0.12;
+  --home-glow: rgba(90, 100, 160, 0.10);
+  --motion: paused; /* en claro, el fondo y el brillo no se mueven */
 
-  /* Colores fijos del puzzle (iguales en ambos temas: es un objeto físico) */
-  --face-top: #FFCF3D;
-  --face-left: #FF5D52;
-  --face-right: #3D46D6;
-  --frame-hi: #2E2A66;
-  --frame-lo: #0E0C24;
-  --tray: #1E1B42;
-  --tray-line: #332F6A;
+  /* Colores del puzzle: en claro, un poco menos saturados para no deslumbrar */
+  --face-top: #F6C340;
+  --face-left: #EC5A4E;
+  --face-right: #3E48C8;
+  --frame-hi: #2C3047;
+  --frame-lo: #12141F;
+  --tray: #1D2030;
+  --tray-line: #30344A;
   --tray-edge: rgba(0, 0, 0, 0.45);
   --halo: #FFFFFF;
   --hl-fill: rgba(255, 255, 255, 0.16);
@@ -67,6 +69,9 @@
     --accent: #FFCF3D; --accent-deep: #C8930A; --accent-ink: #1B1740; --focus: #FFCF3D;
     --shadow: rgba(0, 0, 0, 0.45); --shadow-strong: rgba(0, 0, 0, 0.65); --scrim: rgba(18, 16, 42, 0.8);
     --veil: rgba(5, 4, 16, 0.6); --ok: #4ED69A; --warn: #FF8A80; --glow: 0.5;
+    --face-top: #FFCF3D; --face-left: #FF5D52; --face-right: #3D46D6;
+    --frame-hi: #2E2A66; --frame-lo: #0E0C24; --tray: #1E1B42; --tray-line: #332F6A;
+    --home-glow: rgba(123, 107, 255, 0.28); --motion: running;
     color-scheme: dark;
   }
 }
@@ -76,6 +81,9 @@
   --accent: #FFCF3D; --accent-deep: #C8930A; --accent-ink: #1B1740; --focus: #FFCF3D;
   --shadow: rgba(0, 0, 0, 0.45); --shadow-strong: rgba(0, 0, 0, 0.65); --scrim: rgba(18, 16, 42, 0.8);
   --veil: rgba(5, 4, 16, 0.6); --ok: #4ED69A; --warn: #FF8A80; --glow: 0.5;
+    --face-top: #FFCF3D; --face-left: #FF5D52; --face-right: #3D46D6;
+    --frame-hi: #2E2A66; --frame-lo: #0E0C24; --tray: #1E1B42; --tray-line: #332F6A;
+    --home-glow: rgba(123, 107, 255, 0.28); --motion: running;
   color-scheme: dark;
 }
 
@@ -99,7 +107,7 @@ button { font: inherit; color: inherit; }
 .bg { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none;
   -webkit-mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, #000 85%);
           mask-image: radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, #000 85%); }
-.bg svg { position: absolute; left: 0; top: 0; width: calc(100% + 97px); height: calc(100% + 168px); animation: drift 60s linear infinite; }
+.bg svg { position: absolute; left: 0; top: 0; width: calc(100% + 97px); height: calc(100% + 168px); animation: drift 60s linear infinite; animation-play-state: var(--motion); }
 @keyframes drift { to { transform: translate(-48.5px, -84px); } }
 
 /* ---------- Estructura ---------- */
@@ -175,7 +183,7 @@ button { font: inherit; color: inherit; }
   border-radius: 50%; z-index: 0; pointer-events: none;
   background: conic-gradient(from 30deg, var(--face-top), var(--face-left), var(--face-right), var(--face-top));
   filter: blur(70px); opacity: var(--glow);
-  animation: spin 28s linear infinite;
+  animation: spin 28s linear infinite; animation-play-state: var(--motion);
 }
 @keyframes spin { to { rotate: 360deg; } }
 #board { touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 24px 30px var(--shadow-strong)); }
@@ -659,7 +667,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .nav h2 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; }
 
 #scr-home { justify-content: space-between; align-items: center; text-align: center; overflow: hidden; }
-#scr-home::before { content: ""; position: absolute; left: 50%; top: 4%; width: 140vw; height: 70vh; translate: -50% 0; background: radial-gradient(closest-side, rgba(123, 107, 255, 0.28), transparent); pointer-events: none; }
+#scr-home::before { content: ""; position: absolute; left: 50%; top: 4%; width: 140vw; height: 70vh; translate: -50% 0; background: radial-gradient(closest-side, var(--home-glow), transparent); pointer-events: none; }
 .home-hero { position: relative; display: grid; justify-items: center; gap: 8px; margin-top: 7vh; }
 .home-logo { width: min(46vw, 180px); height: auto; filter: drop-shadow(0 20px 26px var(--shadow-strong)); animation: home-float 3s ease-in-out infinite alternate; }
 @keyframes home-float { to { transform: translateY(-8px); } }
