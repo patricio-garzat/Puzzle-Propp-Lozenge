@@ -968,6 +968,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
             <div class="actions">
               <button class="btn primary" id="win-next" type="button" hidden>Siguiente nivel →</button>
               <button class="btn primary" id="win-again" type="button">Mezclar otra vez</button>
+              <button class="btn" id="win-retry" type="button" hidden>Reintentar</button>
               <button class="btn" id="win-levels" type="button" hidden>Niveles</button>
               <button class="btn" id="win-close" type="button">Seguir jugando</button>
             </div>
@@ -1197,7 +1198,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 
   <section class="screen" id="scr-levels" aria-label="Niveles">
     <header class="nav"><button class="nav-back" type="button" data-back><svg viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Atrás</span></button><h2>Niveles</h2><span></span></header>
-    <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvm-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvm-bank">0</b> pistas</span></div>
+    <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvm-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvm-bank">0</b> guardadas</span></div>
     <div class="lv-list" id="lvm-list"></div>
   </section>
 
@@ -1256,7 +1257,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   <div class="sheet levels-sheet" role="dialog" aria-modal="true" aria-labelledby="levels-title">
     <button class="x" id="levels-x" type="button" aria-label="Cerrar">×</button>
     <h3 id="levels-title">Niveles</h3>
-    <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvd-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvd-bank">0</b> pistas</span></div>
+    <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvd-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvd-bank">0</b> guardadas</span></div>
     <div class="lv-list" id="lvd-list"></div>
   </div>
 </div>
@@ -2068,9 +2069,7 @@ const Sound = (() => {
       $("#s-par-text").innerHTML = `Nivel ${levelNum} · meta ${par}${starsHTML(starsFor(m), "goal-stars")}`;
       goal.classList.toggle("perfect", solved && m <= par);
       goal.classList.toggle("bound", false);
-      $("#s-par-sub").textContent = m <= lt.max
-        ? `★★★ hasta ${lt.three} · ★★ hasta ${lt.two} · máximo ${lt.max} para guardar pistas.`
-        : `Pasaste el máximo (${lt.max}): terminarás con 1 estrella y sin guardar pistas.`;
+      $("#s-par-sub").textContent = `★★★ hasta ${lt.three} · ★★ hasta ${lt.two} · ★ al terminar. Pistas: ${levelHints} del nivel + ${levelProg().bank} guardadas.`;
     } else if (par !== null) {
       $("#s-par").textContent = par;
       $("#s-par-text").textContent = parExact ? `Mínimo: ${movs(par)}` : `Se puede en ${movs(par)}`;
@@ -2103,7 +2102,7 @@ const Sound = (() => {
     $("#hint-btn").disabled = ok === n;
     const hc = $("#hint-count");
     hc.hidden = mode !== "level" || phase === "edit";
-    if (!hc.hidden) { const b = levelProg().bank; if (hc.textContent !== String(b)) restart(hc, "pop"); hc.textContent = b; hc.classList.toggle("zero", b <= 0); }
+    if (!hc.hidden) { const b = levelHints + levelProg().bank; if (hc.textContent !== String(b)) restart(hc, "pop"); hc.textContent = b; hc.classList.toggle("zero", b <= 0); }
     if (phase === "edit") {
       const cnt = colorCounts(), need = n / 3;
       for (const c of [0, 1, 2]) {
@@ -2239,8 +2238,8 @@ const Sound = (() => {
   function afterChange() {
     if (phase === "edit") { sayEdit(); save(); return; }
     if (phase === "playing" && Core.isSolved(st)) { win(); }
-    else if (phase === "playing" && mode === "level" && levelNum && hist.length === levelTargets().max + 1) {
-      say(`Pasaste el máximo de ${levelTargets().max} movimientos: puedes terminar el nivel, pero con 1 estrella y sin guardar pistas.`, "warn");
+    else if (phase === "playing" && mode === "level" && levelNum && hist.length === levelTargets().two + 1) {
+      say("Ya no alcanzas 2 estrellas, pero termina el nivel para desbloquear el siguiente. Siempre puedes reintentarlo.", "warn");
     }
     else if (phase === "playing") {
       const left = st.tiles.length - Core.correctCount(st);
@@ -2285,7 +2284,7 @@ const Sound = (() => {
 
   function win() {
     if (mode === "level" && levelNum) return winLevel();
-    $("#win-stars").hidden = true; $("#win-hints").hidden = true; $("#win-next").hidden = true; $("#win-levels").hidden = true;
+    $("#win-stars").hidden = true; $("#win-hints").hidden = true; $("#win-next").hidden = true; $("#win-levels").hidden = true; $("#win-retry").hidden = true;
     $("#win-again").hidden = false; $("#win-close").hidden = false;
     stopTimer();
     phase = "won";
@@ -2413,7 +2412,7 @@ const Sound = (() => {
     if (busy || phase === "edit" || Core.isSolved(st)) return;
     if (mode === "level" && levelNum) {
       const pr = levelProg();
-      if (pr.bank <= 0) { Sound.bad(); say("Ya no te quedan pistas. Gana más terminando niveles sin pasar el máximo de movimientos.", "warn"); return; }
+      if (levelHints <= 0 && pr.bank <= 0) { Sound.bad(); say("Ya no te quedan pistas. Gana pistas guardadas sacando 3 estrellas en un nivel.", "warn"); return; }
     }
     // Primero el camino más corto exacto; si está demasiado lejos para calcularlo, una pista aproximada.
     const a = st.N >= 5 ? { move: null } : Core.analyze(st);
@@ -2423,7 +2422,12 @@ const Sound = (() => {
     if (!h) { say("No hay ningún grupo que se pueda girar.", "warn"); return; }
     hintMove = { v: h.v, k: h.k };
     hintsUsed++;
-    if (mode === "level" && levelNum) { const pr = levelProg(); pr.bank = Math.max(0, pr.bank - 1); saveLevelProg(pr); levelUsed++; updateStats(); }
+    // Primero se gastan las 3 del nivel y después las guardadas
+    if (mode === "level" && levelNum) {
+      if (levelHints > 0) levelHints--;
+      else { const pr = levelProg(); pr.bank = Math.max(0, pr.bank - 1); saveLevelProg(pr); }
+      levelUsed++; updateStats(); save();
+    }
     drawHint();
     Sound.hint();
     const stp = hintStep(hintMove);
@@ -2629,7 +2633,7 @@ const Sound = (() => {
 
   /* ---------- Persistencia ---------- */
   function serialize() {
-    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver, parExact, level, route, editGen, origin, chosen, levelNum, levelGift, levelUsed };
+    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver, parExact, level, route, editGen, origin, chosen, levelNum, levelHints, levelUsed };
   }
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(serialize())); } catch (e) {}
@@ -2646,7 +2650,7 @@ const Sound = (() => {
       if (phase === "playing" && Core.isSolved(st)) phase = "free";
       mode = snap.mode === "custom" ? "custom" : snap.mode === "level" && snap.levelNum ? "level" : "chaos";
       levelNum = mode === "level" ? +snap.levelNum : null;
-      levelGift = +snap.levelGift || 0; levelUsed = +snap.levelUsed || 0;
+      levelHints = Number.isFinite(+snap.levelHints) ? Math.max(0, Math.min(3, +snap.levelHints)) : 3; levelUsed = +snap.levelUsed || 0;
       elapsed = +snap.elapsed || 0; startedAt = null;
       dir = snap.dir === 1 ? 1 : -1;
       showDots = snap.showDots !== false;
@@ -3111,7 +3115,7 @@ const Sound = (() => {
 
   /* ---------- Modo niveles ---------- */
   const LVKEY = "propp-levels-v1";
-  let levelNum = null, levelGift = 0, levelUsed = 0;
+  let levelNum = null, levelHints = 0, levelUsed = 0; // levelHints: las 3 del nivel (no se guardan)
   function levelProg() {
     let x = null;
     try { x = JSON.parse(localStorage.getItem(LVKEY) || "null"); } catch (e) {}
@@ -3133,9 +3137,8 @@ const Sound = (() => {
     if (!L) return;
     const pr = levelProg();
     if (!unlocked(pr, n)) { Sound.bad(); return; }
-    // Cada nivel regala 3 pistas la primera vez que lo juegas
-    levelGift = 0;
-    if (!pr.gifted[n]) { pr.gifted[n] = true; pr.bank += 3; levelGift = 3; saveLevelProg(pr); }
+    // Cada intento trae 3 pistas que solo sirven en este nivel
+    levelHints = 3;
     levelUsed = 0;
     mode = "level"; levelNum = n;
     st = Core.createState(L.N, L.tiles);
@@ -3148,7 +3151,8 @@ const Sound = (() => {
     closeLevels(); closeShell(); pauseEl.hidden = true; wasRunning = false;
     buildBoard(); playIntro(); Sound.shuffle();
     const t = levelTargets();
-    say(`Nivel ${n} · ${sizeName(L.N)}: meta ${t.three} para ★★★, máximo ${t.max}. ${levelGift ? "Recibiste 3 pistas." : `Tienes ${levelProg().bank} pistas.`}`);
+    const bank = levelProg().bank;
+    say(`Nivel ${n} · ${sizeName(L.N)}: meta ${t.three} para ★★★. Tienes 3 pistas de este nivel${bank ? ` y ${bank} ${bank === 1 ? "guardada" : "guardadas"}` : ""}.`);
     save();
   }
 
@@ -3157,22 +3161,24 @@ const Sound = (() => {
     phase = "won";
     hintMove = null;
     const moves = hist.length, ms = elapsed, t = levelTargets();
-    const stars = starsFor(moves), within = moves <= t.max;
+    const stars = starsFor(moves);
     const pr = levelProg();
     pr.stars[levelNum] = Math.max(pr.stars[levelNum] || 0, stars);
-    // Pistas: si te pasaste del máximo, pierdes las de regalo de este nivel que no usaste
-    const unusedGift = Math.max(0, levelGift - levelUsed);
-    if (!within && unusedGift) pr.bank = Math.max(0, pr.bank - unusedGift);
+    // 3 estrellas = +1 pista guardada (una vez por nivel); las 3 del nivel se pierden al terminar
+    pr.bonus = pr.bonus || {};
+    const earned = stars === 3 && !pr.bonus[levelNum];
+    if (earned) { pr.bonus[levelNum] = true; pr.bank += 1; }
     saveLevelProg(pr);
-    levelGift = 0;
+    levelHints = 0;
     const last = levelNum >= 50;
     $("#win-title").textContent = last ? "¡Completaste los 50 niveles!" : `¡Nivel ${levelNum} completado!`;
     $("#win-line").textContent = `${movs(moves)} · ${fmt(ms)} · meta ${t.three}`;
     const wh = $("#win-hints");
     wh.hidden = false;
-    wh.classList.toggle("lost", !within);
-    wh.textContent = within ? (unusedGift ? `+${unusedGift} ${unusedGift === 1 ? "pista guardada" : "pistas guardadas"} · tienes ${pr.bank}` : `Tienes ${pr.bank} ${pr.bank === 1 ? "pista" : "pistas"}`)
-      : `Te pasaste del máximo (${t.max}): no se guardaron pistas`;
+    wh.classList.toggle("lost", stars < 3);
+    wh.textContent = earned ? `¡+1 pista por 3 estrellas! Tienes ${pr.bank} ${pr.bank === 1 ? "guardada" : "guardadas"}`
+      : stars === 3 ? `Ya ganaste la pista de este nivel · tienes ${pr.bank} ${pr.bank === 1 ? "guardada" : "guardadas"}`
+      : `Saca 3 estrellas (meta ${t.three}) para ganar 1 pista`;
     $("#win-rec").hidden = true;
     const ws = $("#win-stars");
     ws.hidden = false;
@@ -3184,13 +3190,14 @@ const Sound = (() => {
     $("#win-next").hidden = last;
     $("#win-again").hidden = true;
     $("#win-levels").hidden = false;
+    $("#win-retry").hidden = false;
     $("#win-close").hidden = true;
     winEl.hidden = false;
     say(`¡Nivel ${levelNum} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, "good");
     if (layers.tiles) { restart(layers.tiles, "celebrate"); setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400); }
     Sound.win();
     for (let i = 0; i < 3; i++) setTimeout(() => (i < stars ? (Sound.star(i), buzz(18)) : Sound.starMiss()), 550 + 450 + i * 320);
-    if (within && unusedGift) setTimeout(() => Sound.coin(), 1650);
+    if (earned) setTimeout(() => Sound.coin(), 1650);
     buzz([20, 40, 30]);
     bumpStat("solved");
     if (stars === 3) { bumpStat("perfect"); setTimeout(confetti, 1500); }
@@ -3234,8 +3241,9 @@ const Sound = (() => {
   $("#home-levels").addEventListener("click", openLevels);
   $("#pause-levels").addEventListener("click", () => { pauseEl.hidden = true; openLevels(); });
   $("#win-next").addEventListener("click", () => startLevel(Math.min(50, (levelNum || 0) + 1)));
+  $("#win-retry").addEventListener("click", () => startLevel(levelNum || 1));
   $("#win-levels").addEventListener("click", () => { winEl.hidden = true; phase = "free"; openLevels(); });
-  function levelInfoText() { const pr = levelProg(); const n = nextLevel(pr); return `Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} pistas`; }
+  function levelInfoText() { const pr = levelProg(); const n = nextLevel(pr); return `Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`; }
 
   /* ---------- Ventana inicial: Mezclar ---------- */
   let startN = 3;
