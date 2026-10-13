@@ -580,7 +580,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 /* Intro del estudio: fondo blanco, logo de tamaño moderado al centro */
 /* position: absolute a propósito: Safari pinta su barra de arriba con el color de las capas *fijas* pegadas
    arriba; con una capa fija blanca la barra se quedaba blanca. Así la barra siempre toma el fondo de la app. */
-#studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; min-height: 100vh; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; box-sizing: border-box; }
+/* Alto = lo que de verdad se ve (100dvh); con 100vh Safari cuenta el área de sus barras y el logo quedaba abajo */
+#studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; box-sizing: border-box; overflow: hidden; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo blanco; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
