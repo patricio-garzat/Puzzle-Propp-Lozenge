@@ -535,25 +535,25 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   .modal { backdrop-filter: none; -webkit-backdrop-filter: none; }
 }
 
-/* ---------- Animación de inicio: el logo se arma (≈3.5 s) ---------- */
+/* ---------- Animación de inicio: el logo se arma (5 s) ---------- */
 #splash {
   position: fixed; inset: 0; z-index: 200; display: grid; place-items: center;
   background: var(--bg); cursor: pointer;
-  animation: sp-out 0.55s cubic-bezier(.4,0,.2,1) 2.95s forwards;
+  animation: sp-out 0.65s cubic-bezier(.4,0,.2,1) 4.35s forwards;
 }
 #splash.skip { animation: sp-out 0.25s ease forwards; }
-.sp-wrap { display: grid; justify-items: center; gap: 22px; animation: sp-zoom 0.55s cubic-bezier(.4,0,.2,1) 2.95s forwards; }
+.sp-wrap { display: grid; justify-items: center; gap: 22px; animation: sp-zoom 0.65s cubic-bezier(.4,0,.2,1) 4.35s forwards; }
 .sp-mark { width: min(46vw, 32vh, 250px); height: auto; overflow: visible; }
 .sp-tile { transform-box: fill-box; transform-origin: center; opacity: 0; animation: sp-tile 0.6s cubic-bezier(.2,1.3,.35,1) 1.55s forwards; }
 .sp { transform-box: fill-box; transform-origin: center; opacity: 0;
-  animation: sp-in 0.62s cubic-bezier(.2,1.3,.35,1) calc(0.25s + var(--k) * 0.085s) forwards; }
-.sp-cube { transform-box: fill-box; transform-origin: center; animation: sp-pop 0.5s ease 1.9s; }
-.sp-glint { transform: translateX(-2.6px); animation: sp-glint 0.75s ease-in-out 2.05s forwards; }
-.sp-word { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 6.4vw, 44px); letter-spacing: -0.03em; color: var(--ink); line-height: 1; clip-path: inset(0 100% 0 0); animation: sp-reveal 0.6s cubic-bezier(.6,0,.2,1) 2.05s forwards; white-space: nowrap; }
+  animation: sp-in 0.85s cubic-bezier(.2,1.3,.35,1) calc(0.35s + var(--k) * 0.12s) forwards; }
+.sp-cube { transform-box: fill-box; transform-origin: center; animation: sp-pop 0.55s ease 2.6s; }
+.sp-glint { transform: translateX(-2.6px); animation: sp-glint 0.9s ease-in-out 2.75s forwards; }
+.sp-word { margin: 0; font-family: var(--f-display); font-weight: 800; font-size: clamp(26px, 6.4vw, 44px); letter-spacing: -0.03em; color: var(--ink); line-height: 1; clip-path: inset(0 100% 0 0); animation: sp-reveal 0.8s cubic-bezier(.6,0,.2,1) 2.85s forwards; white-space: nowrap; }
 .sp-bar { height: 6px; width: min(64vw, 300px); border-radius: 3px; transform: scaleX(0); transform-origin: left;
   background: linear-gradient(90deg, var(--face-top) 0 33.3%, var(--face-left) 33.3% 66.6%, var(--face-right) 66.6%);
-  animation: sp-bar 0.45s cubic-bezier(.6,0,.2,1) 2.4s forwards; margin-top: -8px; }
-.sp-tag { margin: 0; font-family: var(--f-mono); font-weight: 600; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); opacity: 0; animation: sp-fade 0.4s ease 2.55s forwards; }
+  animation: sp-bar 0.55s cubic-bezier(.6,0,.2,1) 3.35s forwards; margin-top: -8px; }
+.sp-tag { margin: 0; font-family: var(--f-mono); font-weight: 600; font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); opacity: 0; animation: sp-fade 0.5s ease 3.6s forwards; }
 @keyframes sp-in { 0% { opacity: 0; transform: translate(calc(var(--dx) * 1.7), calc(var(--dy) * 1.7)) rotate(-120deg) scale(0.2); } 55% { opacity: 1; } 100% { opacity: 1; transform: none; } }
 @keyframes sp-tile { from { opacity: 0; transform: scale(0.6) rotate(-8deg); } to { opacity: 1; transform: none; } }
 @keyframes sp-pop { 40% { transform: scale(1.08); } }
@@ -2217,7 +2217,7 @@ const Sound = (() => {
     const skip = () => { sp.classList.add("skip"); setTimeout(done, 260); };
     sp.addEventListener("click", skip);
     document.addEventListener("keydown", function k() { skip(); document.removeEventListener("keydown", k); });
-    setTimeout(done, 3550);
+    setTimeout(done, 5050);
   })();
 
   /* ---------- Arranque ---------- */
