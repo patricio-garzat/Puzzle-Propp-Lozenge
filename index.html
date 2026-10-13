@@ -1432,7 +1432,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
       <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#E0A100"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z" fill="currentColor"/></svg></span>Progreso de niveles</span><button class="danger" type="button" id="set-reset-levels">Borrar</button></div>
     </div>
     <p class="group-title">Acerca de</p>
-    <p class="about">Cube Swipe 1.0 · BluBer Games<br>Inspirado en el Propp Lozenge, puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
+    <p class="about">Cube Swipe · BluBer Games<br>Inspirado en el Propp Lozenge, puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
   </section>
 </div>
 
@@ -2352,7 +2352,7 @@ const Sound = (() => {
     "Borrar": "Erase",
     "Progreso de niveles": "Level progress",
     "Acerca de": "About",
-    "Cube Swipe 1.0 · BluBer Games": "Cube Swipe 1.0 · BluBer Games",
+    "Cube Swipe · BluBer Games": "Cube Swipe · BluBer Games",
     "Inspirado en el Propp Lozenge, puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en": "Inspired by the Propp Lozenge, an original puzzle by James Propp and Oskar van Deventer. The physical puzzle is sold at",
     "Pausa": "Paused",
     "Reanudar": "Resume",
@@ -3618,6 +3618,21 @@ const Sound = (() => {
     }
     if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
   };
+  // App de iOS: un toque háptico ligero al presionar cualquier botón (como en las apps nativas).
+  // No aplica en el tablero (los giros ya tienen su propia vibración) ni en botones desactivados.
+  if (isNative()) {
+    let lastTap = 0;
+    document.addEventListener("pointerdown", (e) => {
+      if (!settings.vibe) return;
+      const b = e.target.closest("button, a[href], [role='button'], [role='switch'], label, input, select, .lv");
+      if (!b || b.disabled || b.getAttribute("aria-disabled") === "true" || b.closest("#board-wrap")) return;
+      const now = performance.now();
+      if (now - lastTap < 70) return;
+      lastTap = now;
+      const H = nativePlugin("Haptics");
+      if (H) { try { H.impact({ style: "LIGHT" }); } catch (err) {} }
+    }, { capture: true, passive: true });
+  }
   function applyTheme() {
     if (settings.theme === "auto") { if (document.documentElement.dataset.themeByApp) { delete document.documentElement.dataset.theme; delete document.documentElement.dataset.themeByApp; } }
     else { document.documentElement.dataset.theme = settings.theme; document.documentElement.dataset.themeByApp = "1"; }
