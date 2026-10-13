@@ -1,13 +1,15 @@
-# Propp Lozenge (versión web)
+# Cube Swipe
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="brand/logo-dark.png">
-  <img alt="Propp Lozenge" src="brand/logo-light.png" width="560">
+  <img alt="Cube Swipe" src="brand/logo-light.png" width="560">
 </picture>
 
-Versión web no oficial del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores dentro de un hexágono que forman la ilusión de un cubo. Levanta grupos de tres rombos, gíralos y vuelve a dejar el cubo armado.
+Un puzzle de cubo relajante de **BluBer Games**, inspirado en el puzzle magnético **Propp Lozenge** de James Propp y Oskar van Deventer: 27 rombos de tres colores dentro de un hexágono que forman la ilusión de un cubo. Desliza sobre grupos de tres rombos, gíralos y vuelve a dejar el cubo armado.
 
-**Jugar:** https://patricio-garzat.github.io/Puzzle-Propp-Lozenge/
+**Jugar (web):** https://patricio-garzat.github.io/Puzzle-Propp-Lozenge/
+
+**App de iOS:** está en [`app/`](app/), hecha con Capacitor a partir de este mismo juego. La guía para publicarla en la App Store está en [`app/APP_STORE.md`](app/APP_STORE.md).
 
 ## Qué incluye
 

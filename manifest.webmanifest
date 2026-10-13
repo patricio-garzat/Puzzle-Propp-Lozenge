@@ -1,7 +1,7 @@
 {
-  "name": "Propp Lozenge",
-  "short_name": "Lozenge",
-  "description": "Unofficial web version of the Propp Lozenge magnetic puzzle: turn groups of three tiles to put the cube back together.",
+  "name": "Cube Swipe",
+  "short_name": "Cube Swipe",
+  "description": "A relaxing cube puzzle by BluBer Games. Swipe groups of three tiles to put the cube back together.",
   "lang": "en",
   "start_url": "./",
   "scope": "./",

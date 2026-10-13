@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Unofficial web version of the Propp Lozenge magnetic puzzle: turn groups of three tiles to put the cube back together.">
-<title>Propp Lozenge</title>
+<meta name="description" content="Cube Swipe: a relaxing cube puzzle by BluBer Games. Swipe groups of three tiles to put the cube back together.">
+<title>Cube Swipe</title>
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#EEF5FB" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1C2535" media="(prefers-color-scheme: dark)">
-<meta name="apple-mobile-web-app-title" content="Lozenge">
+<meta name="apple-mobile-web-app-title" content="Cube Swipe">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <script>
@@ -23,6 +23,13 @@
     var dark = t === "dark" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
     var root = document.documentElement;
     if (t !== "auto") { root.dataset.theme = t; root.dataset.themeByApp = "1"; }
+    // Dentro de la app de iOS (Capacitor) no hay barras de Safari: la intro de BluBer arranca en blanco
+    // directo desde la pantalla de carga y la barra de estado se controla de forma nativa
+    if (window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+      root.classList.add("native", "studio-paper");
+      root.style.backgroundColor = "#FFFFFF";
+      return;
+    }
     root.style.backgroundColor = dark ? "#1C2535" : "#EEF5FB";
     var m = document.createElement("meta");
     m.name = "apple-mobile-web-app-status-bar-style";
@@ -611,6 +618,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    las capas fijas (todas oscuras) y <html> y <body> van en blanco; al terminar se devuelve todo y las barras
    regresan al color del tema. Probado en el simulador de iPhone (Safari de iOS 26) */
 html.studio-paper .fixed-off { visibility: hidden !important; }
+/* En la app la intro es blanca desde el primer cuadro (la pantalla de carga nativa también es blanca) */
+html.native #studio { background: #FFFFFF; box-shadow: 0 50vh 0 0 #FFFFFF; transition: none; }
 #studio svg { position: absolute; left: 50%; top: 50dvh; transform: translate(-50%, -50%); width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
@@ -1056,7 +1065,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
         <g clip-path="url(#sp-clip)"><g transform="rotate(20)"><rect class="sp-glint" x="-0.45" y="-1.8" width="0.9" height="3.6" fill="url(#sp-gl)"/></g></g>
       </g>
     </svg>
-    <h2 class="sp-word" aria-label="Propp Lozenge"><span style="--i:0">P</span><span style="--i:1">r</span><span style="--i:2">o</span><span style="--i:3">p</span><span style="--i:4">p</span><span style="--i:5">&nbsp;</span><span style="--i:6">L</span><span style="--i:7">o</span><span style="--i:8">z</span><span style="--i:9">e</span><span style="--i:10">n</span><span style="--i:11">g</span><span style="--i:12">e</span></h2>
+    <h2 class="sp-word" aria-label="Cube Swipe"><span style="--i:0">C</span><span style="--i:1">u</span><span style="--i:2">b</span><span style="--i:3">e</span><span style="--i:4">&nbsp;</span><span style="--i:5">S</span><span style="--i:6">w</span><span style="--i:7">i</span><span style="--i:8">p</span><span style="--i:9">e</span></h2>
   </div>
 </div>
 <div class="bg" aria-hidden="true">
@@ -1081,8 +1090,8 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
     <div class="brand">
       <svg class="logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><g><defs><linearGradient id="lgT" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gt1)"/><stop offset="1" style="stop-color:var(--gt2)"/></linearGradient><linearGradient id="lgL" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gl1)"/><stop offset="1" style="stop-color:var(--gl2)"/></linearGradient><linearGradient id="lgR" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gr1)"/><stop offset="1" style="stop-color:var(--gr2)"/></linearGradient></defs><polygon points="0.0000,-0.9457 0.3390,-0.7500 0.0000,-0.5543 -0.3390,-0.7500" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.4330,-0.6957 -0.0940,-0.5000 -0.4330,-0.3043 -0.7720,-0.5000" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.4330,-0.6957 0.7720,-0.5000 0.4330,-0.3043 0.0940,-0.5000" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.8190,-0.4186 -0.4800,-0.2229 -0.4800,0.1686 -0.8190,-0.0271" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.8190,0.0814 -0.4800,0.2771 -0.4800,0.6686 -0.8190,0.4729" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.3860,0.3314 -0.0470,0.5271 -0.0470,0.9186 -0.3860,0.7229" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.0470,0.5271 0.3860,0.3314 0.3860,0.7229 0.0470,0.9186" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.4800,-0.2229 0.8190,-0.4186 0.8190,-0.0271 0.4800,0.1686" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.4800,0.2771 0.8190,0.0814 0.8190,0.4729 0.4800,0.6686" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/><g class="lg-corner" transform="rotate(180)"><polygon points="0.0000,-0.4457 0.3390,-0.2500 0.0000,-0.0543 -0.3390,-0.2500" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.3860,-0.1686 -0.0470,0.0271 -0.0470,0.4186 -0.3860,0.2229" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.0470,0.0271 0.3860,-0.1686 0.3860,0.2229 0.0470,0.4186" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/></g></g></svg>
       <div>
-        <h1>Propp <span class="mark">Lozenge</span></h1>
-        <p>Versión web no oficial</p>
+        <h1>Cube <span class="mark">Swipe</span></h1>
+        <p>Un puzzle de cubo relajante</p>
       </div>
     </div>
     <div class="top-actions">
@@ -1308,7 +1317,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
       <li><span><b>Pista:</b> desliza sobre el grupo amarillo que dice “Desliza aquí” y hace el giro completo.</span></li>
       <li><span><b>Arma tu mezcla:</b> pinta los rombos blancos tocando o arrastrando el dedo; cada color tiene un cupo. Toca uno del mismo color para quitarlo. Al terminar, toca “Jugar”.</span></li>
     </ul>
-    <p class="credit">Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
+    <p class="credit">Cube Swipe está inspirado en el Propp Lozenge, un puzzle magnético inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" type="button" id="help-ok">Entendido</button></div>
   </div>
 </div>
@@ -1316,8 +1325,8 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
   <section class="screen" id="scr-home" aria-label="Inicio">
     <div class="home-hero">
       <svg class="home-logo" id="home-logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"></svg>
-      <h1 class="home-title">Propp <span class="mark">Lozenge</span></h1>
-      <p class="home-sub">Versión web no oficial</p>
+      <h1 class="home-title">Cube <span class="mark">Swipe</span></h1>
+      <p class="home-sub">Un puzzle de cubo relajante</p>
     </div>
     <div class="home-actions">
       <button class="big-btn primary" type="button" id="home-continue" hidden><span>Continuar</span><small id="home-continue-info"></small></button>
@@ -1424,7 +1433,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
       <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#E0A100"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z" fill="currentColor"/></svg></span>Progreso de niveles</span><button class="danger" type="button" id="set-reset-levels">Borrar</button></div>
     </div>
     <p class="group-title">Acerca de</p>
-    <p class="about">Propp Lozenge · versión web no oficial 1.0<br>Puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
+    <p class="about">Cube Swipe 1.0 · BluBer Games<br>Inspirado en el Propp Lozenge, puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
   </section>
 </div>
 
@@ -2162,7 +2171,7 @@ const Sound = (() => {
   const tr = (es, en) => (LANG === "es" ? es : en);
   // Textos fijos de la página (escritos en español en el HTML): español -> inglés
   const I18N = {
-    "Versión web no oficial": "Unofficial web version",
+    "Un puzzle de cubo relajante": "A relaxing cube puzzle",
     "Cómo se juega": "How to play",
     "Pausa y menú": "Pause and menu",
     "Sonido": "Sound",
@@ -2267,7 +2276,7 @@ const Sound = (() => {
     "desliza sobre el grupo amarillo que dice “Desliza aquí” y hace el giro completo.": "swipe over the yellow group marked “Swipe here” and it makes the whole turn.",
     "Arma tu mezcla:": "Build your own:",
     "pinta los rombos blancos tocando o arrastrando el dedo; cada color tiene un cupo. Toca uno del mismo color para quitarlo. Al terminar, toca “Jugar”.": "paint the white tiles by tapping or dragging; each color has a limit. Tap a tile of the same color to clear it. When you're done, tap “Play”.",
-    "Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en": "Unofficial web version of the Propp Lozenge, invented by James Propp and designed by Oskar van Deventer. There are 980 ways to tile the 3×3×3 hexagon (MacMahon's formula). The physical puzzle is sold at",
+    "Cube Swipe está inspirado en el Propp Lozenge, un puzzle magnético inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en": "Cube Swipe is inspired by the Propp Lozenge, a magnetic puzzle invented by James Propp and designed by Oskar van Deventer. There are 980 ways to tile the 3×3×3 hexagon (MacMahon's formula). The physical puzzle is sold at",
     "Entendido": "Got it",
     "Continuar": "Continue",
     "50 niveles · de 2×2×2 a 4×4×4": "50 levels · from 2×2×2 to 4×4×4",
@@ -2314,8 +2323,8 @@ const Sound = (() => {
     "Borrar": "Erase",
     "Progreso de niveles": "Level progress",
     "Acerca de": "About",
-    "Propp Lozenge · versión web no oficial 1.0": "Propp Lozenge · unofficial web version 1.0",
-    "Puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en": "Original puzzle by James Propp and Oskar van Deventer. The physical puzzle is sold at",
+    "Cube Swipe 1.0 · BluBer Games": "Cube Swipe 1.0 · BluBer Games",
+    "Inspirado en el Propp Lozenge, puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en": "Inspired by the Propp Lozenge, an original puzzle by James Propp and Oskar van Deventer. The physical puzzle is sold at",
     "Pausa": "Paused",
     "Reanudar": "Resume",
     "Reiniciar esta mezcla": "Restart this shuffle",
@@ -3448,6 +3457,7 @@ const Sound = (() => {
       document.documentElement.classList.remove("studio-paper");
       document.querySelectorAll(".fixed-off").forEach((n) => n.classList.remove("fixed-off"));
       setBarColor(""); // de vuelta al fondo del tema
+      nativeBar();
       next();
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
@@ -3466,6 +3476,7 @@ const Sound = (() => {
       if (begun) return;
       begun = true;
       el.classList.add("paper");
+      if (isNative()) { setTimeout(run, 200); return; }
       document.documentElement.classList.add("studio-paper");
       document.querySelectorAll("body *").forEach((n) => { if (n !== el && getComputedStyle(n).position === "fixed") n.classList.add("fixed-off"); });
       setBarColor("#FFFFFF");
@@ -3556,7 +3567,21 @@ const Sound = (() => {
   const saveSettings = () => { try { localStorage.setItem(SETTINGS, JSON.stringify(settings)); } catch (e) {} };
   const readStats = () => { try { return Object.assign({ played: 0, solved: 0, perfect: 0 }, JSON.parse(localStorage.getItem(STATS) || "{}")); } catch (e) { return { played: 0, solved: 0, perfect: 0 }; } };
   const bumpStat = (k) => { const x = readStats(); x[k]++; try { localStorage.setItem(STATS, JSON.stringify(x)); } catch (e) {} };
-  const buzz = (ms) => { if (settings.vibe && navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} } };
+  const buzz = (ms) => {
+    if (!settings.vibe) return;
+    const H = nativePlugin("Haptics");
+    if (H) {
+      // Patrón [vibra, pausa, vibra, …] → toques del motor de vibración del iPhone, más fuertes si duran más
+      const p = Array.isArray(ms) ? ms : [ms];
+      let at = 0;
+      p.forEach((d, i) => {
+        if (i % 2 === 0) setTimeout(() => { try { H.impact({ style: d >= 30 ? "HEAVY" : d >= 15 ? "MEDIUM" : "LIGHT" }); } catch (e) {} }, at);
+        at += d;
+      });
+      return;
+    }
+    if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
+  };
   function applyTheme() {
     if (settings.theme === "auto") { if (document.documentElement.dataset.themeByApp) { delete document.documentElement.dataset.theme; delete document.documentElement.dataset.themeByApp; } }
     else { document.documentElement.dataset.theme = settings.theme; document.documentElement.dataset.themeByApp = "1"; }
@@ -3564,7 +3589,20 @@ const Sound = (() => {
   }
   // La barra de arriba del celular (y la de Safari) toma siempre el color exacto del fondo de la app,
   // también cuando el tema se elige en Ajustes y no en el teléfono.
+  // App de iOS (Capacitor): plugins nativos de barra de estado y vibración
+  function isNative() { return document.documentElement.classList.contains("native"); }
+  function nativePlugin(name) { try { return isNative() ? window.Capacitor.Plugins[name] : null; } catch (e) { return null; } }
+  function nativeBar() {
+    const SB = nativePlugin("StatusBar");
+    if (!SB) return;
+    const root = document.documentElement;
+    // Sobre la intro blanca: texto oscuro. Después, según el fondo del tema
+    const dark = !root.classList.contains("studio-paper") && getComputedStyle(root).getPropertyValue("--bg").trim().toUpperCase() === "#1C2535";
+    try { SB.setStyle({ style: dark ? "DARK" : "LIGHT" }); } catch (e) {}
+  }
   function syncThemeColor() {
+    nativeBar();
+    if (isNative() && document.documentElement.classList.contains("studio-paper")) return;
     document.documentElement.style.backgroundColor = "";
     const col = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
     if (!col) return;
@@ -3578,7 +3616,7 @@ const Sound = (() => {
   // se recarga al instante, sin intros y en la misma pantalla, para que la barra cambie junto con el tema.
   const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
   function refreshForTheme() {
-    if (!IOS) return;
+    if (!IOS || isNative()) return;
     const where = !shell.hidden && stack[stack.length - 1] === "scr-settings" ? "settings" : shell.hidden ? "game" : "home";
     try { sessionStorage.setItem("propp-skip-intro", where); } catch (e) { return; }
     try { save(); } catch (e) {}
@@ -3783,7 +3821,7 @@ const Sound = (() => {
   function syncSettings() {
     $("#set-sound").checked = Sound.on;
     $("#set-vibe").checked = !!settings.vibe;
-    $("#row-vibe").hidden = !("vibrate" in navigator);
+    $("#row-vibe").hidden = !("vibrate" in navigator) && !isNative();
     $("#set-dots").checked = showDots;
     document.querySelectorAll("[data-theme-opt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeOpt === settings.theme)));
     $("#set-reset").textContent = tr("Borrar", "Erase");
