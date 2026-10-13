@@ -2943,11 +2943,33 @@ const Sound = (() => {
     if (wasRunning && phase === "playing") startTimer();
     wasRunning = false;
   }
+  // Qué hace "Continuar": reanudar la partida en curso o, si ya empezaste los niveles, ir al siguiente
+  let continueAction = "resume";
+  const levelsStarted = () => Object.keys(levelProg().stars).length > 0 || (mode === "level" && !!levelNum);
   function syncHome() {
     $("#home-levels-info").textContent = levelInfoText();
-    const can = st && phase === "playing" && !Core.isSolved(st) && (chosen || hist.length > 0);
-    $("#home-continue").hidden = !can;
-    if (can) $("#home-continue-info").textContent = `${mode === "level" && levelNum ? `Nivel ${levelNum}` : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}`;
+    const inGame = st && phase === "playing" && !Core.isSolved(st) && (chosen || hist.length > 0);
+    const started = levelsStarted();
+    // Si ya empezaste los niveles, solo aparece "Continuar" (no "Continuar" y "Niveles")
+    $("#home-levels").hidden = started;
+    if (started) {
+      const pr = levelProg();
+      const resumeLevel = inGame && mode === "level" && levelNum;
+      continueAction = resumeLevel ? "resume" : "next";
+      $("#home-continue").hidden = false;
+      $("#home-continue-info").textContent = resumeLevel
+        ? `Nivel ${levelNum} · ${sizeName(st.N)} · ${movs(hist.length)}`
+        : `Nivel ${nextLevel(pr)} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`;
+    } else {
+      continueAction = "resume";
+      $("#home-continue").hidden = !inGame;
+      if (inGame) $("#home-continue-info").textContent = `${mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}`;
+    }
+  }
+  function continueLevels() {
+    const pr = levelProg(), n = nextLevel(pr);
+    if (pr.stars[n] >= 1) openLevels(); // ya terminaste los 50: elige cuál repetir
+    else startLevel(n);
   }
   // Nueva partida
   let selN = 3;
@@ -2967,7 +2989,7 @@ const Sound = (() => {
   }));
   $("#sel-custom").addEventListener("click", () => { wasRunning = false; closeShell(); closePause(true); enterEditor(selN); });
   // Inicio
-  $("#home-continue").addEventListener("click", () => { Sound.tick(); resumeGame(); });
+  $("#home-continue").addEventListener("click", () => { Sound.tick(); if (continueAction === "next") continueLevels(); else resumeGame(); });
   $("#home-play").addEventListener("click", () => pushScreen("scr-select"));
   $("#home-custom").addEventListener("click", () => { wasRunning = false; closeShell(); enterEditor(); });
   document.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => pushScreen(b.dataset.open)));
@@ -3093,7 +3115,7 @@ const Sound = (() => {
     $("#pause-info").textContent = phase === "edit" ? "Armando tu mezcla"
       : `${mode === "level" && levelNum ? `Nivel ${levelNum}` : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
     $("#pause-restart").hidden = !origin || phase === "edit";
-    $("#pause-levels").hidden = mode !== "level";
+    $("#pause-levels").hidden = false;
     $("#pause-restart span").textContent = mode === "level" ? "Reiniciar nivel" : "Reiniciar esta mezcla";
     pauseEl.hidden = false;
     Sound.tick();
@@ -3237,7 +3259,12 @@ const Sound = (() => {
   $("#levels-x").addEventListener("click", closeLevels);
   $("#levels-modal").addEventListener("click", (e) => { if (e.target.id === "levels-modal") closeLevels(); });
   $("#mix-levels").addEventListener("click", openLevels);
-  $("#start-levels").addEventListener("click", () => { startEl.hidden = true; openLevels(); });
+  $("#start-levels").addEventListener("click", () => {
+    startEl.hidden = true;
+    if (!levelsStarted()) { openLevels(); return; }
+    const inLevel = mode === "level" && levelNum && phase === "playing" && !Core.isSolved(st);
+    if (inLevel) { if (hist.length) startTimer(); } else continueLevels();
+  });
   $("#home-levels").addEventListener("click", openLevels);
   $("#pause-levels").addEventListener("click", () => { pauseEl.hidden = true; openLevels(); });
   $("#win-next").addEventListener("click", () => startLevel(Math.min(50, (levelNum || 0) + 1)));
@@ -3258,6 +3285,7 @@ const Sound = (() => {
   }
   function openStart() {
     $("#start-levels-info").textContent = levelInfoText();
+    $("#start-levels span").textContent = levelsStarted() ? "Continuar niveles" : "Modo niveles";
     startN = st ? st.N : 3;
     $("#start-logo").innerHTML = document.querySelector(".topbar .logo").innerHTML;
     $("#start-continue").hidden = !(st && phase === "playing" && hist.length > 0 && !Core.isSolved(st));
