@@ -43,9 +43,16 @@ for tag in (
     assert tag in html, tag
     html = html.replace(tag, "")
 
+# Versión de la app (Ajustes → Acerca de): la misma del proyecto de Xcode que sube release.sh
+pbx = open(os.path.join(HERE, "ios", "App", "App.xcodeproj", "project.pbxproj"), encoding="utf-8").read()
+version = re.search(r"MARKETING_VERSION = ([0-9.]+);", pbx).group(1)
+build = re.search(r"CURRENT_PROJECT_VERSION = (\d+);", pbx).group(1)
+html, n = re.subn(r'(id="app-version">)Web(<)', rf"\g<1>{version} ({build})\2", html)
+assert n == 1, "no encontré la versión en Ajustes"
+
 shutil.rmtree(WWW, ignore_errors=True)
 os.makedirs(os.path.join(WWW, "fonts"))
 for w in WEIGHTS:
     shutil.copy(os.path.join(FONTS, f"nunito-latin-{w}-normal.woff2"), os.path.join(WWW, "fonts"))
 open(os.path.join(WWW, "index.html"), "w", encoding="utf-8").write(html)
-print("www/ listo:", len(html) // 1024, "KB")
+print("www/ listo:", len(html) // 1024, "KB · versión", version, f"({build})")
