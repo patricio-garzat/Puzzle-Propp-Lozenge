@@ -597,7 +597,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 /* position: absolute a propósito: Safari pinta su barra de arriba con el color de las capas *fijas* pegadas
    arriba; con una capa fija blanca la barra se quedaba blanca. Así la barra siempre toma el fondo de la app. */
 /* Alto = lo que de verdad se ve (100dvh); con 100vh Safari cuenta el área de sus barras y el logo quedaba abajo */
-#studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; z-index: 210; display: grid; place-items: center; background: var(--bg); padding: 16px; box-sizing: border-box; overflow: hidden; transition: background-color 0.45s ease; }
+#studio { position: absolute; inset: 0; z-index: 210; display: grid; place-items: center; background: var(--bg); padding: 16px; box-sizing: border-box; overflow: hidden; transition: background-color 0.45s ease; }
 /* Safari toma el color de su barra al terminar de cargar: la intro empieza con el fondo del tema y se vuelve
    blanca justo después. Mientras dura, <html> también va en blanco para que no se asome el fondo oscuro
    en la franja de abajo del iPhone (el alto visible no siempre llega hasta el borde) */
@@ -606,7 +606,12 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    Una sombra sólida del mismo color extiende la intro hasta el borde sin mover el logo del centro */
 #studio { box-shadow: 0 50vh 0 0 var(--bg); transition: background-color 0.45s ease, box-shadow 0.45s ease; }
 #studio.paper { box-shadow: 0 50vh 0 0 #FFFFFF; }
-#studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
+/* Safari pinta sus barras (arriba y abajo) con las capas *fijas* de los bordes o, si no hay, con el fondo de
+   <html>/<body>; y solo vuelve a mirar cuando cambia ese fondo. Mientras la intro está en blanco se esconden
+   las capas fijas (todas oscuras) y <html> y <body> van en blanco; al terminar se devuelve todo y las barras
+   regresan al color del tema. Probado en el simulador de iPhone (Safari de iOS 26) */
+html.studio-paper .fixed-off { visibility: hidden !important; }
+#studio svg { position: absolute; left: 50%; top: 50dvh; transform: translate(-50%, -50%); width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
 /* La intro del juego espera a que termine la del estudio */
@@ -3440,10 +3445,20 @@ const Sound = (() => {
       return node.animate(frames, { delay, duration, easing, fill });
     };
     const finish = () => {
-      document.documentElement.style.backgroundColor = ""; // de vuelta al fondo del tema
+      document.documentElement.classList.remove("studio-paper");
+      document.querySelectorAll(".fixed-off").forEach((n) => n.classList.remove("fixed-off"));
+      setBarColor(""); // de vuelta al fondo del tema
       next();
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
+    };
+    // Pinta <html> y el color de las barras de Safari ("" = el fondo del tema)
+    const setBarColor = (col) => {
+      const root = document.documentElement;
+      root.style.backgroundColor = col;
+      document.body.style.backgroundColor = col;
+      const c = col || getComputedStyle(root).getPropertyValue("--bg").trim();
+      document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.removeAttribute("media"); m.setAttribute("content", c); });
     };
     // Espera a que la página termine de cargar, pasa a blanco (también <html>) y entonces empieza la animación
     let begun = false;
@@ -3451,7 +3466,9 @@ const Sound = (() => {
       if (begun) return;
       begun = true;
       el.classList.add("paper");
-      document.documentElement.style.backgroundColor = "#FFFFFF";
+      document.documentElement.classList.add("studio-paper");
+      document.querySelectorAll("body *").forEach((n) => { if (n !== el && getComputedStyle(n).position === "fixed") n.classList.add("fixed-off"); });
+      setBarColor("#FFFFFF");
       setTimeout(run, 450);
     };
     if (document.readyState === "complete") setTimeout(begin, 250);
