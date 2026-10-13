@@ -1578,6 +1578,22 @@ const Sound = (() => {
     if (ctx.state !== "running") ctx.resume().catch(() => {});
     return ctx;
   }
+  // iPhone: si el teléfono está en modo silencio, Safari calla el audio de las páginas. Reproducir un
+  // sonido mudo con un elemento <audio> durante un toque pone la sesión en modo "reproducción",
+  // así el juego se oye aunque el interruptor de silencio esté activado (como un video).
+  const SILENT = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+  let primed = false;
+  function primeMedia() {
+    if (primed) return;
+    primed = true;
+    try {
+      const a = new Audio(SILENT);
+      a.setAttribute("playsinline", "");
+      a.setAttribute("x-webkit-airplay", "deny");
+      const p = a.play();
+      if (p && p.catch) p.catch(() => { primed = false; });
+    } catch (e) { primed = false; }
+  }
   // Al volver a la app, reactivar el audio
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && ctx && ctx.state !== "running") ctx.resume().catch(() => {});
@@ -1618,6 +1634,7 @@ const Sound = (() => {
       unlocked = true;
       // Safari: tratar el sonido del juego como reproducción (no lo silencia el interruptor de silencio)
       try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+      if (on) primeMedia();
       ensure();
     },
     // Llama a cb cuando el audio de verdad ya está sonando (el navegador lo confirma de forma asíncrona)
