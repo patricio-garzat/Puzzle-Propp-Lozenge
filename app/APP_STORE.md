@@ -84,6 +84,11 @@ La respuesta es correcta porque el juego no tiene cuentas, analítica ni anuncio
    - En la pestaña **iPhone with Dynamic Island (medium display)** (6.1"/6.3", 1206 × 2622), arrastra las 5 imágenes de `app/store/appstore-6.3/en/` en orden (1 a 5).
    - Si también aparece una pestaña de **6.9"**, usa las de `app/store/appstore-6.9/en/`.
    - Las pestañas de iPad y Apple Watch no aplican: la app es solo para iPhone.
+   - **Header and Search Results** (pestaña aparte en esa misma sección; son las portadas de la App Store de iOS 27):
+     - **Header:** `app/store/creatives/header-3840x1646-en.png`
+     - **Search Results:** `app/store/creatives/search-3840x2560-en.png`
+     - En la ficha en español, usa las que terminan en `-es`.
+     - No uses el formato "universal" de 5244 × 2950: Apple solo respeta un recuadro muy pequeño al centro y recorta todo lo demás. Las de arriba tienen los tamaños dedicados, con todo lo importante dentro de la zona segura de cada una.
 2. **Promotional Text, Description y Keywords:** cópialos del final de esta guía.
 3. **URLs:**
    - **Support URL:** `https://blubergames.com/support/`
