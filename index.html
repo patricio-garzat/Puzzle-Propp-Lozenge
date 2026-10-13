@@ -586,6 +586,19 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .start-levels button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 .start-sizes button { padding: 7px 12px; font-size: 13.5px; }
 
+/* Instrucciones según el tipo de control: mouse/teclado o pantalla táctil */
+.for-touch { display: none; }
+@media (pointer: coarse) {
+  .for-mouse { display: none !important; }
+  .for-touch { display: block; }
+  ul.for-touch { display: grid; }
+  #help .sheet { gap: 12px; padding: 22px 18px 16px; }
+  #help .sheet h3 { font-size: 20px; }
+  #help .sheet > p { font-size: 14px; }
+  #help .howto { font-size: 13.5px; gap: 8px; line-height: 1.4; }
+  #help .credit { display: none; }
+}
+
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -830,17 +843,15 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="help-title">
     <button class="x" id="help-x" type="button" aria-label="Cerrar">×</button>
     <h3 id="help-title">Cómo se juega</h3>
-    <p>El tablero tiene rombos de tres colores que forman la ilusión de un cubo. Tu meta es volver a dejar el cubo armado, como en la imagen de Objetivo.</p>
-    <ul class="howto">
-      <li><span>Solo se levantan los <b>puntos blancos</b>, donde tres rombos forman un hexágono pequeño. Al pasar el cursor, la flecha indica hacia dónde girará.</span></li>
-      <li><span>Cada toque gira el grupo 60°. Con <kbd>Shift</kbd> o clic derecho gira al revés.</span></li>
-      <li><span><b>En celular:</b> desliza el dedo sobre un punto blanco. Hacia arriba gira en sentido horario y hacia abajo, antihorario.</span></li>
-      <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
-      <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
-      <li><span><b>Mezclar al azar</b> revuelve colores y orientaciones por todo el tablero. Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). En 4×4×4: Fácil 9–15, Intermedio 21–35 y Difícil 40–60. En 2×2×2 solo hay Fácil, porque ninguna mezcla necesita más de 14 movimientos.</span></li>
-      <li><span>Cada mezcla te dice en cuántos movimientos se puede resolver. Cuando dice “mínimo”, es el mínimo exacto. En caos Intermedio y Difícil de 3×3×3 y 4×4×4 es una meta segura: seguro se puede en esa cantidad, aunque quizá exista un camino un poco más corto. Lograrlo en ese número o menos es una partida perfecta.</span></li>
-      <li><span><b>Arma tu mezcla:</b> el cubo empieza en blanco. Elige un color y toca o arrastra sobre los rombos para pintarlos: cada color tiene un cupo (9 en 3×3×3) y no puedes poner más. Cuando se acaba uno, pasa solo al siguiente. Toca un rombo de su mismo color para quitarlo. Con “Girar” mueves grupos de tres. Cuando todo esté pintado, presiona “Jugar desde aquí”.</span></li>
-      <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
+    <p class="for-mouse">El tablero tiene rombos de tres colores que forman la ilusión de un cubo. Tu meta es volver a dejar el cubo armado, como en la imagen de Objetivo.</p>
+    <p class="for-touch">Vuelve a armar el cubo: amarillo arriba, rojo a la izquierda y azul a la derecha.</p>
+    <ul class="howto for-touch">
+      <li><span><b>Girar:</b> desliza el dedo sobre un punto blanco. <b>Hacia arriba</b> gira en sentido horario y <b>hacia abajo</b>, antihorario (60° cada vez).</span></li>
+      <li><span>Tres deslizadas en el mismo sentido son media vuelta.</span></li>
+      <li><span><b>Arriba</b> ves tus jugadas, el tiempo, el avance y la <b>meta</b>. Resolverlo en la meta o menos es una partida perfecta.</span></li>
+      <li><span><b>Abajo:</b> la flecha deshace, el foco da una pista, los cuatro puntitos muestran u ocultan los puntos blancos y <b>+ Nueva</b> abre dificultad, tamaño y “Arma tu mezcla”.</span></li>
+      <li><span><b>Pista:</b> desliza sobre el grupo amarillo que dice “Desliza aquí” y hace el giro completo.</span></li>
+      <li><span><b>Arma tu mezcla:</b> pinta los rombos blancos tocando o arrastrando el dedo; cada color tiene un cupo. Toca uno del mismo color para quitarlo. Al terminar, toca “Jugar”.</span></li>
     </ul>
     <p class="credit">Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" type="button" id="help-ok">Entendido</button></div>
