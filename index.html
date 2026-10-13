@@ -922,6 +922,10 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
           <button type="button" class="sw" data-color="2" aria-pressed="false" style="--c:var(--face-right)" title="Azul (3)"><span id="cnt-2">9</span></button>
         </div>
         <span class="sep" aria-hidden="true"></span>
+        <button class="tool" type="button" id="edit-spin" aria-label="Girar al azar" title="Gira los rombos al azar; los colores se mueven con ellos">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12.6 1.6v3.3H9.3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 5.2 10.4 8 8 10.8 5.6 8Z" fill="currentColor"/></svg>
+          <span class="lbl">Girar al azar</span>
+        </button>
         <button class="tool" type="button" id="edit-random" aria-label="Al azar" title="Acomoda todo al azar">
           <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="5.5" r="1.2" fill="currentColor"/><circle cx="10.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/></svg>
           <span class="lbl">Al azar</span>
@@ -1431,6 +1435,9 @@ const Core = (() => {
   const adjacent = (a, b) => { const da = a[0] - b[0], db = a[1] - b[1]; return Math.abs(da) <= 1 && Math.abs(db) <= 1 && Math.abs(da + db) <= 1; };
   const inverse = (used) => used.slice().reverse().map((u) => ({ v: [...u.v], k: (6 - u.k) % 6 }));
 
+  // Cuántos rombos conservan la orientación que tendrían en el cubo armado
+  const sameShape = (st) => st.tiles.filter((t) => type(t) === st.solvedType.get(k2(upDown(t)[0]))).length;
+
   // Giros al azar que no se fusionan con uno anterior (mismo punto sin un giro vecino en medio).
   function walk(st, K, mode, rand) {
     const used = [], touched = new Set();
@@ -1451,7 +1458,9 @@ const Core = (() => {
       const v = pool[Math.floor(rand() * pool.length)];
       for (const id of flippable(st, v)) touched.add(id);
       // Giros de 60°, 120°, 240° y 300° casi siempre; 180° de vez en cuando.
-      const k = mode === "pile" ? 3 : rand() < 0.85 ? [1, 2, 4, 5][Math.floor(rand() * 4)] : 3;
+      // 60° (k = 1 o 5) cambian la orientación y la forma; 120° solo mueve colores; 180° pone o quita un cubito.
+      const r = rand();
+      const k = mode === "pile" ? 3 : r < 0.7 ? (rand() < 0.5 ? 1 : 5) : r < 0.85 ? (rand() < 0.5 ? 2 : 4) : 3;
       applyMove(st, v, k);
       used.push({ v: [...v], k });
     }
@@ -1489,7 +1498,8 @@ const Core = (() => {
       // En 2×2×2 casi cualquier posición revuelta está a 9–12 giros: para Intermedio se revuelve a fondo y se mide.
       const deep = st.N === 2 && level !== "easy";
       const K = pick(), used = walk(st, deep ? 40 : K, mode, rand);
-      const score = correctCount(st);
+      // Puntaje: rombos en su sitio (cuenta doble) + rombos con la orientación del cubo armado.
+      const score = correctCount(st) * 2 + sameShape(st);
       if (best && score >= best.score) { if (Date.now() - t0 > 1500) break; continue; }
       const r = solve(st);
       let cand = null;
@@ -1504,7 +1514,7 @@ const Core = (() => {
         cand = { par: K, exact: false, route: inverse(used), level, tiles: copyTiles(st.tiles), score };
       }
       if (cand && (!best || cand.score < best.score)) best = cand;
-      if (best && (best.score <= total * 0.12 || Date.now() - t0 > 1200)) break;
+      if (best && (best.score <= total * 0.5 || Date.now() - t0 > 1200)) break;
       if (Date.now() - t0 > 2500 && fallback) break;
     }
     const pickOut = best || fallback;
@@ -2322,6 +2332,23 @@ const Sound = (() => {
       } finally { generating = false; }
     }, 30);
   }
+  // Gira los rombos al azar sin cambiar cuántos hay de cada color (sirve en blanco o ya pintados)
+  function editSpin() {
+    if (generating) return;
+    const n = 30 * st.N;
+    for (let i = 0; i < n; i++) {
+      const m = Core.movesOf(st);
+      const k = Math.random() < 0.7 ? (Math.random() < 0.5 ? 1 : 5) : 1 + Math.floor(Math.random() * 5);
+      Core.applyMove(st, m[Math.floor(Math.random() * m.length)], k);
+    }
+    editGen = null;
+    render(); playIntro(); Sound.shuffle(); buzz(12);
+    say(blanks() > 0
+      ? "Rombos girados al azar. Ahora píntalos; los colores se quedan en el rombo donde los pongas."
+      : "Rombos girados al azar: cada color se movió con su rombo.");
+    save();
+  }
+
   function editClear() {
     st = blankBoard(st.N);
     paintColor = 1;
@@ -2546,6 +2573,7 @@ const Sound = (() => {
   $("#tool-rotate").addEventListener("click", () => setTool("rotate"));
   document.querySelectorAll(".sw").forEach((b) => b.addEventListener("click", () => setPaintColor(+b.dataset.color)));
   $("#edit-random").addEventListener("click", editRandom);
+  $("#edit-spin").addEventListener("click", editSpin);
   $("#edit-clear").addEventListener("click", editClear);
   $("#edit-cancel").addEventListener("click", cancelEditor);
   $("#edit-play").addEventListener("click", playFromEditor);
