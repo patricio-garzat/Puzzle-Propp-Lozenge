@@ -194,7 +194,8 @@ button { font: inherit; color: inherit; }
 .brand p { margin: 2px 0 0; font-family: var(--f-mono); font-weight: 800; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .top-actions { display: flex; align-items: center; gap: 8px; }
 /* Mientras se juega no se muestra el logo ni el nombre de la app (ya se vieron en el inicio) */
-.topbar .brand { display: none; }
+/* oculto a la vista pero sin display:none: los demás logos de la app usan los degradados definidos aquí */
+.topbar .brand { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); opacity: 0; pointer-events: none; }
 .topbar { justify-content: flex-end; }
 .pill {
   display: inline-flex; align-items: center; gap: 8px;
@@ -596,7 +597,10 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 /* position: absolute a propósito: Safari pinta su barra de arriba con el color de las capas *fijas* pegadas
    arriba; con una capa fija blanca la barra se quedaba blanca. Así la barra siempre toma el fondo de la app. */
 /* Alto = lo que de verdad se ve (100dvh); con 100vh Safari cuenta el área de sus barras y el logo quedaba abajo */
-#studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; box-sizing: border-box; overflow: hidden; }
+#studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; z-index: 210; display: grid; place-items: center; background: var(--bg); padding: 16px; box-sizing: border-box; overflow: hidden; transition: background-color 0.45s ease; }
+/* Safari toma el color de su barra de arriba al terminar de cargar: la intro empieza con el fondo del tema
+   y se vuelve blanca justo después, así la barra queda del color del tema y no blanca */
+#studio.paper { background: #FFFFFF; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo blanco; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
@@ -3423,7 +3427,7 @@ const Sound = (() => {
 
   /* ---------- Intro del estudio (BluBer Games) ---------- */
   // 4 s: el oso aparece, "BluBer" sube letra por letra, "GAMES" se abre, un brillo y el oso parpadea.
-  function playStudio(el, next) {
+  function playStudio(el, next, onStart) {
     const q = (id) => document.getElementById(id);
     const easeOut = "cubic-bezier(.16,1,.3,1)", inOut = "cubic-bezier(.65,0,.35,1)";
     const tl = (node, frames, delay, duration, easing = easeOut, fill = "both") => {
@@ -3435,6 +3439,19 @@ const Sound = (() => {
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
     };
+    // Espera a que la página termine de cargar, pasa a blanco y entonces empieza la animación
+    let begun = false;
+    const begin = () => {
+      if (begun) return;
+      begun = true;
+      el.classList.add("paper");
+      setTimeout(run, 450);
+    };
+    if (document.readyState === "complete") setTimeout(begin, 250);
+    else window.addEventListener("load", () => setTimeout(begin, 250), { once: true });
+    setTimeout(begin, 2500); // por si la carga tarda demasiado
+    function run() {
+    if (onStart) onStart();
     if (reduceMotion || !el.animate) { el.classList.add("go"); setTimeout(finish, 1600); return; }
     // Las copias de las letras para el brillo (un clipPath no admite grupos)
     const ws = q("bb-word-shape");
@@ -3456,23 +3473,38 @@ const Sound = (() => {
     tl(eye, [{ transform: "scaleY(1)" }, { transform: "scaleY(0.12)", offset: 0.5 }, { transform: "scaleY(1)" }], 3250, 200, "ease-in-out", "none");
     el.classList.add("go"); // ya con todas las animaciones en su estado inicial
     setTimeout(finish, 4000);
+    }
   }
 
   /* ---------- Animación de inicio ---------- */
   (() => {
     const sp = document.getElementById("splash"), studio = document.getElementById("studio");
     if (!sp) return;
+    // Si la app se recargó solo para que Safari cambie el color de su barra (cambio de tema), no se repiten las intros
+    let skip = null;
+    try { skip = sessionStorage.getItem("propp-skip-intro"); sessionStorage.removeItem("propp-skip-intro"); } catch (e) {}
+    if (skip) {
+      if (studio) studio.remove();
+      sp.remove();
+      setTimeout(() => {
+        if (!isMobile()) startEl.hidden = true;
+        if (skip === "settings") pushScreen("scr-settings");
+        else if (skip === "game") closeShell();
+      }, 0);
+      return;
+    }
     // La animación es parte de la app: siempre se muestra completa. Primero el estudio, luego el juego.
     const STUDIO = studio ? (reduceMotion ? 1.6 : 4) : 0;
     const done = () => { if (sp.isConnected) sp.remove(); };
     const startGame = () => { sp.classList.remove("hold"); setTimeout(done, 5550); };
-    if (studio) playStudio(studio, startGame); else startGame();
     // La intro siempre arranca sola. Si el navegador ya deja sonar, suena desde el inicio;
     // si pide un toque primero, el sonido entra en cuanto la persona toca (sin pausar nada).
-    const t0 = performance.now();
+    let t0 = null, pending = false;
     const play = (e) => { if (studio) Sound.studio(e); Sound.intro(e - STUDIO); };
+    const onStart = () => { t0 = performance.now(); if (pending) { pending = false; play(0); } };
+    if (studio) playStudio(studio, startGame, onStart); else { startGame(); onStart(); }
     if (!Sound.on) return;
-    if (Sound.probe()) { play(0); return; }
+    if (Sound.probe()) { if (t0 === null) pending = true; else play(0); return; }
     let sounding = false;
     const late = () => {
       if (sounding || !sp.isConnected) return;
@@ -3482,7 +3514,8 @@ const Sound = (() => {
         if (sounding || !sp.isConnected) return;
         sounding = true;
         ["pointerdown", "touchend", "click", "keydown"].forEach((ev) => document.removeEventListener(ev, late, true));
-        play((performance.now() - t0) / 1000);
+        if (t0 === null) pending = true;
+        else play((performance.now() - t0) / 1000);
       });
     };
     ["pointerdown", "touchend", "click"].forEach((ev) => document.addEventListener(ev, late, true));
@@ -3513,7 +3546,20 @@ const Sound = (() => {
     if (!col) return;
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.removeAttribute("media"); m.setAttribute("content", col); });
   }
-  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => syncThemeColor());
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+    syncThemeColor();
+    if (settings.theme === "auto") refreshForTheme();
+  });
+  // Safari del iPhone solo toma el color de su barra de arriba al cargar la página: al cambiar de tema
+  // se recarga al instante, sin intros y en la misma pantalla, para que la barra cambie junto con el tema.
+  const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  function refreshForTheme() {
+    if (!IOS) return;
+    const where = !shell.hidden && stack[stack.length - 1] === "scr-settings" ? "settings" : shell.hidden ? "game" : "home";
+    try { sessionStorage.setItem("propp-skip-intro", where); } catch (e) { return; }
+    try { save(); } catch (e) {}
+    setTimeout(() => location.reload(), 80);
+  }
   applyTheme();
 
   // Navegación tipo iOS: pila de pantallas que entran desde la derecha
@@ -3725,7 +3771,11 @@ const Sound = (() => {
   $("#set-sound").addEventListener("change", (e) => setSound(e.target.checked));
   $("#set-vibe").addEventListener("change", (e) => { settings.vibe = e.target.checked; saveSettings(); buzz(15); });
   $("#set-dots").addEventListener("change", (e) => setDots(e.target.checked));
-  document.querySelectorAll("[data-theme-opt]").forEach((b) => b.addEventListener("click", () => { settings.theme = b.dataset.themeOpt; saveSettings(); applyTheme(); syncSettings(); Sound.tick(); }));
+  document.querySelectorAll("[data-theme-opt]").forEach((b) => b.addEventListener("click", () => {
+    if (settings.theme === b.dataset.themeOpt) return;
+    settings.theme = b.dataset.themeOpt; saveSettings(); applyTheme(); syncSettings(); Sound.tick();
+    refreshForTheme();
+  }));
   // Cambiar el idioma: textos fijos y todo lo que se dibuja con datos
   function setLang(l) {
     if (l === LANG) return;
