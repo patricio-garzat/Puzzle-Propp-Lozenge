@@ -602,6 +602,10 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    blanca justo después. Mientras dura, <html> también va en blanco para que no se asome el fondo oscuro
    en la franja de abajo del iPhone (el alto visible no siempre llega hasta el borde) */
 #studio.paper { background: #FFFFFF; }
+/* En el iPhone 100dvh puede quedar más corto que la pantalla y abajo se asomaba la intro del juego (oscura).
+   Una sombra sólida del mismo color extiende la intro hasta el borde sin mover el logo del centro */
+#studio { box-shadow: 0 50vh 0 0 var(--bg); transition: background-color 0.45s ease, box-shadow 0.45s ease; }
+#studio.paper { box-shadow: 0 50vh 0 0 #FFFFFF; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
