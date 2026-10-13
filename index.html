@@ -437,6 +437,71 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 @keyframes paintpop { 40% { transform: scale(1.14); } }
 .goal.over .goal-n { background: var(--face-left); font-size: 20px; }
 
+/* ---------- Celular: una sola pantalla, sin scroll, solo lo necesario ---------- */
+.mobile-only, .lbl-short { display: none; }
+@media (max-width: 719px), (max-height: 520px) and (pointer: coarse) {
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  .app { height: 100%; padding-inline: 12px; padding-block: 10px 10px; gap: 8px; }
+  .tool.mobile-only { display: inline-flex; }
+  .topbar { flex-wrap: nowrap; }
+  .logo { width: 30px; height: 30px; }
+  .brand { gap: 9px; }
+  .brand h1 { font-size: clamp(16px, 5vw, 19px); white-space: nowrap; }
+  .brand p { display: none; }
+  .pill { padding: 8px; width: 38px; height: 38px; justify-content: center; }
+  .pill .lbl { display: none; }
+
+  .main { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; gap: 0; }
+  .side.left { display: none; }
+  .stage { flex: 1 1 auto; min-height: 0; gap: 8px; }
+  .board-wrap { flex: 1 1 auto; min-height: 0; max-width: none; }
+  #board { height: 100%; max-height: none; filter: drop-shadow(0 14px 18px var(--shadow-strong)); }
+  .glow { width: min(80%, 50vh); }
+
+  .mstats { display: flex; align-items: center; gap: 12px; width: 100%; flex: none; }
+  .m-item { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-display); font-weight: 700; font-size: 16px; font-variant-numeric: tabular-nums; }
+  .m-item i { width: 10px; height: 7px; transform: skewX(-30deg); border-radius: 1.5px; }
+  .m-item small { font-size: 12px; color: var(--muted); font-weight: 500; }
+  .m-bar { flex: 1 1 auto; height: 8px; border-radius: 99px; background: var(--card-2); overflow: hidden; min-width: 40px; }
+  .m-bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--face-left), var(--face-top)); border-radius: inherit; transition: width 0.4s ease; }
+  .m-bar span.done { background: var(--ok); }
+  .m-goal { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--face-right); color: #FFFFFF; white-space: nowrap; }
+  .m-goal.bound { background: var(--accent); color: var(--accent-ink); }
+  .m-goal.over { background: var(--face-left); }
+
+  .dock { border-radius: 18px; gap: 4px; padding: 5px; width: 100%; justify-content: space-between; flex-wrap: nowrap; }
+  .dock .lbl, .dock .sep, .dock .switch { display: none; }
+  .dock .lbl-short { display: inline; }
+  .tool, .seg button { padding: 9px 11px; }
+  .tool svg, .seg svg { width: 19px; height: 19px; }
+  .dock.edit { flex-wrap: wrap; justify-content: center; }
+  .sw { width: 40px; height: 34px; }
+  .sw::before { width: 26px; height: 16px; }
+
+  .status { font-size: 12.5px; min-height: 2.7em; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-align: center; }
+  .status::before { display: none; }
+
+  /* Nueva partida como hoja que sube desde abajo */
+  .sheet-scrim { position: fixed; inset: 0; z-index: 24; background: var(--veil); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; display: block; }
+  .side.right {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+    background: var(--bg); border-radius: 22px 22px 0 0; border-top: 1.5px solid var(--line);
+    padding: 18px 12px calc(14px + env(safe-area-inset-bottom, 0px));
+    box-shadow: 0 -18px 40px var(--shadow-strong);
+    transform: translateY(105%); transition: transform 0.32s cubic-bezier(.2,1,.3,1);
+    max-height: 92%; overflow: hidden; gap: 0;
+  }
+  .side.right > .card:last-child { display: none; }
+  .side.right .card { box-shadow: none; border: 0; padding: 4px; background: transparent; animation: none; }
+  .sheet-open .sheet-scrim { opacity: 1; pointer-events: auto; }
+  .sheet-open .side.right { transform: translateY(0); }
+  .sheet-x { top: 10px; right: 10px; z-index: 2; display: grid; }
+  .mode small { display: none; }
+  .mode { padding: 10px 12px; }
+  .sheet .howto { gap: 8px; font-size: 13.5px; }
+  .modal .sheet { padding: 22px 18px 18px; }
+}
+
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -477,9 +542,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       </div>
     </div>
     <div class="top-actions">
-      <button class="pill" type="button" id="help-btn">
+      <button class="pill" type="button" id="help-btn" aria-label="Cómo se juega">
         <svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.9 7a2.2 2.2 0 1 1 3.2 2c-.7.4-1.1.8-1.1 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="13.2" r="1" fill="currentColor"/></svg>
-        Cómo se juega
+        <span class="lbl">Cómo se juega</span>
       </button>
       <button class="pill icon" type="button" id="sound-btn" aria-pressed="true" aria-label="Sonido" title="Sonido (M)">
         <svg class="snd-on" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="M12.4 6.2a4 4 0 0 1 0 5.6M14.4 4.2a6.8 6.8 0 0 1 0 9.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -520,6 +585,12 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     </aside>
 
     <section class="stage" aria-label="Tablero">
+      <div class="mstats mobile-only" aria-label="Tu partida">
+        <span class="m-item"><i style="background:var(--face-top)"></i><b id="m-moves">0</b></span>
+        <span class="m-item"><i style="background:var(--face-left)"></i><b id="m-time">0:00</b></span>
+        <span class="m-bar"><span id="m-bar"></span></span>
+        <span class="m-goal" id="m-goal" hidden>Mínimo 9</span>
+      </div>
       <div class="board-wrap" id="board-wrap">
         <div class="glow" aria-hidden="true"></div>
         <svg id="board" role="application" aria-label="Tablero hexagonal con rombos" aria-describedby="status"></svg>
@@ -546,11 +617,11 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         <div class="seg" role="group" aria-label="Herramienta">
           <button type="button" id="tool-paint" aria-pressed="true" title="Toca o arrastra sobre los rombos para pintarlos">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.5 2.5 13.5 5.5 7 12H4V9Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M2.5 14h11" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
-            Pintar
+            <span class="lbl">Pintar</span>
           </button>
           <button type="button" id="tool-rotate" aria-pressed="false" title="Toca los puntos blancos para mover grupos de tres">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12.6 1.6v3.3H9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Girar
+            <span class="lbl">Girar</span>
           </button>
         </div>
         <div class="swatches" role="group" aria-label="Color para pintar">
@@ -559,43 +630,55 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
           <button type="button" class="sw" data-color="2" aria-pressed="false" style="--c:var(--face-right)" title="Azul (3)"><span id="cnt-2">9</span></button>
         </div>
         <span class="sep" aria-hidden="true"></span>
-        <button class="tool" type="button" id="edit-random" title="Acomoda todo al azar">
+        <button class="tool" type="button" id="edit-random" aria-label="Al azar" title="Acomoda todo al azar">
           <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="5.5" cy="5.5" r="1.2" fill="currentColor"/><circle cx="10.5" cy="10.5" r="1.2" fill="currentColor"/><circle cx="8" cy="8" r="1.2" fill="currentColor"/></svg>
-          Al azar
+          <span class="lbl">Al azar</span>
         </button>
-        <button class="tool" type="button" id="edit-clear" title="Vuelve al cubo armado">Reiniciar</button>
+        <button class="tool" type="button" id="edit-clear" aria-label="Reiniciar" title="Vuelve al cubo en blanco">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 1.6v3.3h3.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span class="lbl">Reiniciar</span>
+        </button>
         <span class="sep" aria-hidden="true"></span>
-        <button class="tool" type="button" id="edit-cancel">Cancelar</button>
-        <button class="tool go-play" type="button" id="edit-play">Jugar desde aquí ▶</button>
+        <button class="tool" type="button" id="edit-cancel" aria-label="Cancelar">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span class="lbl">Cancelar</span>
+        </button>
+        <button class="tool go-play" type="button" id="edit-play"><span class="lbl">Jugar desde aquí</span><span class="lbl-short">Jugar</span> ▶</button>
       </div>
 
       <div class="dock" id="play-dock">
         <div class="seg" role="group" aria-label="Sentido del giro">
-          <button type="button" id="dir-cw" aria-pressed="true" title="Cada toque gira 60° en sentido horario (R)">
+          <button type="button" id="dir-cw" aria-pressed="true" aria-label="Horario" title="Cada toque gira 60° en sentido horario (R)">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12.6 1.6v3.3H9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Horario
+            <span class="lbl">Horario</span>
           </button>
-          <button type="button" id="dir-ccw" aria-pressed="false" title="Cada toque gira 60° en sentido antihorario (R)">
+          <button type="button" id="dir-ccw" aria-pressed="false" aria-label="Antihorario" title="Cada toque gira 60° en sentido antihorario (R)">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8a5 5 0 1 0 1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M3.4 1.6v3.3h3.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Antihorario
+            <span class="lbl">Antihorario</span>
           </button>
         </div>
         <span class="sep" aria-hidden="true"></span>
-        <button class="tool" type="button" id="undo" title="Deshacer el último movimiento (Z)">
+        <button class="tool" type="button" id="undo" aria-label="Deshacer" title="Deshacer el último movimiento (Z)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-          Deshacer
+          <span class="lbl">Deshacer</span>
         </button>
-        <button class="tool" type="button" id="hint-btn" title="Marca el siguiente giro del camino más corto (H)">
+        <button class="tool" type="button" id="hint-btn" aria-label="Pista" title="Marca el siguiente giro del camino más corto (H)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
-          Pista
+          <span class="lbl">Pista</span>
         </button>
         <span class="sep" aria-hidden="true"></span>
+        <button class="tool go-play mobile-only" type="button" id="new-btn">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Nueva
+        </button>
         <label class="switch" title="Muestra los puntos donde se puede girar"><input type="checkbox" id="show-dots" checked><span class="track"></span>Puntos</label>
       </div>
       <p class="status" id="status" aria-live="polite">Toca un punto blanco para girar ese grupo de tres rombos.</p>
     </section>
 
-    <aside class="side right">
+    <div class="sheet-scrim mobile-only" id="sheet-scrim"></div>
+    <aside class="side right" id="new-sheet">
+      <button class="x sheet-x mobile-only" id="sheet-x" type="button" aria-label="Cerrar">×</button>
       <section class="card" style="--d:100ms">
         <h2>Nueva partida</h2>
         <div class="levels" role="group" aria-label="Dificultad">
@@ -1329,6 +1412,17 @@ const Sound = (() => {
         : left > 0 ? (parExact ? `Es el mínimo exacto. Te quedan ${left} para una partida perfecta.` : `Meta segura. Te quedan ${left}; quizá exista un camino un poco más corto.`)
         : (parExact ? "Ya pasaste el mínimo, pero todavía puedes resolverlo." : "Ya pasaste la meta, pero todavía puedes resolverlo.");
     }
+    // Barra compacta del celular
+    $("#m-moves").innerHTML = par !== null ? `${hist.length}<small>/${par}</small>` : String(hist.length);
+    $("#m-time").textContent = fmt(nowElapsed());
+    const mb = $("#m-bar");
+    mb.style.width = pct + "%";
+    mb.classList.toggle("done", ok === n);
+    const mg = $("#m-goal");
+    mg.hidden = phase === "edit" || (par === null && !parOver);
+    mg.textContent = par !== null ? (parExact ? `Mínimo ${par}` : `Meta ${par}`) : "Más de 8";
+    mg.classList.toggle("bound", par !== null && !parExact);
+    mg.classList.toggle("over", par === null && parOver);
     const b = readBest()[st.N];
     $("#s-best").innerHTML = b
       ? `Récord en ${sizeName(st.N)}: <b>${movs(b.moves)}</b> · ${fmt(b.ms)}`
@@ -1354,7 +1448,7 @@ const Sound = (() => {
     if (startedAt !== null) return;
     startedAt = Date.now();
     clearInterval(tick);
-    tick = setInterval(() => { $("#s-time").textContent = fmt(nowElapsed()); }, 250);
+    tick = setInterval(() => { $("#s-time").textContent = $("#m-time").textContent = fmt(nowElapsed()); }, 250);
   }
   function stopTimer() {
     if (startedAt !== null) { elapsed += Date.now() - startedAt; startedAt = null; }
@@ -1912,6 +2006,8 @@ const Sound = (() => {
     $("#sound-btn").setAttribute("aria-pressed", String(onNow));
     if (onNow) { Sound.unlock(); Sound.toggle(true); }
   }
+  function openSheet() { document.body.classList.add("sheet-open"); Sound.tick(); }
+  function closeSheet() { document.body.classList.remove("sheet-open"); }
   function openHelp() { helpEl.hidden = false; Sound.tick(); setTimeout(() => $("#help-ok").focus({ preventScroll: true }), 50); }
   function closeHelp() { if (!helpEl.hidden) { helpEl.hidden = true; $("#help-btn").focus({ preventScroll: true }); } }
 
@@ -1938,6 +2034,11 @@ const Sound = (() => {
   $("#reset").addEventListener("click", resetToCube);
   $("#sound-btn").addEventListener("click", () => setSound(!Sound.on));
   $("#help-btn").addEventListener("click", openHelp);
+  $("#new-btn").addEventListener("click", openSheet);
+  $("#sheet-x").addEventListener("click", closeSheet);
+  $("#sheet-scrim").addEventListener("click", closeSheet);
+  // Al elegir algo en la hoja, se cierra sola.
+  $("#new-sheet").addEventListener("click", (e) => { if (e.target.closest("button:not(#sheet-x)")) setTimeout(closeSheet, 120); });
   $("#help-x").addEventListener("click", closeHelp);
   $("#help-ok").addEventListener("click", closeHelp);
   helpEl.addEventListener("click", (e) => { if (e.target === helpEl) closeHelp(); });
@@ -1952,7 +2053,7 @@ const Sound = (() => {
   document.addEventListener("keydown", unlock, { capture: true });
 
   document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { closeHelp(); closeWin(); return; }
+    if (e.key === "Escape") { closeHelp(); closeWin(); closeSheet(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
     if (e.metaKey || e.ctrlKey || e.altKey || !helpEl.hidden) return;
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
