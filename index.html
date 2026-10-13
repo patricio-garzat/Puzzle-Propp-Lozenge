@@ -426,6 +426,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .sw.done { opacity: 0.45; }
 .sw.done span { font-size: 15px; }
 .tool.go-play.locked { filter: grayscale(0.7); opacity: 0.6; }
+#dots-btn .slash { display: none; }
+#dots-btn[aria-pressed="false"] { opacity: 0.55; }
+#dots-btn[aria-pressed="false"] .slash { display: inline; }
 .tile.nope { animation: nope 0.3s ease; transform-box: fill-box; transform-origin: center; }
 @keyframes nope { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .dock.edit { border-radius: 22px; border: 2px solid var(--face-top); }
@@ -736,6 +739,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
           <span class="lbl">Pista</span>
         </button>
         <span class="sep" aria-hidden="true"></span>
+        <button class="tool mobile-only" type="button" id="dots-btn" aria-pressed="true" aria-label="Puntos de giro" title="Mostrar u ocultar los puntos de giro">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="3.5" cy="8" r="1.9" fill="currentColor"/><circle cx="8" cy="3.5" r="1.9" fill="currentColor"/><circle cx="12.5" cy="8" r="1.9" fill="currentColor"/><circle cx="8" cy="12.5" r="1.9" fill="currentColor"/><path class="slash" d="M2 14 14 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
         <button class="tool go-play mobile-only" type="button" id="new-btn">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
           Nueva
@@ -2141,7 +2147,16 @@ const Sound = (() => {
   $("#dir-ccw").addEventListener("click", () => setDir(1));
   $("#undo").addEventListener("click", undo);
   $("#hint-btn").addEventListener("click", showHint);
-  $("#show-dots").addEventListener("change", (e) => { showDots = e.target.checked; Sound.tick(); render(); save(); });
+  function setDots(on, quiet) {
+    showDots = on;
+    $("#show-dots").checked = on;
+    $("#dots-btn").setAttribute("aria-pressed", String(on));
+    if (quiet) return;
+    Sound.tick(); render(); save();
+    say(on ? "Puntos de giro visibles." : "Puntos de giro ocultos. Puedes seguir girando en los mismos lugares.");
+  }
+  $("#show-dots").addEventListener("change", (e) => setDots(e.target.checked));
+  $("#dots-btn").addEventListener("click", () => setDots(!showDots));
   $("#mix-chaos").addEventListener("click", () => newGame(st.N, "chaos"));
   $("#win-again").addEventListener("click", () => (mode === "custom" ? enterEditor() : newGame(st.N, mode)));
   $("#mix-custom").addEventListener("click", () => enterEditor());
@@ -2216,7 +2231,7 @@ const Sound = (() => {
       buildBoard();
       playIntro();
       setDir(dir, true);
-      $("#show-dots").checked = showDots;
+      setDots(showDots, true);
       if (phase === "playing" && hist.length) startTimer();
       afterChange();
     } else {
