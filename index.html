@@ -9,8 +9,8 @@
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#F3F4F6" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#12102A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#EEF5FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1C2535" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-title" content="Lozenge">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -23,7 +23,7 @@
     var dark = t === "dark" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
     var root = document.documentElement;
     if (t !== "auto") { root.dataset.theme = t; root.dataset.themeByApp = "1"; }
-    root.style.backgroundColor = dark ? "#12102A" : "#F3F4F6";
+    root.style.backgroundColor = dark ? "#1C2535" : "#EEF5FB";
     var m = document.createElement("meta");
     m.name = "apple-mobile-web-app-status-bar-style";
     m.content = dark ? "black-translucent" : "default";
@@ -32,78 +32,86 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap">
 <style>
 /* Layout: consola de juego a pantalla completa. Barra superior; tres columnas en escritorio (tu partida · tablero · nueva partida); en móvil se apila y hace scroll */
 :root {
-  --bg: #F3F4F6;
-  --pat-a: #F0F1F4;
-  --pat-b: #ECEEF1;
-  --pat-c: #E8EAEE;
+  /* Tema claro "Hielo BluBer": blanco hielo, azul marino de la marca y rombos en mantequilla, salmón y azul aciano */
+  --bg: #EEF5FB;
+  --pat-a: #E9F2FA;
+  --pat-b: #E4EEF8;
+  --pat-c: #DFEAF5;
   --card: #FFFFFF;
-  --card-2: #F2F3F6;
-  --line: #E1E4EA;
-  --ink: #1B1E2C;
-  --muted: #5D6375;
-  --accent: #F8C53A;
-  --accent-deep: #D9A21C;
-  --accent-ink: #1B1E2C;
-  --focus: #3B44C4;
-  --shadow: rgba(22, 26, 44, 0.08);
-  --shadow-strong: rgba(22, 26, 44, 0.18);
-  --scrim: rgba(243, 244, 246, 0.85);
-  --veil: rgba(22, 24, 36, 0.32);
-  --ok: #16885A;
-  --warn: #C9392F;
-  --glow: 0.12;
-  --home-glow: rgba(90, 100, 160, 0.10);
+  --card-2: #E9F2FA;
+  --line: #D5E4F1;
+  --ink: #00385B;
+  --muted: #557089;
+  --accent: #FFD57A;
+  --accent-deep: #E5B24C;
+  --accent-ink: #3D2E0C;
+  --focus: #3E7BD6;
+  --shadow: rgba(0, 56, 91, 0.08);
+  --shadow-strong: rgba(0, 56, 91, 0.16);
+  --scrim: rgba(238, 245, 251, 0.86);
+  --veil: rgba(0, 38, 64, 0.28);
+  --ok: #2E9C78;
+  --warn: #D25A4C;
+  --easy: #3E9E78;
+  --glow: 0.14;
+  --home-glow: rgba(110, 146, 230, 0.16);
   --motion: paused; /* en claro, el fondo y el brillo no se mueven */
 
-  /* Colores del puzzle: en claro, un poco menos saturados para no deslumbrar */
-  --face-top: #EFAA16;
-  --face-left: #DE4034;
-  --face-right: #2F37B4;
-  --gt1: #F6C23E; --gt2: #E39A0B;
-  --gl1: #EE6357; --gl2: #CC3327;
-  --gr1: #4C56DE; --gr2: #252CA3;
-  --frame-hi: #2C3047;
-  --frame-lo: #12141F;
-  --tray: #1D2030;
-  --tray-line: #30344A;
-  --tray-edge: rgba(0, 0, 0, 0.45);
+  /* Colores del puzzle */
+  --face-top: #F7C45E;
+  --face-left: #EE8475;
+  --face-right: #5B80DA;
+  --on-left: #4D1A12;   /* texto sobre el salmón */
+  --on-right: #FFFFFF;  /* texto sobre el azul */
+  --gt1: #FFDE93; --gt2: #F2B84A;
+  --gl1: #F7A699; --gl2: #E5786A;
+  --gr1: #86A4EE; --gr2: #5276D3;
+  --frame-hi: #C7DAEC;
+  --frame-lo: #AFC7DF;
+  --tray: #DCE9F5;
+  --tray-line: #C6D8EB;
+  --tray-edge: rgba(0, 56, 91, 0.14);
   --halo: #FFFFFF;
-  --hl-fill: rgba(255, 255, 255, 0.16);
-  --bevel: rgba(255, 255, 255, 0.4);
-  --sheen: rgba(255, 255, 255, 0.2);
+  --dot-ring: #00385B;  /* borde de los puntos de giro */
+  --hl-fill: rgba(255, 255, 255, 0.3);
+  --bevel: rgba(255, 255, 255, 0.5);
+  --sheen: rgba(255, 255, 255, 0.25);
 
-  --f-display: "Unbounded", "Avenir Next", "Helvetica Neue", system-ui, sans-serif;
-  --f-body: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --f-mono: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; /* etiquetas: misma familia que el texto, en mayúsculas */
+  /* Tipografía redondeada y tranquila en toda la app */
+  --f-display: "Nunito", "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+  --f-body: "Nunito", "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+  --f-mono: "Nunito", "SF Pro Rounded", system-ui, -apple-system, sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #12102A; --pat-a: #1A1741; --pat-b: #161339; --pat-c: #110F2E;
-    --card: #1B1839; --card-2: #232049; --line: #2F2B5C; --ink: #F2F0FF; --muted: #A6A2CF;
-    --accent: #FFCF3D; --accent-deep: #C8930A; --accent-ink: #1B1740; --focus: #FFCF3D;
-    --shadow: rgba(0, 0, 0, 0.45); --shadow-strong: rgba(0, 0, 0, 0.65); --scrim: rgba(18, 16, 42, 0.8);
-    --veil: rgba(5, 4, 16, 0.6); --ok: #4ED69A; --warn: #FF8A80; --glow: 0.5;
-    --face-top: #FFCF3D; --face-left: #FF5D52; --face-right: #3D46D6;
-    --gt1: #FFE27E; --gt2: #FFC21C; --gl1: #FF8174; --gl2: #EE4235; --gr1: #6D78FF; --gr2: #3640D0;
-    --frame-hi: #2E2A66; --frame-lo: #0E0C24; --tray: #1E1B42; --tray-line: #332F6A;
-    --home-glow: rgba(123, 107, 255, 0.28); --motion: running;
+    --bg: #1C2535; --pat-a: #212B3D; --pat-b: #1F2839; --pat-c: #1A2231;
+    --card: #222D40; --card-2: #2A3650; --line: #33415B; --ink: #EEF1F6; --muted: #9DABC2;
+    --accent: #F2D08C; --accent-deep: #CFA75A; --accent-ink: #3A2E14; --focus: #F2D08C;
+    --shadow: rgba(0, 0, 0, 0.35); --shadow-strong: rgba(0, 0, 0, 0.55); --scrim: rgba(28, 37, 53, 0.84);
+    --veil: rgba(8, 12, 20, 0.6); --ok: #6FD3A8; --warn: #F29A8C; --easy: #4FAE88; --glow: 0.35;
+    --face-top: #F2D08C; --face-left: #EA9483; --face-right: #8EA8E6; --on-left: #3A1712; --on-right: #14213D;
+    --gt1: #F8DFA9; --gt2: #E8BD6C; --gl1: #F2AB9D; --gl2: #DE7E6C; --gr1: #AABFF1; --gr2: #7590DA;
+    --frame-hi: #2E3B55; --frame-lo: #151D2B; --tray: #26324A; --tray-line: #34425E; --tray-edge: rgba(0, 0, 0, 0.4); --dot-ring: #151D2B;
+    --hl-fill: rgba(255, 255, 255, 0.16); --bevel: rgba(255, 255, 255, 0.35); --sheen: rgba(255, 255, 255, 0.16);
+    --home-glow: rgba(142, 168, 230, 0.18); --motion: running;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #12102A; --pat-a: #1A1741; --pat-b: #161339; --pat-c: #110F2E;
-  --card: #1B1839; --card-2: #232049; --line: #2F2B5C; --ink: #F2F0FF; --muted: #A6A2CF;
-  --accent: #FFCF3D; --accent-deep: #C8930A; --accent-ink: #1B1740; --focus: #FFCF3D;
-  --shadow: rgba(0, 0, 0, 0.45); --shadow-strong: rgba(0, 0, 0, 0.65); --scrim: rgba(18, 16, 42, 0.8);
-  --veil: rgba(5, 4, 16, 0.6); --ok: #4ED69A; --warn: #FF8A80; --glow: 0.5;
-    --face-top: #FFCF3D; --face-left: #FF5D52; --face-right: #3D46D6;
-    --gt1: #FFE27E; --gt2: #FFC21C; --gl1: #FF8174; --gl2: #EE4235; --gr1: #6D78FF; --gr2: #3640D0;
-    --frame-hi: #2E2A66; --frame-lo: #0E0C24; --tray: #1E1B42; --tray-line: #332F6A;
-    --home-glow: rgba(123, 107, 255, 0.28); --motion: running;
+  --bg: #1C2535; --pat-a: #212B3D; --pat-b: #1F2839; --pat-c: #1A2231;
+  --card: #222D40; --card-2: #2A3650; --line: #33415B; --ink: #EEF1F6; --muted: #9DABC2;
+  --accent: #F2D08C; --accent-deep: #CFA75A; --accent-ink: #3A2E14; --focus: #F2D08C;
+  --shadow: rgba(0, 0, 0, 0.35); --shadow-strong: rgba(0, 0, 0, 0.55); --scrim: rgba(28, 37, 53, 0.84);
+  --veil: rgba(8, 12, 20, 0.6); --ok: #6FD3A8; --warn: #F29A8C; --easy: #4FAE88; --glow: 0.35;
+  --face-top: #F2D08C; --face-left: #EA9483; --face-right: #8EA8E6; --on-left: #3A1712; --on-right: #14213D;
+  --gt1: #F8DFA9; --gt2: #E8BD6C; --gl1: #F2AB9D; --gl2: #DE7E6C; --gr1: #AABFF1; --gr2: #7590DA;
+  --frame-hi: #2E3B55; --frame-lo: #151D2B; --tray: #26324A; --tray-line: #34425E; --tray-edge: rgba(0, 0, 0, 0.4); --dot-ring: #151D2B;
+  --hl-fill: rgba(255, 255, 255, 0.16); --bevel: rgba(255, 255, 255, 0.35); --sheen: rgba(255, 255, 255, 0.16);
+  --home-glow: rgba(142, 168, 230, 0.18); --motion: running;
   color-scheme: dark;
 }
 
@@ -222,7 +230,7 @@ button { font: inherit; color: inherit; }
 .c0 { color: var(--face-left); }
 .c1 { color: var(--face-top); }
 .c2 { color: var(--face-right); }
-.dot { fill: var(--halo); stroke: var(--frame-lo); stroke-width: 1.6; pointer-events: none; animation: dotin 0.35s ease both; transform-box: fill-box; transform-origin: center; }
+.dot { fill: var(--halo); stroke: var(--dot-ring); stroke-width: 1.6; pointer-events: none; animation: dotin 0.35s ease both; transform-box: fill-box; transform-origin: center; }
 @keyframes dotin { from { transform: scale(0); } }
 .hit { fill: transparent; outline: none; pointer-events: none; }
 .hl-under { fill: none; stroke: rgba(8, 6, 24, 0.55); stroke-width: 6.5; stroke-linejoin: round; stroke-linecap: round; }
@@ -305,7 +313,7 @@ button { font: inherit; color: inherit; }
 .chip { font-family: var(--f-body); letter-spacing: 0; text-transform: none; font-size: 12px; font-weight: 700; color: var(--ink); background: var(--card-2); border-radius: 99px; padding: 2px 9px; }
 
 .goal { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: center; background: var(--card-2); border-radius: 14px; padding: 10px 12px; }
-.goal-n { min-width: 54px; height: 54px; padding: 0 8px; display: grid; place-items: center; border-radius: 14px; background: var(--face-right); color: #FFFFFF; font-family: var(--f-display); font-weight: 800; font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; box-shadow: 0 6px 14px var(--shadow); }
+.goal-n { min-width: 54px; height: 54px; padding: 0 8px; display: grid; place-items: center; border-radius: 14px; background: var(--face-right); color: var(--on-right); font-family: var(--f-display); font-weight: 800; font-size: 24px; font-variant-numeric: tabular-nums; letter-spacing: -0.02em; box-shadow: 0 6px 14px var(--shadow); }
 .goal.perfect .goal-n { background: var(--ok); }
 .goal p { margin: 0; font-size: 13px; line-height: 1.35; color: var(--muted); }
 .goal p b { display: block; color: var(--ink); font-size: 14.5px; }
@@ -446,7 +454,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .levels button[data-level="easy"][aria-pressed="true"] { background: var(--ok); color: #FFFFFF; }
 .levels button[data-level="mid"][aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
 .levels button[data-level="mid"][aria-pressed="true"] small { color: var(--accent-ink); }
-.levels button[data-level="hard"][aria-pressed="true"] { background: var(--face-left); color: #FFFFFF; }
+.levels button[data-level="hard"][aria-pressed="true"] { background: var(--face-left); color: var(--on-left); }
 .levels button[data-level="easy"][aria-pressed="true"] small, .levels button[data-level="hard"][aria-pressed="true"] small { color: #FFFFFF; }
 .levels button:disabled { opacity: 0.35; cursor: not-allowed; background: transparent; transform: none; }
 .level-note { margin: -4px 0 0; font-size: 12.5px; color: var(--muted); }
@@ -455,9 +463,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 
 /* ---------- Editor: arma tu mezcla (estilos) ---------- */
 /* Rombos sin pintar: blancos, con un sombreado leve por orientación para que se siga viendo el cubo */
-.tile.blank.o1 { color: #F7F6FD; }
-.tile.blank.o0 { color: #DEDBEC; }
-.tile.blank.o2 { color: #C7C3DA; }
+.tile.blank.o1 { color: #FFFFFF; }
+.tile.blank.o0 { color: #E4EDF6; }
+.tile.blank.o2 { color: #CCDAE9; }
 .tile.blank .bevel { stroke: rgba(255, 255, 255, 0.9); }
 .sw.done { opacity: 0.45; }
 .sw.done span { font-size: 15px; }
@@ -486,7 +494,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 #board.paint .tile:hover .bevel { stroke: #FFFFFF; stroke-width: 3; }
 .tile.painted { animation: paintpop 0.32s cubic-bezier(.3,1.8,.5,1); transform-box: fill-box; transform-origin: center; }
 @keyframes paintpop { 40% { transform: scale(1.14); } }
-.goal.over .goal-n { background: var(--face-left); font-size: 20px; }
+.goal.over .goal-n { background: var(--face-left); color: var(--on-left); font-size: 20px; }
 
 /* ---------- Celular: una sola pantalla, sin scroll, solo lo necesario ---------- */
 .mobile-only, .lbl-short { display: none; }
@@ -516,9 +524,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   .m-bar { flex: 1 1 auto; height: 8px; border-radius: 99px; background: var(--card-2); overflow: hidden; min-width: 40px; }
   .m-bar span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--face-left), var(--face-top)); border-radius: inherit; transition: width 0.4s ease; }
   .m-bar span.done { background: var(--ok); }
-  .m-goal { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--face-right); color: #FFFFFF; white-space: nowrap; }
+  .m-goal { font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--face-right); color: var(--on-right); white-space: nowrap; }
   .m-goal.bound { background: var(--accent); color: var(--accent-ink); }
-  .m-goal.over { background: var(--face-left); }
+  .m-goal.over { background: var(--face-left); color: var(--on-left); }
 
   .dock { border-radius: 18px; gap: 4px; padding: 5px; width: 100%; justify-content: space-between; flex-wrap: nowrap; }
   .dock .lbl, .dock .sep, .dock .switch { display: none; }
@@ -668,9 +676,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .start-levels button small { font-family: var(--f-mono); font-size: 12px; font-weight: 600; opacity: 0.85; text-align: right; }
 .start-levels button:hover { transform: translateY(-2px); }
 .start-levels button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22); }
-.start-levels [data-start-level="easy"], .start-levels [data-sel-level="easy"] { background: #17A06B; color: #FFFFFF; }
+.start-levels [data-start-level="easy"], .start-levels [data-sel-level="easy"] { background: var(--easy); color: #FFFFFF; }
 .start-levels [data-start-level="mid"], .start-levels [data-sel-level="mid"] { background: var(--accent); color: var(--accent-ink); }
-.start-levels [data-start-level="hard"], .start-levels [data-sel-level="hard"] { background: #E8493E; color: #FFFFFF; }
+.start-levels [data-start-level="hard"], .start-levels [data-sel-level="hard"] { background: var(--face-left); color: var(--on-left); }
 .start-levels button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
 .start-sizes button { padding: 7px 12px; font-size: 13.5px; }
 
@@ -753,7 +761,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 @keyframes demo-pulse { 50% { box-shadow: 0 0 0 3px rgba(18, 20, 36, 0.6), 0 0 0 16px rgba(255, 255, 255, 0.12); } }
 .demo-steps { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .demo-steps span { padding: 7px 12px; border-radius: 999px; background: var(--card-2); border: 1.5px solid var(--line); font-weight: 700; font-size: 13px; color: var(--muted); transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s cubic-bezier(.3,1.6,.5,1); }
-.demo-steps span.ok { background: #17A06B; border-color: #17A06B; color: #FFFFFF; transform: scale(1.06); }
+.demo-steps span.ok { background: var(--easy); border-color: var(--easy); color: #FFFFFF; transform: scale(1.06); }
 .demo-steps span.now { color: var(--ink); border-color: var(--ink); }
 .ill-swipe .finger { position: absolute; pointer-events: none; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.25), 0 6px 14px var(--shadow-strong); animation: finger 2.2s cubic-bezier(.5,0,.3,1) infinite; }
 .ill-swipe.want-down .finger { animation-name: finger-down; }
@@ -763,7 +771,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .ill-pair { width: min(84vw, 320px); aspect-ratio: auto; grid-template-columns: 1fr auto 1fr; gap: 10px; }
 .ill-arrow { font-family: var(--f-display); font-weight: 800; font-size: 28px; color: var(--muted); }
 .ill-goal { display: flex; gap: 18px; align-items: center; justify-content: center; }
-.goal-chip { font-family: var(--f-display); font-weight: 800; font-size: 26px; padding: 14px 20px; border-radius: 18px; background: var(--face-right); color: #FFFFFF; box-shadow: 0 10px 20px var(--shadow); }
+.goal-chip { font-family: var(--f-display); font-weight: 800; font-size: 26px; padding: 14px 20px; border-radius: 18px; background: var(--face-right); color: var(--on-right); box-shadow: 0 10px 20px var(--shadow); }
 .bulb { width: 72px; height: 72px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); box-shadow: 0 10px 20px var(--shadow); }
 .bulb svg { width: 34px; height: 34px; filter: none; }
 .dots { display: flex; gap: 8px; justify-content: center; margin: 12px 0 14px; flex: none; }
@@ -814,7 +822,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 
 /* ---------- Modo niveles ---------- */
 .hint-tool { position: relative; }
-.hint-count { position: absolute; top: 1px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--face-left); color: #FFFFFF; font: 800 11px/18px var(--f-body); text-align: center; box-shadow: 0 0 0 2px var(--card); }
+.hint-count { position: absolute; top: 1px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--face-left); color: var(--on-left); font: 800 11px/18px var(--f-body); text-align: center; box-shadow: 0 0 0 2px var(--card); }
 .hint-count.zero { background: var(--muted); }
 .hint-count.pop { animation: bump 0.4s cubic-bezier(.3,1.8,.5,1); }
 .lv-top { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 10px; }
@@ -847,7 +855,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .start-lv { width: 100%; margin-bottom: 2px; }
 .mode-ico { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--accent); color: var(--accent-ink); }
 .mode-ico svg { width: 22px; height: 22px; }
-.m-goal.lvl { background: var(--face-right); color: #FFFFFF; display: inline-flex; align-items: center; gap: 2px; }
+.m-goal.lvl { background: var(--face-right); color: var(--on-right); display: inline-flex; align-items: center; gap: 2px; }
 .m-goal.lvl .goal-stars svg.off path { fill: rgba(255, 255, 255, 0.3); }
 .goal-stars { display: inline-flex; gap: 2px; margin-left: 6px; vertical-align: -2px; }
 .goal-stars svg { width: 14px; height: 14px; }
@@ -1009,8 +1017,8 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
         <linearGradient id="spL" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gl1)"/><stop offset="1" style="stop-color:var(--gl2)"/></linearGradient>
         <linearGradient id="spR" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gr1)"/><stop offset="1" style="stop-color:var(--gr2)"/></linearGradient>
         <linearGradient id="sp-frame" x1="0" y1="0" x2="0.35" y2="1"><stop offset="0" style="stop-color:var(--frame-hi)"/><stop offset="1" style="stop-color:var(--frame-lo)"/></linearGradient>
-        <radialGradient id="sp-halo"><stop offset="0" stop-color="#7B6BFF" stop-opacity="0.28"/><stop offset="0.55" stop-color="#FF7A5C" stop-opacity="0.08"/><stop offset="1" stop-color="#7B6BFF" stop-opacity="0"/></radialGradient>
-        <radialGradient id="sp-ground"><stop offset="0" stop-color="#06041A" stop-opacity="0.42"/><stop offset="1" stop-color="#06041A" stop-opacity="0"/></radialGradient>
+        <radialGradient id="sp-halo"><stop offset="0" stop-color="#8EA8E6" stop-opacity="0.28"/><stop offset="0.55" stop-color="#EA9483" stop-opacity="0.08"/><stop offset="1" stop-color="#7B6BFF" stop-opacity="0"/></radialGradient>
+        <radialGradient id="sp-ground"><stop offset="0" stop-color="#0A101C" stop-opacity="0.42"/><stop offset="1" stop-color="#0A101C" stop-opacity="0"/></radialGradient>
         <linearGradient id="sp-gl" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/><stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.45"/><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
         <clipPath id="sp-clip"><polygon points="0.0000,-1.0400 0.9007,-0.5200 0.9007,0.5200 0.0000,1.0400 -0.9007,0.5200 -0.9007,-0.5200"/></clipPath>
       </defs>
@@ -1376,13 +1384,13 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
     <header class="nav"><button class="nav-back" type="button" data-back><svg viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Atrás</span></button><h2>Ajustes</h2><span></span></header>
     <p class="group-title">Juego</p>
     <div class="list">
-      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#FF5D52"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="M12.4 6.2a4 4 0 0 1 0 5.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Sonido</span><label class="switch"><input type="checkbox" id="set-sound"><span class="track"></span></label></div>
+      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#EE8475"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="M12.4 6.2a4 4 0 0 1 0 5.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Sonido</span><label class="switch"><input type="checkbox" id="set-sound"><span class="track"></span></label></div>
       <div class="list-row" id="row-vibe"><span class="lbl-l"><span class="ico" style="background:#129460"><svg viewBox="0 0 18 18" aria-hidden="true"><rect x="5.5" y="2.5" width="7" height="13" rx="1.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M2.5 6v6M15.5 6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span>Vibración</span><label class="switch"><input type="checkbox" id="set-vibe"><span class="track"></span></label></div>
-      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#3D46D6"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="4" cy="9" r="2" fill="currentColor"/><circle cx="9" cy="4" r="2" fill="currentColor"/><circle cx="14" cy="9" r="2" fill="currentColor"/><circle cx="9" cy="14" r="2" fill="currentColor"/></svg></span>Puntos de giro</span><label class="switch"><input type="checkbox" id="set-dots"><span class="track"></span></label></div>
+      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#5B80DA"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="4" cy="9" r="2" fill="currentColor"/><circle cx="9" cy="4" r="2" fill="currentColor"/><circle cx="14" cy="9" r="2" fill="currentColor"/><circle cx="9" cy="14" r="2" fill="currentColor"/></svg></span>Puntos de giro</span><label class="switch"><input type="checkbox" id="set-dots"><span class="track"></span></label></div>
     </div>
     <p class="group-title">Apariencia</p>
     <div class="list">
-      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#2E2A66"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M14.5 11.2A6 6 0 0 1 6.8 3.5a6 6 0 1 0 7.7 7.7Z" fill="currentColor"/></svg></span>Tema</span>
+      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#3A4A6B"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M14.5 11.2A6 6 0 0 1 6.8 3.5a6 6 0 1 0 7.7 7.7Z" fill="currentColor"/></svg></span>Tema</span>
         <div class="seg theme-seg" role="group" aria-label="Tema"><button type="button" data-theme-opt="auto">Auto</button><button type="button" data-theme-opt="light">Claro</button><button type="button" data-theme-opt="dark">Oscuro</button></div>
       </div>
       <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#1F8FD6"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.6 9h12.8M9 2.4c2 2 2.9 4.2 2.9 6.6S11 13.6 9 15.6C7 13.6 6.1 11.4 6.1 9S7 4.4 9 2.4Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>Idioma</span>
@@ -1444,7 +1452,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
     <button class="link" type="button" id="start-continue" hidden>Continuar la partida guardada</button>
   </div>
 </div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="star-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE07A"/><stop offset="1" stop-color="#F2A812"/></linearGradient></defs></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="star-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE3A0"/><stop offset="1" stop-color="#EDB54A"/></linearGradient></defs></svg>
 <canvas id="confetti" aria-hidden="true"></canvas>
 <!-- Final de los 50 niveles y el nivel extremo secreto -->
 <div class="finale" id="finale" hidden role="dialog" aria-modal="true" aria-label="Completaste los 50 niveles">
