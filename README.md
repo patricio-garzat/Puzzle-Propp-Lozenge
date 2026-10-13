@@ -7,7 +7,7 @@
 
 Un puzzle de cubo relajante de **BluBer Games**, inspirado en el puzzle magnético **Propp Lozenge** de James Propp y Oskar van Deventer: 27 rombos de tres colores dentro de un hexágono que forman la ilusión de un cubo. Desliza sobre grupos de tres rombos, gíralos y vuelve a dejar el cubo armado.
 
-**Jugar (web):** https://patricio-garzat.github.io/Puzzle-Propp-Lozenge/
+**Jugar (web):** https://cubeswipe.blubergames.com
 
 **App de iOS:** está en [`app/`](app/), hecha con Capacitor a partir de este mismo juego. La guía para publicarla en la App Store está en [`app/APP_STORE.md`](app/APP_STORE.md).
 
