@@ -11,6 +11,7 @@ Versión web no oficial del puzzle magnético **Propp Lozenge**: 27 rombos de tr
 
 ## Qué incluye
 
+- **Modo niveles:** 50 niveles fijos (iguales para todos) que se van poniendo más difíciles: 1–5 en 2×2×2, 6–10 en 3×3×3, 11–20 en 4×4×4, 21–30 en 5×5×5, 31–40 en 6×6×6 y 41–50 en 8×8×8. Cada nivel da 1, 2 o 3 estrellas según los movimientos y regala 3 pistas; las que no uses se acumulan si no pasas el máximo de movimientos.
 - Tableros de 2×2×2, 3×3×3 (el original) y 4×4×4.
 - **Mezclar al azar:** revuelve colores y orientaciones por todo el tablero, con la dificultad que elijas.
 - **Arma tu mezcla:** el cubo empieza en blanco; pintas cada color con su cupo exacto (9 en 3×3×3), acomodas con giros y juegas desde ahí.

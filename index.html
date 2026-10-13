@@ -782,6 +782,62 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   .top-actions #help-btn, .top-actions #sound-btn { display: none; }
 }
 
+/* ---------- Modo niveles ---------- */
+.hint-tool { position: relative; }
+.hint-count { position: absolute; top: 1px; right: 2px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--face-left); color: #FFFFFF; font: 800 11px/18px var(--f-body); text-align: center; box-shadow: 0 0 0 2px var(--card); }
+.hint-count.zero { background: var(--muted); }
+.hint-count.pop { animation: bump 0.4s cubic-bezier(.3,1.8,.5,1); }
+.lv-top { display: flex; gap: 8px; flex-wrap: wrap; margin: 2px 0 10px; }
+.lv-chip { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border-radius: 999px; background: var(--card); border: 1.5px solid var(--line); font-weight: 600; font-size: 14px; color: var(--muted); }
+.lv-chip b { color: var(--ink); font-family: var(--f-display); font-weight: 700; }
+.lv-chip svg { width: 17px; height: 17px; }
+.lv-chip svg path { fill: var(--accent); }
+.lv-chip:nth-child(2) svg path { fill: none; }
+.lv-list { display: grid; gap: 16px; padding-bottom: 8px; }
+.lv-sec h4 { margin: 0 0 8px 2px; font-family: var(--f-mono); font-weight: 800; font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
+.lv-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.lv {
+  position: relative; aspect-ratio: 1 / 1.08; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card);
+  display: grid; place-items: center; align-content: center; gap: 3px; cursor: pointer; color: var(--ink); padding: 0;
+  box-shadow: 0 3px 0 var(--line); transition: transform 0.12s ease;
+}
+.lv:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--line); }
+.lv b { font-family: var(--f-display); font-weight: 800; font-size: 18px; line-height: 1; }
+.lv .mini { display: flex; gap: 1px; }
+.lv .mini svg { width: 11px; height: 11px; }
+.lv .mini svg path { fill: var(--line); }
+.lv .mini svg.on path { fill: var(--accent); }
+.lv.next { background: var(--accent); border-color: var(--accent-deep); box-shadow: 0 3px 0 var(--accent-deep); color: var(--accent-ink); animation: lv-next 1.6s ease-in-out infinite; }
+.lv.next .mini svg path { fill: rgba(0, 0, 0, 0.18); }
+@keyframes lv-next { 50% { transform: scale(1.06); } }
+.lv.locked { cursor: not-allowed; opacity: 0.55; background: var(--card-2); box-shadow: none; }
+.lv.locked svg.lock { width: 16px; height: 16px; color: var(--muted); }
+.levels-sheet { width: min(100%, 560px); max-height: calc(100% - 32px); }
+.levels-sheet .lv-list { max-height: 60vh; overflow: auto; padding-right: 4px; }
+.start-lv { width: 100%; margin-bottom: 2px; }
+.mode-ico { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: var(--accent); color: var(--accent-ink); }
+.mode-ico svg { width: 22px; height: 22px; }
+.m-goal.lvl { background: var(--face-right); color: #FFFFFF; display: inline-flex; align-items: center; gap: 2px; }
+.m-goal.lvl .goal-stars svg.off path { fill: rgba(255, 255, 255, 0.3); }
+.goal-stars { display: inline-flex; gap: 2px; margin-left: 6px; vertical-align: -2px; }
+.goal-stars svg { width: 14px; height: 14px; }
+.goal-stars svg path { fill: var(--accent); transition: fill 0.3s ease; }
+.goal-stars svg.off path { fill: var(--line); }
+/* Victoria de nivel: estrellas que aparecen una por una */
+.win-stars { display: flex; align-items: flex-end; justify-content: center; gap: 6px; margin: 2px 0 2px; }
+.wstar { width: 52px; height: 52px; display: grid; place-items: center; }
+.wstar.big { width: 68px; height: 68px; margin-bottom: 8px; }
+.wstar svg { width: 100%; height: 100%; overflow: visible; }
+.wstar svg path { fill: var(--line); stroke: rgba(0, 0, 0, 0.08); stroke-width: 0.6; stroke-linejoin: round; }
+.wstar.got svg path { fill: url(#star-grad); }
+.wstar.got { animation: star-in 0.6s cubic-bezier(.2,1.6,.4,1) both; animation-delay: var(--sd); }
+.wstar.got svg { filter: drop-shadow(0 6px 10px rgba(217, 162, 28, 0.45)); }
+.wstar:not(.got) { animation: star-dim 0.4s ease both; animation-delay: var(--sd); }
+@keyframes star-in { 0% { transform: scale(0) rotate(-120deg); opacity: 0; } 60% { transform: scale(1.3) rotate(12deg); opacity: 1; } 100% { transform: none; } }
+@keyframes star-dim { from { transform: scale(0.4); opacity: 0; } }
+.win-hints { margin: 0; font-weight: 700; font-size: 14px; color: var(--ok) !important; animation: rise 0.4s ease both; animation-delay: 1.5s; }
+.win-hints.lost { color: var(--warn) !important; }
+
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -905,10 +961,14 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
             <button class="x" id="win-x" type="button" aria-label="Cerrar">×</button>
             <svg class="logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"><g><defs><linearGradient id="lgT" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gt1)"/><stop offset="1" style="stop-color:var(--gt2)"/></linearGradient><linearGradient id="lgL" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gl1)"/><stop offset="1" style="stop-color:var(--gl2)"/></linearGradient><linearGradient id="lgR" x1="0.2" y1="0" x2="0.8" y2="1"><stop offset="0" style="stop-color:var(--gr1)"/><stop offset="1" style="stop-color:var(--gr2)"/></linearGradient></defs><polygon points="0.0000,-0.9457 0.3390,-0.7500 0.0000,-0.5543 -0.3390,-0.7500" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.4330,-0.6957 -0.0940,-0.5000 -0.4330,-0.3043 -0.7720,-0.5000" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.4330,-0.6957 0.7720,-0.5000 0.4330,-0.3043 0.0940,-0.5000" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.8190,-0.4186 -0.4800,-0.2229 -0.4800,0.1686 -0.8190,-0.0271" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.8190,0.0814 -0.4800,0.2771 -0.4800,0.6686 -0.8190,0.4729" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.3860,0.3314 -0.0470,0.5271 -0.0470,0.9186 -0.3860,0.7229" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.0470,0.5271 0.3860,0.3314 0.3860,0.7229 0.0470,0.9186" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.4800,-0.2229 0.8190,-0.4186 0.8190,-0.0271 0.4800,0.1686" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.4800,0.2771 0.8190,0.0814 0.8190,0.4729 0.4800,0.6686" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/><g class="lg-corner" transform="rotate(180)"><polygon points="0.0000,-0.4457 0.3390,-0.2500 0.0000,-0.0543 -0.3390,-0.2500" fill="url(#lgT)" stroke="url(#lgT)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="-0.3860,-0.1686 -0.0470,0.0271 -0.0470,0.4186 -0.3860,0.2229" fill="url(#lgL)" stroke="url(#lgL)" stroke-width="0.05" stroke-linejoin="round"/><polygon points="0.0470,0.0271 0.3860,-0.1686 0.3860,0.2229 0.0470,0.4186" fill="url(#lgR)" stroke="url(#lgR)" stroke-width="0.05" stroke-linejoin="round"/></g></g></svg>
             <h3 id="win-title">¡Cubo restaurado!</h3>
+            <div class="win-stars" id="win-stars" hidden><span class="wstar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg></span><span class="wstar big"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg></span><span class="wstar"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg></span></div>
             <p id="win-line"></p>
+            <p class="win-hints" id="win-hints" hidden></p>
             <p class="rec" id="win-rec" hidden>Nuevo récord en este tamaño</p>
             <div class="actions">
+              <button class="btn primary" id="win-next" type="button" hidden>Siguiente nivel →</button>
               <button class="btn primary" id="win-again" type="button">Mezclar otra vez</button>
+              <button class="btn" id="win-levels" type="button" hidden>Niveles</button>
               <button class="btn" id="win-close" type="button">Seguir jugando</button>
             </div>
           </div>
@@ -968,9 +1028,10 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
           <span class="lbl">Deshacer</span>
         </button>
-        <button class="tool" type="button" id="hint-btn" aria-label="Pista" title="Marca el siguiente giro del camino más corto (H)">
+        <button class="tool hint-tool" type="button" id="hint-btn" aria-label="Pista" title="Marca el siguiente giro del camino más corto (H)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
           <span class="lbl">Pista</span>
+          <span class="hint-count" id="hint-count" hidden>0</span>
         </button>
         <span class="sep" aria-hidden="true"></span>
         <button class="tool mobile-only" type="button" id="dots-btn" aria-pressed="true" aria-label="Puntos de giro" title="Mostrar u ocultar los puntos de giro">
@@ -997,6 +1058,11 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         </div>
         <p class="level-note" id="level-note">Movimientos para resolver la mezcla.</p>
         <div class="modes">
+          <button class="mode" type="button" id="mix-levels" data-current="false" title="50 niveles fijos con estrellas y pistas.">
+            <span class="mode-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="6.5" height="6.5" rx="1.6" fill="currentColor"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.6" fill="currentColor"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.6" fill="currentColor"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.6" fill="currentColor"/></svg></span>
+            <span><b>Niveles</b><small>50 niveles con estrellas y pistas.</small></span>
+            <span class="go" aria-hidden="true">→</span>
+          </button>
           <button class="mode" type="button" id="mix-chaos" data-current="true" title="Colores y orientaciones revueltos por todo el tablero.">
             <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
               <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-right)"/>
@@ -1067,7 +1133,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     </div>
     <div class="home-actions">
       <button class="big-btn primary" type="button" id="home-continue" hidden><span>Continuar</span><small id="home-continue-info"></small></button>
-      <button class="big-btn primary" type="button" id="home-play"><span>Jugar</span><small>Elige tamaño y dificultad</small></button>
+      <button class="big-btn primary" type="button" id="home-levels"><span>Niveles</span><small id="home-levels-info">50 niveles · de 2×2×2 a 8×8×8</small></button>
+      <button class="big-btn secondary" type="button" id="home-play"><span>Partida libre</span><small>Elige tamaño y dificultad</small></button>
       <button class="big-btn secondary" type="button" id="home-custom"><span>Arma tu mezcla</span></button>
       <div class="home-tiles">
         <button class="home-tile" type="button" data-open="scr-howto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.3 9.4a2.8 2.8 0 1 1 4 2.5c-.9.5-1.3 1-1.3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.1" fill="currentColor"/></svg><span>Cómo jugar</span></button>
@@ -1128,6 +1195,12 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <button class="big-btn primary" type="button" id="howto-next"><span>Siguiente</span></button>
   </section>
 
+  <section class="screen" id="scr-levels" aria-label="Niveles">
+    <header class="nav"><button class="nav-back" type="button" data-back><svg viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Atrás</span></button><h2>Niveles</h2><span></span></header>
+    <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvm-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvm-bank">0</b> pistas</span></div>
+    <div class="lv-list" id="lvm-list"></div>
+  </section>
+
   <section class="screen" id="scr-stats" aria-label="Récords">
     <header class="nav"><button class="nav-back" type="button" data-back><svg viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Atrás</span></button><h2>Récords</h2><span></span></header>
     <div class="stat-grid">
@@ -1169,6 +1242,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <div class="pause-actions">
       <button class="big-btn primary" type="button" id="pause-resume"><span>Reanudar</span></button>
       <button class="big-btn secondary" type="button" id="pause-restart"><span>Reiniciar esta mezcla</span></button>
+      <button class="big-btn secondary" type="button" id="pause-levels" hidden><span>Niveles</span></button>
       <button class="big-btn secondary" type="button" id="pause-new"><span>Nueva partida</span></button>
       <div class="home-tiles">
         <button class="home-tile" type="button" data-open="scr-howto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.3 9.4a2.8 2.8 0 1 1 4 2.5c-.9.5-1.3 1-1.3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.1" fill="currentColor"/></svg><span>Cómo jugar</span></button>
@@ -1178,11 +1252,20 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     </div>
   </div>
 </div>
+<div class="modal" id="levels-modal" hidden>
+  <div class="sheet levels-sheet" role="dialog" aria-modal="true" aria-labelledby="levels-title">
+    <button class="x" id="levels-x" type="button" aria-label="Cerrar">×</button>
+    <h3 id="levels-title">Niveles</h3>
+    <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvd-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvd-bank">0</b> pistas</span></div>
+    <div class="lv-list" id="lvd-list"></div>
+  </div>
+</div>
 <div class="modal" id="start" hidden>
   <div class="sheet start-sheet" role="dialog" aria-modal="true" aria-labelledby="start-title">
     <svg class="logo start-logo" id="start-logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"></svg>
     <h3 id="start-title">Mezclar</h3>
-    <p>Elige la dificultad para empezar.</p>
+    <button class="big-btn primary start-lv" type="button" id="start-levels"><span>Modo niveles</span><small id="start-levels-info">50 niveles · de 2×2×2 a 8×8×8</small></button>
+    <p>O elige una partida libre:</p>
     <div class="seg start-sizes" role="group" aria-label="Tamaño del hexágono">
       <button type="button" data-start-size="2" aria-pressed="false">2×2×2</button>
       <button type="button" data-start-size="3" aria-pressed="true">3×3×3</button>
@@ -1196,6 +1279,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <button class="link" type="button" id="start-continue" hidden>Continuar la partida guardada</button>
   </div>
 </div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="star-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE07A"/><stop offset="1" stop-color="#F2A812"/></linearGradient></defs></svg>
 <canvas id="confetti" aria-hidden="true"></canvas>
 
 <script>
@@ -1552,7 +1636,27 @@ const Core = (() => {
     return best;
   }
 
-  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve, rangeFor, maxFor, rangesOf };
+  /* ---- Modo niveles: 50 mezclas fijas (iguales para todos), cada vez más difíciles ---- */
+  const LEVELS = [];
+  [[2, [3, 4, 5, 6, 7]], [3, [6, 7, 8, 9, 10]], [4, Array.from({ length: 10 }, (_, i) => 10 + i)],
+   [5, Array.from({ length: 10 }, (_, i) => 18 + i)], [6, Array.from({ length: 10 }, (_, i) => 26 + i)],
+   [8, Array.from({ length: 10 }, (_, i) => 36 + i)]].forEach(([N, ks]) => ks.forEach((K) => LEVELS.push({ N, K })));
+  // Generador pseudoaleatorio con semilla: la misma mezcla en todos los dispositivos
+  function seeded(seed) {
+    let a = seed >>> 0;
+    return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+  }
+  function level(n) {
+    const L = LEVELS[n - 1];
+    if (!L) return null;
+    const st = createState(L.N);
+    const used = walk(st, L.K, "chaos", seeded(n * 7919 + 2027));
+    let meta = L.K, exact = false;
+    if (L.N <= 3) { const r = solve(st); if (r.d !== null) { meta = r.d; exact = true; } }
+    return { N: L.N, K: L.K, meta, exact, tiles: copyTiles(st.tiles), route: inverse(used) };
+  }
+
+  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve, rangeFor, maxFor, rangesOf, LEVELS, level };
 })();
 /*END CORE*/
 
@@ -1692,6 +1796,16 @@ const Sound = (() => {
       for (let i = 0; i < 16; i++) noise({ t: i * 0.032 + Math.random() * 0.01, dur: 0.03, vol: 0.1, freq: 2200 + Math.random() * 3000, q: 3 });
       tone(330, { t: 0.55, dur: 0.14, type: "triangle", vol: 0.12, slide: 1.5 });
     },
+    // Estrella ganada: campanita que sube con cada estrella
+    star(i) {
+      const f = [784, 988, 1318.5][i] || 1318.5;
+      tone(f, { dur: 0.55, type: "triangle", vol: 0.13 });
+      tone(f * 1.5, { t: 0.05, dur: 0.45, vol: 0.05 });
+      tone(f * 2, { t: 0.09, dur: 0.35, vol: 0.03 });
+      noise({ dur: 0.08, vol: 0.04, freq: 6000, q: 0.7 });
+    },
+    starMiss() { tone(330, { dur: 0.18, type: "triangle", vol: 0.06, slide: 0.8 }); },
+    coin() { tone(1567.98, { dur: 0.09, vol: 0.08 }); tone(2093, { t: 0.08, dur: 0.25, vol: 0.07 }); },
     win() {
       [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => tone(f, { t: i * 0.09, dur: 0.55, type: "triangle", vol: 0.15 }));
       [1567.98, 2093, 2637].forEach((f, i) => tone(f, { t: 0.52 + i * 0.07, dur: 0.4, vol: 0.06 }));
@@ -1704,7 +1818,7 @@ const Sound = (() => {
   const SQ3 = Core.SQ3;
   const R = 200, M = 34;
   const STORE = "rombos-propp-v1", BEST = "rombos-propp-best-v1";
-  const TILINGS = { 2: "20", 3: "980", 4: "232 848" };
+  const TILINGS = { 2: "20", 3: "980", 4: "232 848", 5: "267 227 532", 6: "1 478 619 421 136", 8: "5 055 160 684 040 254 910 720" };
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   // En celulares y tabletas se apagan los efectos caros (filtros y animaciones de fondo).
   const LOWFX = matchMedia("(max-width: 719px), (pointer: coarse)").matches;
@@ -1812,7 +1926,10 @@ const Sound = (() => {
     $("#mix-custom").dataset.current = String(mode === "custom" || phase === "edit");
 
     const label = phase === "edit" ? "Armando" : mode === "custom" ? "Tu mezcla" : "Al azar";
-    $("#mode-chip").textContent = mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
+    $("#mode-chip").textContent = mode === "level" && levelNum ? `Nivel ${levelNum} · ${sizeName(st.N)}`
+      : mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
+    $("#mix-levels").dataset.current = String(mode === "level" && phase !== "edit");
+    if (mode === "level") { $("#mix-chaos").dataset.current = "false"; $("#mix-custom").dataset.current = "false"; }
     syncLevels();
     syncEditUI();
     lastShown = { moves: null, ok: null };
@@ -1945,7 +2062,16 @@ const Sound = (() => {
       $("#s-par-text").textContent = "Más de 8 movimientos";
       $("#s-par-sub").textContent = Core.isSolved(st) ? "¡Resuelto! Era una mezcla difícil." : "Está tan lejos del cubo que el mínimo exacto no se calcula al instante.";
     }
-    if (par !== null) {
+    if (par !== null && mode === "level" && levelNum) {
+      const lt = levelTargets(), m = hist.length, solved = Core.isSolved(st);
+      $("#s-par").textContent = par;
+      $("#s-par-text").innerHTML = `Nivel ${levelNum} · meta ${par}${starsHTML(starsFor(m), "goal-stars")}`;
+      goal.classList.toggle("perfect", solved && m <= par);
+      goal.classList.toggle("bound", false);
+      $("#s-par-sub").textContent = m <= lt.max
+        ? `★★★ hasta ${lt.three} · ★★ hasta ${lt.two} · máximo ${lt.max} para guardar pistas.`
+        : `Pasaste el máximo (${lt.max}): terminarás con 1 estrella y sin guardar pistas.`;
+    } else if (par !== null) {
       $("#s-par").textContent = par;
       $("#s-par-text").textContent = parExact ? `Mínimo: ${movs(par)}` : `Se puede en ${movs(par)}`;
       const left = par - hist.length, solved = Core.isSolved(st);
@@ -1964,8 +2090,10 @@ const Sound = (() => {
     mb.classList.toggle("done", ok === n);
     const mg = $("#m-goal");
     mg.hidden = phase === "edit" || (par === null && !parOver);
-    mg.textContent = par !== null ? (parExact ? `Mínimo ${par}` : `Meta ${par}`) : "Más de 8";
-    mg.classList.toggle("bound", par !== null && !parExact);
+    if (mode === "level" && levelNum && par !== null) mg.innerHTML = `N${levelNum}${starsHTML(starsFor(hist.length), "goal-stars")}`;
+    else mg.textContent = par !== null ? (parExact ? `Mínimo ${par}` : `Meta ${par}`) : "Más de 8";
+    mg.classList.toggle("bound", par !== null && !parExact && mode !== "level");
+    mg.classList.toggle("lvl", mode === "level" && !!levelNum);
     mg.classList.toggle("over", par === null && parOver);
     const b = readBest()[st.N];
     $("#s-best").innerHTML = b
@@ -1973,6 +2101,9 @@ const Sound = (() => {
       : `Aún no tienes récord en ${sizeName(st.N)}.`;
     $("#undo").disabled = hist.length === 0;
     $("#hint-btn").disabled = ok === n;
+    const hc = $("#hint-count");
+    hc.hidden = mode !== "level" || phase === "edit";
+    if (!hc.hidden) { const b = levelProg().bank; if (hc.textContent !== String(b)) restart(hc, "pop"); hc.textContent = b; hc.classList.toggle("zero", b <= 0); }
     if (phase === "edit") {
       const cnt = colorCounts(), need = n / 3;
       for (const c of [0, 1, 2]) {
@@ -2108,6 +2239,9 @@ const Sound = (() => {
   function afterChange() {
     if (phase === "edit") { sayEdit(); save(); return; }
     if (phase === "playing" && Core.isSolved(st)) { win(); }
+    else if (phase === "playing" && mode === "level" && levelNum && hist.length === levelTargets().max + 1) {
+      say(`Pasaste el máximo de ${levelTargets().max} movimientos: puedes terminar el nivel, pero con 1 estrella y sin guardar pistas.`, "warn");
+    }
     else if (phase === "playing") {
       const left = st.tiles.length - Core.correctCount(st);
       say(left <= 3 ? `Ya casi: ${left === 1 ? "falta 1 rombo" : `faltan ${left} rombos`}.` : IDLE);
@@ -2150,6 +2284,9 @@ const Sound = (() => {
   }
 
   function win() {
+    if (mode === "level" && levelNum) return winLevel();
+    $("#win-stars").hidden = true; $("#win-hints").hidden = true; $("#win-next").hidden = true; $("#win-levels").hidden = true;
+    $("#win-again").hidden = false; $("#win-close").hidden = false;
     stopTimer();
     phase = "won";
     hintMove = null;
@@ -2189,6 +2326,7 @@ const Sound = (() => {
 
   function newGame(N, m, quiet) {
     if (generating) return;
+    levelNum = null;
     if (m === "pile") m = "chaos"; // las mezclas siempre son al azar
     generating = true;
     mode = m;
@@ -2273,14 +2411,19 @@ const Sound = (() => {
 
   function showHint() {
     if (busy || phase === "edit" || Core.isSolved(st)) return;
+    if (mode === "level" && levelNum) {
+      const pr = levelProg();
+      if (pr.bank <= 0) { Sound.bad(); say("Ya no te quedan pistas. Gana más terminando niveles sin pasar el máximo de movimientos.", "warn"); return; }
+    }
     // Primero el camino más corto exacto; si está demasiado lejos para calcularlo, una pista aproximada.
-    const a = Core.analyze(st);
+    const a = st.N >= 5 ? { move: null } : Core.analyze(st);
     const h = a.move ? { v: a.move.v, k: a.move.k, left: a.d - 1 }
       : route && route.length ? { v: route[0].v, k: route[0].k, left: route.length - 1, known: true }
       : Core.hint(st, hist[hist.length - 1]);
     if (!h) { say("No hay ningún grupo que se pueda girar.", "warn"); return; }
     hintMove = { v: h.v, k: h.k };
     hintsUsed++;
+    if (mode === "level" && levelNum) { const pr = levelProg(); pr.bank = Math.max(0, pr.bank - 1); saveLevelProg(pr); levelUsed++; updateStats(); }
     drawHint();
     Sound.hint();
     const stp = hintStep(hintMove);
@@ -2333,6 +2476,7 @@ const Sound = (() => {
   }
 
   function enterEditor(N) {
+    if (mode === "level") { mode = "custom"; levelNum = null; }
     if (phase !== "edit") editBackup = serialize();
     stopTimer();
     st = blankBoard(N || st.N);
@@ -2478,19 +2622,20 @@ const Sound = (() => {
     par = origin.par; parExact = origin.parExact !== false; parOver = !!origin.parOver;
     route = origin.route ? JSON.parse(JSON.stringify(origin.route)) : null;
     buildBoard(); playIntro(); Sound.shuffle();
+    if (mode === "level" && levelNum) { say(`Nivel ${levelNum} reiniciado.`); save(); return; }
     say(`Mezcla reiniciada: ${par !== null ? (parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`) : "más de 8 movimientos"}.`);
     save();
   }
 
   /* ---------- Persistencia ---------- */
   function serialize() {
-    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver, parExact, level, route, editGen, origin, chosen };
+    return { N: st.N, tiles: st.tiles, hist, phase: phase === "won" ? "free" : phase, mode, elapsed: nowElapsed(), dir, showDots, hintsUsed, par, parOver, parExact, level, route, editGen, origin, chosen, levelNum, levelGift, levelUsed };
   }
   function save() {
     try { localStorage.setItem(STORE, JSON.stringify(serialize())); } catch (e) {}
   }
   function restore(snap) {
-    if (!snap || ![2, 3, 4].includes(snap.N) || !Array.isArray(snap.tiles)) return false;
+    if (!snap || ![2, 3, 4, 5, 6, 8].includes(snap.N) || !Array.isArray(snap.tiles)) return false;
     try {
       const s = Core.createState(snap.N, snap.tiles);
       if (!Core.isValid(s)) return false;
@@ -2499,7 +2644,9 @@ const Sound = (() => {
       hist = Array.isArray(snap.hist) ? snap.hist.filter((h) => h && Array.isArray(h.v) && h.k >= 1 && h.k <= 5) : [];
       phase = snap.phase === "playing" ? "playing" : snap.phase === "edit" ? "edit" : "free";
       if (phase === "playing" && Core.isSolved(st)) phase = "free";
-      mode = snap.mode === "custom" ? "custom" : "chaos";
+      mode = snap.mode === "custom" ? "custom" : snap.mode === "level" && snap.levelNum ? "level" : "chaos";
+      levelNum = mode === "level" ? +snap.levelNum : null;
+      levelGift = +snap.levelGift || 0; levelUsed = +snap.levelUsed || 0;
       elapsed = +snap.elapsed || 0; startedAt = null;
       dir = snap.dir === 1 ? 1 : -1;
       showDots = snap.showDots !== false;
@@ -2793,11 +2940,10 @@ const Sound = (() => {
     wasRunning = false;
   }
   function syncHome() {
+    $("#home-levels-info").textContent = levelInfoText();
     const can = st && phase === "playing" && !Core.isSolved(st) && (chosen || hist.length > 0);
     $("#home-continue").hidden = !can;
-    $("#home-play").classList.toggle("primary", !can);
-    $("#home-play").classList.toggle("secondary", can);
-    if (can) $("#home-continue-info").textContent = `${mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}`;
+    if (can) $("#home-continue-info").textContent = `${mode === "level" && levelNum ? `Nivel ${levelNum}` : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}`;
   }
   // Nueva partida
   let selN = 3;
@@ -2941,8 +3087,10 @@ const Sound = (() => {
     wasRunning = startedAt !== null;
     stopTimer();
     $("#pause-info").textContent = phase === "edit" ? "Armando tu mezcla"
-      : `${mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
+      : `${mode === "level" && levelNum ? `Nivel ${levelNum}` : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
     $("#pause-restart").hidden = !origin || phase === "edit";
+    $("#pause-levels").hidden = mode !== "level";
+    $("#pause-restart span").textContent = mode === "level" ? "Reiniciar nivel" : "Reiniciar esta mezcla";
     pauseEl.hidden = false;
     Sound.tick();
   }
@@ -2961,6 +3109,134 @@ const Sound = (() => {
   // Las pantallas abiertas desde la pausa regresan al juego al cerrar
   document.querySelectorAll("#pause [data-open]").forEach((b) => b.addEventListener("click", () => { pauseEl.hidden = true; }, { capture: true }));
 
+  /* ---------- Modo niveles ---------- */
+  const LVKEY = "propp-levels-v1";
+  let levelNum = null, levelGift = 0, levelUsed = 0;
+  function levelProg() {
+    let x = null;
+    try { x = JSON.parse(localStorage.getItem(LVKEY) || "null"); } catch (e) {}
+    x = x && typeof x === "object" ? x : {};
+    x.stars = x.stars || {}; x.gifted = x.gifted || {}; x.bank = Number.isFinite(x.bank) ? x.bank : 0;
+    return x;
+  }
+  function saveLevelProg(x) { try { localStorage.setItem(LVKEY, JSON.stringify(x)); } catch (e) {} }
+  const totalStars = (pr) => Object.values(pr.stars).reduce((a, b) => a + b, 0);
+  const unlocked = (pr, n) => n === 1 || (pr.stars[n - 1] || 0) >= 1;
+  const nextLevel = (pr) => { for (let n = 1; n <= 50; n++) if (!(pr.stars[n] >= 1)) return n; return 50; };
+  function levelTargets() { const m = par || 1; return { three: m, two: Math.ceil(m * 1.5), max: m * 2 }; }
+  function starsFor(moves) { const t = levelTargets(); return moves <= t.three ? 3 : moves <= t.two ? 2 : 1; }
+  const STAR_SVG = '<svg class="%C" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg>';
+  function starsHTML(n, cls) { return `<span class="${cls}">` + [0, 1, 2].map((i) => STAR_SVG.replace("%C", i < n ? "on" : "off")).join("") + "</span>"; }
+
+  function startLevel(n) {
+    const L = Core.level(n);
+    if (!L) return;
+    const pr = levelProg();
+    if (!unlocked(pr, n)) { Sound.bad(); return; }
+    // Cada nivel regala 3 pistas la primera vez que lo juegas
+    levelGift = 0;
+    if (!pr.gifted[n]) { pr.gifted[n] = true; pr.bank += 3; levelGift = 3; saveLevelProg(pr); }
+    levelUsed = 0;
+    mode = "level"; levelNum = n;
+    st = Core.createState(L.N, L.tiles);
+    resetSession("playing");
+    par = L.meta; parExact = L.exact; parOver = false;
+    route = JSON.parse(JSON.stringify(L.route));
+    origin = { tiles: JSON.parse(JSON.stringify(st.tiles)), par, parExact, route: JSON.parse(JSON.stringify(route)) };
+    chosen = true;
+    bumpStat("played");
+    closeLevels(); closeShell(); pauseEl.hidden = true; wasRunning = false;
+    buildBoard(); playIntro(); Sound.shuffle();
+    const t = levelTargets();
+    say(`Nivel ${n} · ${sizeName(L.N)}: meta ${t.three} para ★★★, máximo ${t.max}. ${levelGift ? "Recibiste 3 pistas." : `Tienes ${levelProg().bank} pistas.`}`);
+    save();
+  }
+
+  function winLevel() {
+    stopTimer();
+    phase = "won";
+    hintMove = null;
+    const moves = hist.length, ms = elapsed, t = levelTargets();
+    const stars = starsFor(moves), within = moves <= t.max;
+    const pr = levelProg();
+    pr.stars[levelNum] = Math.max(pr.stars[levelNum] || 0, stars);
+    // Pistas: si te pasaste del máximo, pierdes las de regalo de este nivel que no usaste
+    const unusedGift = Math.max(0, levelGift - levelUsed);
+    if (!within && unusedGift) pr.bank = Math.max(0, pr.bank - unusedGift);
+    saveLevelProg(pr);
+    levelGift = 0;
+    const last = levelNum >= 50;
+    $("#win-title").textContent = last ? "¡Completaste los 50 niveles!" : `¡Nivel ${levelNum} completado!`;
+    $("#win-line").textContent = `${movs(moves)} · ${fmt(ms)} · meta ${t.three}`;
+    const wh = $("#win-hints");
+    wh.hidden = false;
+    wh.classList.toggle("lost", !within);
+    wh.textContent = within ? (unusedGift ? `+${unusedGift} ${unusedGift === 1 ? "pista guardada" : "pistas guardadas"} · tienes ${pr.bank}` : `Tienes ${pr.bank} ${pr.bank === 1 ? "pista" : "pistas"}`)
+      : `Te pasaste del máximo (${t.max}): no se guardaron pistas`;
+    $("#win-rec").hidden = true;
+    const ws = $("#win-stars");
+    ws.hidden = false;
+    ws.querySelectorAll(".wstar").forEach((el, i) => {
+      el.classList.remove("got"); void el.getBoundingClientRect();
+      el.style.setProperty("--sd", `${0.55 + i * 0.32}s`);
+      el.classList.toggle("got", i < stars);
+    });
+    $("#win-next").hidden = last;
+    $("#win-again").hidden = true;
+    $("#win-levels").hidden = false;
+    $("#win-close").hidden = true;
+    winEl.hidden = false;
+    say(`¡Nivel ${levelNum} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, "good");
+    if (layers.tiles) { restart(layers.tiles, "celebrate"); setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400); }
+    Sound.win();
+    for (let i = 0; i < 3; i++) setTimeout(() => (i < stars ? (Sound.star(i), buzz(18)) : Sound.starMiss()), 550 + 450 + i * 320);
+    if (within && unusedGift) setTimeout(() => Sound.coin(), 1650);
+    buzz([20, 40, 30]);
+    bumpStat("solved");
+    if (stars === 3) { bumpStat("perfect"); setTimeout(confetti, 1500); }
+    updateStats();
+    setTimeout(() => { if (!winEl.hidden) $(last ? "#win-levels" : "#win-next").focus({ preventScroll: true }); }, 600);
+  }
+
+  // Lista de niveles (pantalla del celular y ventana de la computadora)
+  const SECTIONS = [[1, 5], [6, 10], [11, 20], [21, 30], [31, 40], [41, 50]];
+  function renderLevels(prefix) {
+    const pr = levelProg(), nx = nextLevel(pr);
+    $(`#${prefix}-stars`).textContent = totalStars(pr);
+    $(`#${prefix}-bank`).textContent = pr.bank;
+    $(`#${prefix}-list`).innerHTML = SECTIONS.map(([a, b]) => {
+      const N = Core.LEVELS[a - 1].N;
+      let got = 0;
+      const cells = [];
+      for (let n = a; n <= b; n++) {
+        const sN = pr.stars[n] || 0; got += sN;
+        if (!unlocked(pr, n)) { cells.push(`<button class="lv locked" type="button" disabled aria-label="Nivel ${n} bloqueado"><b>${n}</b>${LOCK_SVG}</button>`); continue; }
+        cells.push(`<button class="lv${n === nx && !(pr.stars[n] >= 1) ? " next" : ""}" type="button" data-lv="${n}" aria-label="Nivel ${n}, ${sN} estrellas"><b>${n}</b>${starsHTML(sN, "mini")}</button>`);
+      }
+      return `<div class="lv-sec"><h4><span>${sizeName(N)} · niveles ${a}–${b}</span><span>★ ${got}/${(b - a + 1) * 3}</span></h4><div class="lv-grid">${cells.join("")}</div></div>`;
+    }).join("");
+  }
+  const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  function openLevels() {
+    if (isMobile()) { renderLevels("lvm"); pushScreen("scr-levels"); setTimeout(() => scrollToNext("lvm"), 380); }
+    else { renderLevels("lvd"); $("#levels-modal").hidden = false; Sound.tick(); scrollToNext("lvd"); }
+  }
+  function scrollToNext(prefix) { const el = $(`#${prefix}-list .lv.next`); if (el) el.scrollIntoView({ block: "center", behavior: "auto" }); }
+  function closeLevels() { $("#levels-modal").hidden = true; }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest && e.target.closest("[data-lv]");
+    if (b) startLevel(+b.dataset.lv);
+  });
+  $("#levels-x").addEventListener("click", closeLevels);
+  $("#levels-modal").addEventListener("click", (e) => { if (e.target.id === "levels-modal") closeLevels(); });
+  $("#mix-levels").addEventListener("click", openLevels);
+  $("#start-levels").addEventListener("click", () => { startEl.hidden = true; openLevels(); });
+  $("#home-levels").addEventListener("click", openLevels);
+  $("#pause-levels").addEventListener("click", () => { pauseEl.hidden = true; openLevels(); });
+  $("#win-next").addEventListener("click", () => startLevel(Math.min(50, (levelNum || 0) + 1)));
+  $("#win-levels").addEventListener("click", () => { winEl.hidden = true; phase = "free"; openLevels(); });
+  function levelInfoText() { const pr = levelProg(); const n = nextLevel(pr); return `Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} pistas`; }
+
   /* ---------- Ventana inicial: Mezclar ---------- */
   let startN = 3;
   function syncStart() {
@@ -2973,6 +3249,7 @@ const Sound = (() => {
     }
   }
   function openStart() {
+    $("#start-levels-info").textContent = levelInfoText();
     startN = st ? st.N : 3;
     $("#start-logo").innerHTML = document.querySelector(".topbar .logo").innerHTML;
     $("#start-continue").hidden = !(st && phase === "playing" && hist.length > 0 && !Core.isSolved(st));
