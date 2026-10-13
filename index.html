@@ -565,6 +565,27 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 @keyframes sp-zoom { to { transform: scale(1.08); } }
 @media (prefers-reduced-motion: reduce) { #splash { display: none; } }
 
+/* ---------- Ventana inicial: Mezclar ---------- */
+.start-sheet { width: min(100%, 420px); justify-items: center; text-align: center; gap: 14px; padding: 30px 22px 24px; }
+.start-sheet h3 { font-size: 30px; padding: 0; }
+.start-sheet > p { margin-top: -6px; }
+.start-logo { width: 72px; height: 72px; }
+.start-levels { display: grid; gap: 10px; width: 100%; }
+.start-levels button {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  padding: 16px 18px; border: 0; border-radius: 16px; cursor: pointer; color: #FFFFFF;
+  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.22); transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.start-levels button b { font-family: var(--f-display); font-weight: 800; font-size: 19px; letter-spacing: -0.01em; }
+.start-levels button small { font-family: var(--f-mono); font-size: 12px; font-weight: 600; opacity: 0.85; text-align: right; }
+.start-levels button:hover { transform: translateY(-2px); }
+.start-levels button:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.22); }
+.start-levels [data-start-level="easy"] { background: var(--ok); }
+.start-levels [data-start-level="mid"] { background: var(--accent); color: var(--accent-ink); }
+.start-levels [data-start-level="hard"] { background: var(--face-left); }
+.start-levels button:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+.start-sizes button { padding: 7px 12px; font-size: 13.5px; }
+
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -823,6 +844,24 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     </ul>
     <p class="credit">Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" type="button" id="help-ok">Entendido</button></div>
+  </div>
+</div>
+<div class="modal" id="start" hidden>
+  <div class="sheet start-sheet" role="dialog" aria-modal="true" aria-labelledby="start-title">
+    <svg class="logo start-logo" id="start-logo" viewBox="-1.06 -1.06 2.12 2.12" aria-hidden="true"></svg>
+    <h3 id="start-title">Mezclar</h3>
+    <p>Elige la dificultad para empezar.</p>
+    <div class="seg start-sizes" role="group" aria-label="Tamaño del hexágono">
+      <button type="button" data-start-size="2" aria-pressed="false">2×2×2</button>
+      <button type="button" data-start-size="3" aria-pressed="true">3×3×3</button>
+      <button type="button" data-start-size="4" aria-pressed="false">4×4×4</button>
+    </div>
+    <div class="start-levels">
+      <button type="button" data-start-level="easy"><b>Fácil</b><small id="sl-easy">6–9 movimientos</small></button>
+      <button type="button" data-start-level="mid"><b>Intermedio</b><small id="sl-mid">15–20 movimientos</small></button>
+      <button type="button" data-start-level="hard"><b>Difícil</b><small id="sl-hard">30–35 movimientos</small></button>
+    </div>
+    <button class="link" type="button" id="start-continue" hidden>Continuar la partida guardada</button>
   </div>
 </div>
 <canvas id="confetti" aria-hidden="true"></canvas>
@@ -1266,6 +1305,7 @@ const Sound = (() => {
   const wrap = $("#board-wrap");
   const winEl = $("#win");
   const helpEl = $("#help");
+  const startEl = $("#start");
 
   let st, S;
   let hist = [];          // [{v:[a,b], k:1..5}] pasos antihorarios netos
@@ -2192,6 +2232,7 @@ const Sound = (() => {
   document.addEventListener("keydown", unlock, { capture: true });
 
   document.addEventListener("keydown", (e) => {
+    if (!startEl.hidden) { if (e.key === "Escape") continueSaved(); return; }
     if (e.key === "Escape") { closeHelp(); closeWin(); closeSheet(); return; }
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "z") { e.preventDefault(); undo(); return; }
     if (e.metaKey || e.ctrlKey || e.altKey || !helpEl.hidden) return;
@@ -2220,6 +2261,41 @@ const Sound = (() => {
     setTimeout(done, 5050);
   })();
 
+  /* ---------- Ventana inicial: Mezclar ---------- */
+  let startN = 3;
+  function syncStart() {
+    document.querySelectorAll("[data-start-size]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.startSize === startN)));
+    for (const lv of ["easy", "mid", "hard"]) {
+      const r = Core.rangeFor(startN, "chaos", lv);
+      const b = document.querySelector(`[data-start-level="${lv}"]`);
+      b.disabled = !r;
+      $(`#sl-${lv}`).textContent = r ? `${r[0]}–${r[1]} movimientos` : `No hay en ${sizeName(startN)}`;
+    }
+  }
+  function openStart() {
+    startN = st ? st.N : 3;
+    $("#start-logo").innerHTML = document.querySelector(".topbar .logo").innerHTML;
+    $("#start-continue").hidden = !(st && phase === "playing" && hist.length > 0 && !Core.isSolved(st));
+    syncStart();
+    startEl.hidden = false;
+    setTimeout(() => { const b = document.querySelector('[data-start-level="easy"]'); if (b && !startEl.hidden) b.focus({ preventScroll: true }); }, 60);
+  }
+  function chooseStart(lv) {
+    level = lv;
+    startEl.hidden = true;
+    closeSheet();
+    newGame(startN, "chaos");
+  }
+  function continueSaved() {
+    if ($("#start-continue").hidden) return;
+    startEl.hidden = true;
+    Sound.tick();
+    if (phase === "playing" && hist.length) startTimer();
+  }
+  document.querySelectorAll("[data-start-size]").forEach((b) => b.addEventListener("click", () => { startN = +b.dataset.startSize; Sound.tick(); syncStart(); }));
+  document.querySelectorAll("[data-start-level]").forEach((b) => b.addEventListener("click", () => chooseStart(b.dataset.startLevel)));
+  $("#start-continue").addEventListener("click", continueSaved);
+
   /* ---------- Arranque ---------- */
   function start(data) {
     $("#sound-btn").setAttribute("aria-pressed", String(Sound.on));
@@ -2231,11 +2307,12 @@ const Sound = (() => {
       playIntro();
       setDir(dir, true);
       setDots(showDots, true);
-      if (phase === "playing" && hist.length) startTimer();
       afterChange();
     } else {
       newGame(3, "chaos", true);
     }
+    // Al abrir la app siempre se pregunta la dificultad.
+    openStart();
   }
   if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === "function") {
     window.claude.hot.snapshot(() => serialize());
