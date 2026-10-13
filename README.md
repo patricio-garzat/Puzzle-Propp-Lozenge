@@ -1,5 +1,10 @@
 # Rombos de Propp
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/logo-dark.png">
+  <img alt="Rombos de Propp" src="brand/logo-light.png" width="560">
+</picture>
+
 Versión web del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores dentro de un hexágono que forman la ilusión de un cubo. Levanta grupos de tres rombos, gíralos y vuelve a dejar el cubo armado.
 
 **Jugar:** https://patricio-garzat.github.io/Puzzle-Propp-Lozenge/
@@ -13,6 +18,12 @@ Versión web del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores 
 - Cada mezcla indica en cuántos movimientos se resuelve (el mínimo exacto cuando se puede calcular).
 - Pistas que siguen el camino más corto, deshacer, récords por tamaño y atajos de teclado.
 - Sonidos generados con Web Audio y animaciones; tema claro y oscuro.
+
+## Logo e íconos
+
+- `brand/logo-light.png` y `brand/logo-dark.png`: logo horizontal para fondos claros y oscuros.
+- `icons/`: ícono de la app (SVG y PNG de 192 y 512, versión *maskable*) y favicon.
+- `manifest.webmanifest` y `apple-touch-icon.png`: para instalarla en la pantalla de inicio del celular.
 
 ## Cómo funciona
 
