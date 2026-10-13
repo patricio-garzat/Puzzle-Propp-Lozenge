@@ -14,7 +14,22 @@
 <meta name="apple-mobile-web-app-title" content="Lozenge">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<script>
+  // Antes de pintar nada: el tema guardado decide el fondo, el color de la barra de Safari y la barra
+  // de estado del ícono en la pantalla de inicio (en oscuro deja ver el fondo de la app, nunca blanca).
+  (function () {
+    var t = "auto";
+    try { t = (JSON.parse(localStorage.getItem("propp-settings-v1") || "{}").theme) || "auto"; } catch (e) {}
+    var dark = t === "dark" || (t === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+    var root = document.documentElement;
+    if (t !== "auto") { root.dataset.theme = t; root.dataset.themeByApp = "1"; }
+    root.style.backgroundColor = dark ? "#12102A" : "#F3F4F6";
+    var m = document.createElement("meta");
+    m.name = "apple-mobile-web-app-status-bar-style";
+    m.content = dark ? "black-translucent" : "default";
+    document.head.appendChild(m);
+  })();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -95,6 +110,7 @@
 [hidden] { display: none !important; }
 *, *::before, *::after { box-sizing: border-box; }
 html, body { height: 100%; }
+html { background-color: var(--bg); }
 body {
   margin: 0;
   background: var(--bg);
@@ -476,7 +492,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .mobile-only, .lbl-short { display: none; }
 @media (max-width: 719px), (max-height: 520px) and (pointer: coarse) {
   html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
-  .app { height: 100%; padding-inline: 12px; padding-block: 10px 10px; gap: 8px; }
+  .app { height: 100%; padding-inline: 12px; padding-block: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-bottom, 0px)); gap: 8px; }
   .tool.mobile-only { display: inline-flex; }
   .topbar { flex-wrap: nowrap; }
   .logo { width: 34px; height: 34px; }
@@ -866,7 +882,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   .stage { gap: 6px; }
 }
 
-#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; display: none; }
+#confetti.on { display: block; }
 
 /* ---------- Nivel extremo (secreto) ---------- */
 .xglow { position: absolute; inset: 4% 10%; z-index: 0; pointer-events: none; opacity: 0; border-radius: 50%;
@@ -2544,6 +2561,9 @@ const Sound = (() => {
   function confetti() {
     if (reduceMotion) return;
     const cv = $("#confetti"), ctx = cv.getContext("2d");
+    cv.classList.add("on");
+    clearTimeout(confetti.t);
+    confetti.t = setTimeout(() => cv.classList.remove("on"), 3000);
     const dpr = Math.min(2, window.devicePixelRatio || 1);
     const W = innerWidth, H = innerHeight;
     cv.width = W * dpr; cv.height = H * dpr;
@@ -3235,6 +3255,7 @@ const Sound = (() => {
   // también cuando el tema se elige en Ajustes y no en el teléfono. Durante la intro del estudio es blanca.
   var themeColorHold; // sin valor inicial: la intro del estudio puede fijarlo antes de llegar a esta línea
   function syncThemeColor() {
+    document.documentElement.style.backgroundColor = "";
     const col = themeColorHold || getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
     if (!col) return;
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.removeAttribute("media"); m.setAttribute("content", col); });
