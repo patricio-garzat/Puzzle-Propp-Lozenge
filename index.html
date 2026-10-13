@@ -1216,7 +1216,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
     <div class="home-actions">
       <button class="big-btn primary" type="button" id="home-continue" hidden><span>Continuar</span><small id="home-continue-info"></small></button>
       <button class="big-btn primary" type="button" id="home-levels"><span>Niveles</span><small id="home-levels-info">50 niveles · de 2×2×2 a 4×4×4</small></button>
-      <button class="big-btn secondary" type="button" id="home-play"><span>Partida libre</span><small>Elige tamaño y dificultad</small></button>
+      <button class="big-btn secondary" type="button" id="home-play"><span>Partida libre</span><small id="home-play-info">Elige tamaño y dificultad</small></button>
       <button class="big-btn secondary" type="button" id="home-custom"><span>Arma tu mezcla</span></button>
       <div class="home-tiles">
         <button class="home-tile" type="button" data-open="scr-howto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.3 9.4a2.8 2.8 0 1 1 4 2.5c-.9.5-1.3 1-1.3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.1" fill="currentColor"/></svg><span>Cómo jugar</span></button>
@@ -1230,6 +1230,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
   <section class="screen" id="scr-select" aria-label="Nueva partida">
     <header class="nav"><button class="nav-back" type="button" data-back><svg viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Atrás</span></button><h2>Nueva partida</h2><span></span></header>
     <div class="sel-body">
+      <button class="big-btn primary" type="button" id="sel-resume" hidden><span>Seguir la partida</span><small id="sel-resume-info"></small></button>
       <p class="sel-label">Tamaño</p>
       <div class="seg sel-sizes" role="group" aria-label="Tamaño del hexágono">
         <button type="button" data-sel-size="2">2×2×2</button>
@@ -3176,21 +3177,23 @@ const Sound = (() => {
     $("#home-levels-info").textContent = levelInfoText();
     const inGame = st && phase === "playing" && !Core.isSolved(st) && (chosen || hist.length > 0);
     const started = levelsStarted();
-    // Si ya empezaste los niveles, solo aparece "Continuar" (no "Continuar" y "Niveles")
+    // Arriba siempre hay un solo botón de niveles: "Continuar" si ya empezaste los niveles, "Niveles" si no.
     $("#home-levels").hidden = started;
+    $("#home-continue").hidden = !started;
     if (started) {
       const pr = levelProg();
       const resumeLevel = inGame && mode === "level" && levelNum;
       continueAction = resumeLevel ? "resume" : "next";
-      $("#home-continue").hidden = false;
       $("#home-continue-info").textContent = resumeLevel
         ? `${lvName(levelNum)} · ${sizeName(st.N)} · ${movs(hist.length)}`
         : `Nivel ${nextLevel(pr)} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`;
-    } else {
-      continueAction = "resume";
-      $("#home-continue").hidden = !inGame;
-      if (inGame) $("#home-continue-info").textContent = `${mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}`;
     }
+    // Una partida libre a medias se sigue desde "Partida libre"
+    const freeInGame = inGame && mode !== "level";
+    const freeInfo = freeInGame ? `${mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}` : "";
+    $("#home-play-info").textContent = freeInGame ? `En curso: ${freeInfo}` : "Elige tamaño y dificultad";
+    $("#sel-resume").hidden = !freeInGame;
+    $("#sel-resume-info").textContent = freeInfo;
   }
   function continueLevels() {
     const pr = levelProg(), n = nextLevel(pr);
@@ -3216,7 +3219,8 @@ const Sound = (() => {
   $("#sel-custom").addEventListener("click", () => { wasRunning = false; closeShell(); closePause(true); enterEditor(selN); });
   // Inicio
   $("#home-continue").addEventListener("click", () => { Sound.tick(); if (continueAction === "next") continueLevels(); else resumeGame(); });
-  $("#home-play").addEventListener("click", () => pushScreen("scr-select"));
+  $("#home-play").addEventListener("click", () => { syncHome(); pushScreen("scr-select"); });
+  $("#sel-resume").addEventListener("click", () => { Sound.tick(); resumeGame(); });
   $("#home-custom").addEventListener("click", () => { wasRunning = false; closeShell(); enterEditor(); });
   document.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => pushScreen(b.dataset.open)));
   document.querySelectorAll("[data-back]").forEach((b) => b.addEventListener("click", popScreen));
