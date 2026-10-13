@@ -561,6 +561,11 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    2.0–2.85   la esquina se levanta, da media vuelta y aterriza (onda expansiva)
    2.9–3.8    el nombre aparece letra por letra y la franja
    hasta 5.0  logo completo para leerlo; 5.0–5.5 se desvanece */
+/* Intro del estudio: fondo blanco, logo de tamaño moderado al centro */
+#studio { position: fixed; inset: 0; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; }
+#studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
+/* La intro del juego espera a que termine la del estudio */
+#splash.hold, #splash.hold * { animation-play-state: paused !important; }
 #splash {
   position: fixed; inset: 0; z-index: 200; display: grid; place-items: center;
   background: var(--bg);
@@ -925,7 +930,53 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
 </head>
 <body>
 
-<div id="splash" aria-hidden="true">
+<!-- Intro del estudio (BluBer Games), antes de la intro del juego -->
+<div id="studio" role="img" aria-label="BluBer Games">
+  <svg id="bb-logo" viewBox="10.5 148 260 206" aria-hidden="true">
+    <defs>
+      <clipPath id="bb-above-base"><rect x="0" y="200" width="400" height="94.6"/></clipPath>
+      <clipPath id="bb-word-shape"></clipPath>
+      <linearGradient id="bb-shine" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#FFFFFF" stop-opacity="0"/>
+        <stop offset="0.5" stop-color="#FFFFFF" stop-opacity="0.6"/>
+        <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <g id="bb-all">
+      <g>
+        <g transform="translate(560 0)">
+          <g id="bb-bear"><g>
+            <path id="bb-body" fill="#82CAFD" d="M-373.4,176.8c-.7-1.1-.3-2,.3-2.8-1.5,0-3.5,0-5.9-.8-3.1-1.1-6.9-.8-11.1.3-1.2.3-2.5.7-3.8,1.2-1.7.6-3.5,1.5-5.4,2.6-4,2.3-8.6,5.3-14.3,8.1h0c-2.7.6-5.4,1.6-8.1,3-5.6,3-10.9,7.6-15.4,13.6-.2.3-.4.5-.6.8-3.9,5.4-7.3,11.9-9.6,19-.7,2.1-1.3,4.2-1.7,6.2h11.5c.9-1.5,2-2.8,3.2-4.1,1-1,2.2-2,3.4-2.8.8-.5,1.6-1,2.5-1.4,1.2-.6,2.4-1.1,3.6-1.4,1.9-.6,3.9-.9,5.9-.9.2,1.5.4,3,.8,4.5.5,2.2,1.2,4.3,2.1,6.2h12.6c-.6-2-1.1-4-1.4-6.1-.2-1.7-.4-3.5-.4-5.3s0-1,0-1.5c0-1.3.2-2.6.4-3.9.8-5.6,2.8-10.7,5.7-15,0,0,0,0,0-.1,1.1-1.7,2.4-3.2,3.8-4.6.4-.4.9-.9,1.3-1.3,1.6-1.4,3.3-2.6,5.1-3.6,4-2.3,8.6-3.6,13.4-3.6s1,0,1.4,0c1.5-1.8,2.2-3.5,2.5-5-.9,0-1.7-.3-2.3-1.2ZM-385.4,177c-.3-2.6,4.6-1.5,4.6-1.5,0,0-4.3,4.1-4.6,1.5Z"/>
+            <path id="bb-side" fill="#50AFEA" d="M-373.7,183c-.9,1.1-2.1,2.3-3.7,3.4,0,0,0,0,0,0-.3.2-.7.5-1.1.7,0,0,0,0,0,0-1.5,1.1-2.8,2.3-4,3.7-1,1.2-1.9,2.5-2.7,3.8-.7,1.3-1.3,2.7-1.7,4.1h0c-.7,2.1-1,4.4-1,6.7s0,.9,0,1.3c1.9,2.8,3.5,5.9,4.7,9.2.4,1.1.8,2.2,1.1,3.3.1.5.3.9.4,1.4,0,.1,0,.3.1.4h0c.6,2.3,1,4.6,1.2,6.8h-12.4c-1.1-2.4-2.5-4.7-4.1-6.6-2.3-2.8-5.1-5-8.3-6.4,0-1.3.2-2.6.4-3.9.8-5.6,2.8-10.7,5.7-15,0,0,0,0,0-.1,1.1-1.7,2.4-3.2,3.8-4.6.4-.4.9-.9,1.3-1.3,1.6-1.4,3.3-2.6,5.1-3.6,4-2.3,8.6-3.6,13.4-3.6s1,0,1.4,0Z"/>
+            <path id="bb-leg" fill="#50AFEA" d="M-417.9,221.8c-1.1,1.9-1.9,4-2.3,6.2h-9.5c.7-1.8,1.2-3.7,1.4-5.8,0-.8.1-1.7.1-2.5h0c1.2-.6,2.4-1.1,3.6-1.5,1.9-.6,3.9-.9,5.9-.9.2,1.5.4,3,.8,4.5Z"/>
+            <path id="bb-ear" fill="#50AFEA" d="M-390,173.5c-1.2.3-2.5.7-3.8,1.2-1.7.6-3.5,1.5-5.4,2.6.3-1.5.9-3.5,1.7-4.3,1.3-1.2,4.6-1.3,7.5.6Z"/>
+            <path id="bb-nose" fill="#00385B" d="M-371.2,178c-.9,0-1.7-.3-2.3-1.2-.7-1.1-.3-2,.3-2.8,1,0,1.7,0,2.1.5.1.6.2,1.9-.1,3.6Z"/>
+            <path id="bb-eye" fill="#00385B" d="M-380.8,175.5s-4.3,4.1-4.6,1.5c-.3-2.6,4.6-1.5,4.6-1.5Z"/></g>
+          </g>
+        </g>
+      </g>
+      <g clip-path="url(#bb-above-base)">
+        <g transform="translate(560 0)" id="bb-word" fill="#00385B">
+          <path class="ltr" d="M-487.3,281.5c0,7.4-6.1,11.8-17.6,11.8h-23.2v-42.9h21.9c11.3,0,16.8,4.6,16.8,11.2s-2.1,7.4-5.8,9.3c4.8,1.7,7.8,5.4,7.8,10.6ZM-516,259.1v8.3h8.3c4,0,6.1-1.4,6.1-4.2s-2.1-4.1-6.1-4.1h-8.3ZM-499.5,280.1c0-2.9-2.2-4.4-6.4-4.4h-10.2v8.7h10.2c4.2,0,6.4-1.4,6.4-4.3Z"/>
+          <path class="ltr" d="M-481.5,247.8h11.6v45.5h-11.6v-45.5Z"/>
+          <path class="ltr" d="M-427.4,260v33.2h-11.1v-3.6c-2.5,2.8-6.1,4.1-9.9,4.1-8.1,0-14.1-4.7-14.1-15.2v-18.6h11.6v16.7c0,5.1,2,7.2,5.5,7.2s6.2-2.3,6.2-7.8v-16h11.6Z"/>
+          <path class="ltr" d="M-378.6,281.5c0,7.4-6.1,11.8-17.6,11.8h-23.2v-42.9h21.9c11.3,0,16.8,4.6,16.8,11.2s-2.1,7.4-5.8,9.3c4.8,1.7,7.8,5.4,7.8,10.6ZM-407.4,259.1v8.3h8.3c4,0,6.1-1.4,6.1-4.2s-2.1-4.1-6.1-4.1h-8.3ZM-390.8,280.1c0-2.9-2.2-4.4-6.4-4.4h-10.2v8.7h10.2c4.2,0,6.4-1.4,6.4-4.3Z"/>
+          <path class="ltr" d="M-339.1,279.6h-24.1c1,3.4,3.9,5.3,8.1,5.3s5.4-.9,7.7-2.9l6.1,6.4c-3.2,3.6-7.8,5.4-14.2,5.4-11.8,0-19.5-7.3-19.5-17.2s7.8-17.1,18.3-17.1,17.8,6.2,17.8,17.2-.1,2-.2,2.9ZM-363.4,273.4h13.6c-.6-3.5-3.2-5.7-6.8-5.7s-6.1,2.2-6.8,5.7Z"/>
+          <path class="ltr" d="M-311.3,259.5v10.5c-1-.1-1.8-.2-2.6-.2-4.7,0-8,2.4-8,8.2v15.3h-11.6v-33.2h11.1v4c2.4-3,6.2-4.5,11.2-4.5Z"/>
+        </g>
+      </g>
+      <g clip-path="url(#bb-word-shape)"><rect id="bb-sweep" x="-70" y="240" width="46" height="60" fill="url(#bb-shine)"/></g>
+      <g transform="translate(560 0)" id="bb-games" fill="#82CAFD">
+          <path class="gm" d="M-468,331.3c-1.1,0-2.1-.2-2.9-.5-.9-.3-1.7-.8-2.3-1.5-.7-.6-1.2-1.4-1.5-2.2-.4-.9-.5-1.8-.5-2.8s.2-2,.5-2.8c.4-.9.9-1.6,1.6-2.2.7-.6,1.5-1.1,2.4-1.5.9-.3,1.9-.5,3-.5s2.2.2,3.1.6c.9.4,1.7.9,2.4,1.7l-1.6,1.6c-.5-.5-1.1-.9-1.7-1.2-.6-.3-1.3-.4-2-.4s-1.4.1-2,.4c-.6.2-1.1.6-1.6,1-.4.4-.8.9-1,1.5-.2.6-.4,1.2-.4,1.9s.1,1.3.4,1.9c.2.6.6,1.1,1,1.5.4.4,1,.8,1.6,1s1.3.4,2,.4,1.3-.1,2-.3c.6-.2,1.2-.6,1.8-1.1l1.4,1.9c-.7.6-1.5,1-2.5,1.3s-1.9.4-2.9.4ZM-465.1,329.2v-5.1h2.4v5.5l-2.4-.3Z"/>
+          <path class="gm" d="M-451.5,331.1l6.2-13.7h2.5l6.2,13.7h-2.7l-5.3-12.3h1l-5.3,12.3h-2.6ZM-448.6,327.9l.7-2h7.4l.7,2h-8.8Z"/>
+          <path class="gm" d="M-425.1,331.1v-13.7h2.1l6,10h-1.1l5.9-10h2.1v13.7s-2.4,0-2.4,0v-9.9s.5,0,.5,0l-5,8.4h-1.1l-5.1-8.4h.6v9.9h-2.4Z"/>
+          <path class="gm" d="M-394.1,329h7.7v2.1h-10.3v-13.7h10v2.1h-7.5v9.4ZM-394.3,323.1h6.8v2.1h-6.8v-2.1Z"/>
+          <path class="gm" d="M-369.5,331.3c-1.1,0-2.1-.2-3.1-.5-1-.3-1.8-.7-2.3-1.2l.9-2c.5.4,1.2.8,2,1.1.8.3,1.6.4,2.5.4s1.3,0,1.7-.2c.4-.2.8-.4,1-.6s.3-.6.3-.9-.2-.8-.5-1c-.3-.3-.7-.5-1.2-.6-.5-.1-1-.3-1.6-.4s-1.2-.3-1.7-.5-1.1-.4-1.6-.7c-.5-.3-.9-.7-1.2-1.1-.3-.5-.5-1.1-.5-1.8s.2-1.4.6-2c.4-.6,1-1.1,1.8-1.5.8-.4,1.8-.6,3.1-.6s1.6.1,2.4.3c.8.2,1.5.5,2.1.9l-.8,2c-.6-.4-1.2-.6-1.9-.8-.7-.2-1.3-.3-1.9-.3s-1.3,0-1.7.3c-.4.2-.8.4-1,.7s-.3.6-.3.9.1.8.4,1c.3.3.7.5,1.2.6.5.1,1,.3,1.6.4.6.1,1.2.3,1.8.5.6.2,1.1.4,1.6.7.5.3.9.6,1.2,1.1.3.5.4,1.1.4,1.8s-.2,1.4-.6,2c-.4.6-1,1.1-1.8,1.5s-1.9.6-3.1.6Z"/>
+        </g>
+    </g>
+  </svg>
+</div>
+<div id="splash" class="hold" aria-hidden="true">
   <div class="sp-wrap">
     <svg class="sp-mark" viewBox="-1.32 -1.32 2.64 2.64">
       <defs>
@@ -2009,6 +2060,21 @@ const Sound = (() => {
     },
     starMiss() { pluck(196, { vol: 0.045, dur: 0.6 }); },
     coin() { pluck(523.25, { vol: 0.07, dur: 1 }); pluck(659.25, { t: 0.1, vol: 0.055, dur: 1.2 }); },
+    // Intro del estudio: el oso aparece con un soplo y una nota grave, golpecitos suaves por letra
+    studio(from = 0) {
+      const c = ensure(); if (!c) return;
+      const at = (o) => Object.assign({}, o, { t: o.t - from });
+      const P = (f, o) => { if (o.t >= from) pluck(f, at(o)); };
+      const H = (o) => { if (o.t >= from) thump(at(o)); };
+      const B = (o) => { if (o.t >= from) breath(at(o)); };
+      B({ t: 0.25, dur: 1.1, vol: 0.022, from: 300, to: 800 });
+      P(293.66, { t: 0.35, vol: 0.055, dur: 2 });
+      P(440, { t: 0.5, vol: 0.03, dur: 1.8 });
+      for (let i = 0; i < 6; i++) H({ t: 1.25 + i * 0.07, vol: 0.05 });
+      P(392, { t: 1.95, vol: 0.045, dur: 1.8 });
+      P(587.33, { t: 2.07, vol: 0.03, dur: 1.8 });
+      B({ t: 2.8, dur: 0.9, vol: 0.012, from: 1800, to: 3200 });
+    },
     // Retumbo grave que se acelera (presentación del nivel extremo)
     rumble() {
       for (let i = 0, t = 0; i < 9; i++) { thump({ t, vol: 0.1 + i * 0.016 }); t += 0.2 - i * 0.017; }
@@ -3080,18 +3146,57 @@ const Sound = (() => {
     else if (phase === "edit" && k === "enter" && e.target === document.body) playFromEditor();
   });
 
+  /* ---------- Intro del estudio (BluBer Games) ---------- */
+  // 4 s: el oso aparece, "BluBer" sube letra por letra, "GAMES" se abre, un brillo y el oso parpadea.
+  function playStudio(el, next) {
+    const q = (id) => document.getElementById(id);
+    const easeOut = "cubic-bezier(.16,1,.3,1)", inOut = "cubic-bezier(.65,0,.35,1)";
+    const tl = (node, frames, delay, duration, easing = easeOut, fill = "both") => {
+      node.style.transformBox = "fill-box";
+      return node.animate(frames, { delay, duration, easing, fill });
+    };
+    const finish = () => {
+      next();
+      const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+      out.onfinish = () => el.remove();
+    };
+    if (reduceMotion || !el.animate) { setTimeout(finish, 1600); return; }
+    // Las copias de las letras para el brillo (un clipPath no admite grupos)
+    const ws = q("bb-word-shape");
+    el.querySelectorAll("#bb-word path").forEach((l) => { const c = l.cloneNode(); c.setAttribute("transform", "translate(560 0)"); ws.appendChild(c); });
+    const all = q("bb-all"); all.style.transformOrigin = "center";
+    tl(all, [{ transform: "scale(0.955)" }, { transform: "scale(1)" }], 0, 4000, "cubic-bezier(.22,.6,.2,1)");
+    const bear = q("bb-bear"); bear.style.transformOrigin = "50% 100%";
+    tl(bear, [{ transform: "translateY(3px) scale(0.965)", opacity: 0 }, { transform: "none", opacity: 1 }], 250, 1000, "cubic-bezier(.25,.1,.25,1)");
+    el.querySelectorAll("#bb-word path").forEach((l, i) => tl(l, [{ transform: "translateY(54px)" }, { transform: "translateY(0)" }], 1200 + i * 70, 760));
+    const gm = [...el.querySelectorAll("#bb-games path")], boxes = gm.map((g) => g.getBBox());
+    const cx = (boxes[0].x + boxes[4].x + boxes[4].width) / 2;
+    gm.forEach((g, i) => {
+      const dx = (cx - (boxes[i].x + boxes[i].width / 2)) * 0.75;
+      tl(g, [{ transform: `translateX(${dx}px)`, opacity: 0 }, { transform: "translateX(0)", opacity: 1 }], 1950 + Math.abs(i - 2) * 70, 800);
+    });
+    tl(q("bb-sweep"), [{ transform: "translateX(0) skewX(-18deg)" }, { transform: "translateX(360px) skewX(-18deg)" }], 2800, 900, inOut);
+    tl(bear, [{ transform: "rotate(0deg)" }, { transform: "rotate(-2.6deg)", offset: 0.45 }, { transform: "rotate(-2.6deg)", offset: 0.65 }, { transform: "rotate(0deg)" }], 2700, 1000, inOut, "none");
+    const eye = q("bb-eye"); eye.style.transformOrigin = "center";
+    tl(eye, [{ transform: "scaleY(1)" }, { transform: "scaleY(0.12)", offset: 0.5 }, { transform: "scaleY(1)" }], 3250, 200, "ease-in-out", "none");
+    setTimeout(finish, 4000);
+  }
+
   /* ---------- Animación de inicio ---------- */
   (() => {
-    const sp = document.getElementById("splash");
+    const sp = document.getElementById("splash"), studio = document.getElementById("studio");
     if (!sp) return;
-    // La animación es parte de la app: siempre se muestra completa.
+    // La animación es parte de la app: siempre se muestra completa. Primero el estudio, luego el juego.
+    const STUDIO = studio ? (reduceMotion ? 1.6 : 4) : 0;
     const done = () => { if (sp.isConnected) sp.remove(); };
+    const startGame = () => { sp.classList.remove("hold"); setTimeout(done, 5550); };
+    if (studio) playStudio(studio, startGame); else startGame();
     // La intro siempre arranca sola. Si el navegador ya deja sonar, suena desde el inicio;
     // si pide un toque primero, el sonido entra en cuanto la persona toca (sin pausar nada).
     const t0 = performance.now();
-    setTimeout(done, 5550);
+    const play = (e) => { if (studio) Sound.studio(e); Sound.intro(e - STUDIO); };
     if (!Sound.on) return;
-    if (Sound.probe()) { Sound.intro(0); return; }
+    if (Sound.probe()) { play(0); return; }
     let sounding = false;
     const late = () => {
       if (sounding || !sp.isConnected) return;
@@ -3101,7 +3206,7 @@ const Sound = (() => {
         if (sounding || !sp.isConnected) return;
         sounding = true;
         ["pointerdown", "touchend", "click", "keydown"].forEach((ev) => document.removeEventListener(ev, late, true));
-        Sound.intro((performance.now() - t0) / 1000);
+        play((performance.now() - t0) / 1000);
       });
     };
     ["pointerdown", "touchend", "click"].forEach((ev) => document.addEventListener(ev, late, true));
