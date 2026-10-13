@@ -629,7 +629,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   <main class="main">
     <aside class="side left">
       <section class="card" style="--d:60ms" aria-label="Tu partida">
-        <h2>Tu partida <span class="chip" id="mode-chip">En pilas · 3×3×3</span></h2>
+        <h2>Tu partida <span class="chip" id="mode-chip">Al azar · Fácil</span></h2>
         <div class="goal" id="goal" hidden>
           <span class="goal-n" id="s-par">0</span>
           <p><b id="s-par-text">Se resuelve en 0 movimientos</b><span id="s-par-sub">Es el mínimo posible.</span></p>
@@ -650,7 +650,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
           <li><span>Deshacer</span><kbd>Z</kbd></li>
           <li><span>Cambiar sentido de giro</span><kbd>R</kbd></li>
           <li><span>Girar al revés</span><kbd>Shift + clic</kbd></li>
-          <li><span>Mezclar en pilas / caos</span><kbd>N</kbd> <kbd>C</kbd></li>
+          <li><span>Mezclar al azar</span><kbd>N</kbd></li>
           <li><span>Arma tu mezcla</span><kbd>E</kbd></li>
           <li><span>Sonido</span><kbd>M</kbd></li>
         </ul>
@@ -757,22 +757,13 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         </div>
         <p class="level-note" id="level-note">Movimientos para resolver la mezcla.</p>
         <div class="modes">
-          <button class="mode" type="button" id="mix-pile" data-current="true" title="Giros de 180°. Siempre verás cubitos apilados.">
-            <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
-              <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-top)"/>
-              <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-left)"/>
-              <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-right)"/>
-            </svg>
-            <span><b>En pilas</b><small>Giros de 180°. Siempre verás cubitos apilados.</small></span>
-            <span class="go" aria-hidden="true">→</span>
-          </button>
-          <button class="mode" type="button" id="mix-chaos" data-current="false" title="Giros de 60°. Colores y orientaciones revueltos.">
+          <button class="mode" type="button" id="mix-chaos" data-current="true" title="Colores y orientaciones revueltos por todo el tablero.">
             <svg viewBox="-1.1 -1.1 2.2 2.2" aria-hidden="true">
               <polygon points="0,-1 0.866,-0.5 0,0 -0.866,-0.5" style="fill:var(--face-right)"/>
               <polygon points="-0.866,-0.5 0,0 0,1 -0.866,0.5" style="fill:var(--face-top)"/>
               <polygon points="0,0 0.866,-0.5 0.866,0.5 0,1" style="fill:var(--face-left)"/>
             </svg>
-            <span><b>Caos total</b><small>Giros de 60°. Colores y orientaciones revueltos.</small></span>
+            <span><b>Mezclar al azar</b><small>Colores y orientaciones revueltos por todo el tablero.</small></span>
             <span class="go" aria-hidden="true">→</span>
           </button>
           <button class="mode" type="button" id="mix-custom" data-current="false" title="Pinta y acomoda los rombos como quieras, y juega desde ahí.">
@@ -820,7 +811,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       <li><span><b>En celular:</b> desliza el dedo sobre un punto blanco. Hacia arriba gira en sentido horario y hacia abajo, antihorario.</span></li>
       <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
       <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
-      <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). En 4×4×4 los rangos son más grandes: Fácil 9–15, Intermedio 21–35 y Difícil 40–60. Los tableros chicos no dan para tanto: en 2×2×2 solo hay Fácil (en pilas el máximo es 8 y en caos, 14), y en 3×3×3 en pilas el máximo es 27, así que Difícil solo existe en caos.</span></li>
+      <li><span><b>Mezclar al azar</b> revuelve colores y orientaciones por todo el tablero. Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). En 4×4×4: Fácil 9–15, Intermedio 21–35 y Difícil 40–60. En 2×2×2 solo hay Fácil, porque ninguna mezcla necesita más de 14 movimientos.</span></li>
       <li><span>Cada mezcla te dice en cuántos movimientos se puede resolver. Cuando dice “mínimo”, es el mínimo exacto. En caos Intermedio y Difícil de 3×3×3 y 4×4×4 es una meta segura: seguro se puede en esa cantidad, aunque quizá exista un camino un poco más corto. Lograrlo en ese número o menos es una partida perfecta.</span></li>
       <li><span><b>Arma tu mezcla:</b> el cubo empieza en blanco. Elige un color y toca o arrastra sobre los rombos para pintarlos: cada color tiene un cupo (9 en 3×3×3) y no puedes poner más. Cuando se acaba uno, pasa solo al siguiente. Toca un rombo de su mismo color para quitarlo. Con “Girar” mueves grupos de tres. Cuando todo esté pintado, presiona “Jugar desde aquí”.</span></li>
       <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
@@ -1080,16 +1071,25 @@ const Core = (() => {
 
   // Giros al azar que no se fusionan con uno anterior (mismo punto sin un giro vecino en medio).
   function walk(st, K, mode, rand) {
-    const used = [];
+    const used = [], touched = new Set();
     for (let i = 0; i < K; i++) {
       const all = movesOf(st);
-      const ok = all.filter((v) => {
+      let ok = all.filter((v) => {
         for (let j = used.length - 1; j >= 0; j--) if (adjacent(used[j].v, v)) return !(used[j].v[0] === v[0] && used[j].v[1] === v[1]);
         return true;
       });
-      const pool = ok.length ? ok : all;
+      if (!ok.length) ok = all;
+      // Preferir grupos con rombos que todavía no se han movido: así la mezcla se reparte por todo el tablero.
+      let most = -1, pool = [];
+      for (const v of ok) {
+        const n = flippable(st, v).filter((id) => !touched.has(id)).length;
+        if (n > most) { most = n; pool = [v]; } else if (n === most) pool.push(v);
+      }
+      if (most <= 0 || rand() < 0.2) pool = ok;
       const v = pool[Math.floor(rand() * pool.length)];
-      const k = mode === "pile" ? 3 : 1 + Math.floor(rand() * 5);
+      for (const id of flippable(st, v)) touched.add(id);
+      // Giros de 60°, 120°, 240° y 300° casi siempre; 180° de vez en cuando.
+      const k = mode === "pile" ? 3 : rand() < 0.85 ? [1, 2, 4, 5][Math.floor(rand() * 4)] : 3;
       applyMove(st, v, k);
       used.push({ v: [...v], k });
     }
@@ -1119,27 +1119,34 @@ const Core = (() => {
       return { par: d, exact: true, route: inverse(used), level };
     }
 
-    const M = maxExact(st.N), t0 = Date.now();
-    let fallback = null;
-    for (let attempt = 0; attempt < 40; attempt++) {
+    // Se prueban varias mezclas válidas y se queda la más revuelta (la que deja menos rombos en su sitio).
+    const M = maxExact(st.N), t0 = Date.now(), total = st.tiles.length;
+    let best = null, fallback = null;
+    for (let attempt = 0; attempt < 80; attempt++) {
       reset();
       // En 2×2×2 casi cualquier posición revuelta está a 9–12 giros: para Intermedio se revuelve a fondo y se mide.
       const deep = st.N === 2 && level !== "easy";
       const K = pick(), used = walk(st, deep ? 40 : K, mode, rand);
+      const score = correctCount(st);
+      if (best && score >= best.score) { if (Date.now() - t0 > 1500) break; continue; }
       const r = solve(st);
+      let cand = null;
       if (deep || K <= M + 1) {
         // Se puede verificar: si no hay solución en M o menos y se mezcló con M + 1, el mínimo es M + 1.
         const d = r.d !== null ? r.d : K;
-        const out = { par: d, exact: true, route: inverse(used), level, tiles: copyTiles(st.tiles) };
-        if (d >= lo && d <= hi) return out;
-        if (!fallback || Math.abs(d - lo) < Math.abs(fallback.par - lo)) fallback = out;
+        const out = { par: d, exact: true, route: inverse(used), level, tiles: copyTiles(st.tiles), score };
+        if (d >= lo && d <= hi) cand = out;
+        else if (!fallback || Math.abs(d - lo) < Math.abs(fallback.par - lo)) fallback = out;
       } else if (r.d === null) {
         // Más allá de lo que se calcula al instante: se garantiza que se resuelve en K y que necesita más de M.
-        return { par: K, exact: false, route: inverse(used), level };
+        cand = { par: K, exact: false, route: inverse(used), level, tiles: copyTiles(st.tiles), score };
       }
+      if (cand && (!best || cand.score < best.score)) best = cand;
+      if (best && (best.score <= total * 0.12 || Date.now() - t0 > 1200)) break;
       if (Date.now() - t0 > 2500 && fallback) break;
     }
-    if (fallback) { st.tiles = fallback.tiles; reindex(st); delete fallback.tiles; return fallback; }
+    const pickOut = best || fallback;
+    if (pickOut) { st.tiles = pickOut.tiles; reindex(st); delete pickOut.tiles; delete pickOut.score; return pickOut; }
     reset();
     const used = walk(st, hi, mode, rand);
     return { par: hi, exact: false, route: inverse(used), level };
@@ -1258,7 +1265,7 @@ const Sound = (() => {
   let st, S;
   let hist = [];          // [{v:[a,b], k:1..5}] pasos antihorarios netos
   let phase = "playing";  // playing | won | free
-  let mode = "pile";
+  let mode = "chaos";
   let elapsed = 0, startedAt = null, tick = null;
   let dir = -1;           // -1 horario, +1 antihorario
   let showDots = true;
@@ -1345,11 +1352,11 @@ const Sound = (() => {
     $("#f-each").textContent = n / 3;
     $("#f-tilings").textContent = TILINGS[st.N];
     document.querySelectorAll("[data-size]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.size === st.N)));
-    $("#mix-pile").dataset.current = String(mode === "pile");
+
     $("#mix-chaos").dataset.current = String(mode === "chaos" && phase !== "edit");
     $("#mix-custom").dataset.current = String(mode === "custom" || phase === "edit");
-    if (phase === "edit") $("#mix-pile").dataset.current = "false";
-    const label = phase === "edit" ? "Armando" : mode === "pile" ? "En pilas" : mode === "chaos" ? "Caos total" : "Tu mezcla";
+
+    const label = phase === "edit" ? "Armando" : mode === "custom" ? "Tu mezcla" : "Al azar";
     $("#mode-chip").textContent = mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
     syncLevels();
     syncEditUI();
@@ -1723,6 +1730,7 @@ const Sound = (() => {
 
   function newGame(N, m, quiet) {
     if (generating) return;
+    if (m === "pile") m = "chaos"; // las mezclas siempre son al azar
     generating = true;
     mode = m;
     if (!quiet) { say(`Mezclando (${LEVEL_NAMES[level].toLowerCase()})…`); svg.classList.add("busy-board"); }
@@ -1738,8 +1746,8 @@ const Sound = (() => {
         buildBoard();
         playIntro();
         if (!quiet) Sound.shuffle();
-        const name = `${m === "pile" ? "En pilas" : "Caos total"}, ${LEVEL_NAMES[level].toLowerCase()}`;
-        const note = want !== level ? ` (En ${sizeName(N)} ${m === "pile" ? "en pilas" : "en caos"} el máximo es ${Core.maxFor(N, m)}, así que usé ${LEVEL_NAMES[level]}.)` : "";
+        const name = `Al azar, ${LEVEL_NAMES[level].toLowerCase()}`;
+        const note = want !== level ? ` (En ${sizeName(N)} el máximo es ${Core.maxFor(N, m)} movimientos, así que usé ${LEVEL_NAMES[level]}.)` : "";
         say(`${name}: ${parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.${note}`);
         save();
       } finally {
@@ -1771,7 +1779,7 @@ const Sound = (() => {
     }
     const max = Core.maxFor(st.N, m);
     $("#level-note").textContent = max < Core.rangesOf(st.N).hard[1]
-      ? `En ${sizeName(st.N)} ${m === "pile" ? "en pilas" : "en caos"} el máximo es ${max} movimientos.`
+      ? `En ${sizeName(st.N)} el máximo es ${max} movimientos.`
       : "Movimientos para resolver la mezcla.";
   }
 
@@ -1878,7 +1886,7 @@ const Sound = (() => {
 
   function cancelEditor() {
     if (editBackup && restore(editBackup)) { buildBoard(); setDir(dir, true); afterChange(); }
-    else newGame(st.N, "pile");
+    else newGame(st.N, "chaos");
     editBackup = null;
     Sound.undo();
   }
@@ -1997,7 +2005,7 @@ const Sound = (() => {
       hist = Array.isArray(snap.hist) ? snap.hist.filter((h) => h && Array.isArray(h.v) && h.k >= 1 && h.k <= 5) : [];
       phase = snap.phase === "playing" ? "playing" : snap.phase === "edit" ? "edit" : "free";
       if (phase === "playing" && Core.isSolved(st)) phase = "free";
-      mode = ["chaos", "custom"].includes(snap.mode) ? snap.mode : "pile";
+      mode = snap.mode === "custom" ? "custom" : "chaos";
       elapsed = +snap.elapsed || 0; startedAt = null;
       dir = snap.dir === 1 ? 1 : -1;
       showDots = snap.showDots !== false;
@@ -2134,7 +2142,6 @@ const Sound = (() => {
   $("#undo").addEventListener("click", undo);
   $("#hint-btn").addEventListener("click", showHint);
   $("#show-dots").addEventListener("change", (e) => { showDots = e.target.checked; Sound.tick(); render(); save(); });
-  $("#mix-pile").addEventListener("click", () => newGame(st.N, "pile"));
   $("#mix-chaos").addEventListener("click", () => newGame(st.N, "chaos"));
   $("#win-again").addEventListener("click", () => (mode === "custom" ? enterEditor() : newGame(st.N, mode)));
   $("#mix-custom").addEventListener("click", () => enterEditor());
@@ -2180,7 +2187,7 @@ const Sound = (() => {
     else if (k === "z") undo();
     else if (k === "r") setDir(-dir);
     else if (k === "m") setSound(!Sound.on);
-    else if (k === "n") newGame(st.N, "pile");
+    else if (k === "n") newGame(st.N, "chaos");
     else if (k === "c") newGame(st.N, "chaos");
     else if (k === "e") enterEditor();
     else if (phase === "edit" && (k === "1" || k === "2" || k === "3")) setPaintColor({ 1: 1, 2: 0, 3: 2 }[k]);
@@ -2213,7 +2220,7 @@ const Sound = (() => {
       if (phase === "playing" && hist.length) startTimer();
       afterChange();
     } else {
-      newGame(3, "pile", true);
+      newGame(3, "chaos", true);
     }
   }
   if (window.claude && window.claude.hot && typeof window.claude.hot.snapshot === "function") {

@@ -12,7 +12,7 @@ Versión web del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores 
 ## Qué incluye
 
 - Tableros de 2×2×2, 3×3×3 (el original) y 4×4×4.
-- Dos tipos de mezcla: **En pilas** (giros de 180°, siempre se ven cubitos apilados) y **Caos total** (giros de 60°).
+- **Mezclar al azar:** revuelve colores y orientaciones por todo el tablero, con la dificultad que elijas.
 - **Arma tu mezcla:** el cubo empieza en blanco; pintas cada color con su cupo exacto (9 en 3×3×3), acomodas con giros y juegas desde ahí.
 - Tres niveles de dificultad: Fácil (6–9 movimientos), Intermedio (15–20) y Difícil (30–35); en 4×4×4, Fácil 9–15, Intermedio 21–35 y Difícil 40–60. Se ajustan a lo que permite cada tamaño.
 - Cada mezcla indica en cuántos movimientos se resuelve (el mínimo exacto cuando se puede calcular).
@@ -30,8 +30,7 @@ Versión web del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores 
 Todo es un solo archivo, `index.html`, sin dependencias ni compilación. Para jugar sin internet, descárgalo y ábrelo en el navegador.
 
 - Las posiciones se modelan como teselados por rombos de un hexágono en una red triangular.
-- En el modo *En pilas*, el mínimo es el número de cubitos que faltan para completar la caja.
-- En *Caos total* y en las mezclas propias, el mínimo se calcula con una búsqueda bidireccional exacta (hasta 8 movimientos).
+- El mínimo se calcula con una búsqueda bidireccional exacta (hasta 14 movimientos en 2×2×2 y 8 en los demás). Más allá de eso, cada mezcla trae una meta segura: se sabe que se resuelve en ese número.
 
 ## Créditos
 
