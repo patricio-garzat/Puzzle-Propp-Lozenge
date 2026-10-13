@@ -46,23 +46,11 @@ def background(W, H, glow_xy):
 
 
 def board(src, height):
-    """Recorta el tablero (bandeja hexagonal) de una captura del simulador y lo escala."""
+    """Tablero 3x3x3 del juego en alta resolución (renderizado del SVG real del juego con Chrome,
+    sin puntos de giro ni pistas, fondo transparente) escalado a la altura pedida."""
     im = Image.open(os.path.join(HERE, "raw", src)).convert("RGBA")
-    cx, top, bot = 603, 654, 1890  # bandeja medida en la captura de 1206 x 2622
-    h = bot - top
-    w = h * math.sqrt(3) / 2
-    box = (round(cx - w / 2) - 4, top - 4, round(cx + w / 2) + 4, bot + 4)
-    crop = im.crop(box)
-    cw, ch = crop.size
-    # máscara hexagonal (punta arriba) con esquinas suaves
-    ss = 4
-    m = Image.new("L", (cw * ss, ch * ss), 0)
-    pts = [(cw / 2, 4), (cw - 4, 4 + h / 4), (cw - 4, 4 + 3 * h / 4), (cw / 2, ch - 4), (4, 4 + 3 * h / 4), (4, 4 + h / 4)]
-    ImageDraw.Draw(m).polygon([(x * ss, y * ss) for x, y in pts], fill=255)
-    m = m.filter(ImageFilter.GaussianBlur(10)).point(lambda v: 255 if v > 128 else int(v * 2)).resize((cw, ch), Image.LANCZOS)
-    crop.putalpha(m)
-    k = height / ch
-    return crop.resize((round(cw * k), round(ch * k)), Image.LANCZOS)
+    k = height / im.height
+    return im.resize((round(im.width * k), round(im.height * k)), Image.LANCZOS)
 
 
 def rhombus(kind, size, angle):
@@ -170,8 +158,8 @@ def compose(W, H, safe, board_src, board_h, title_size, tag_size, tagline, seed,
 os.makedirs(os.path.join(HERE, "creatives"), exist_ok=True)
 for lang, t in TEXT.items():
     # Header 3840 x 1646 · zona segura 1646 x 661 en (1097, 493)
-    compose(3840, 1646, (1097, 493, 1097 + 1646, 493 + 661), "02-play-dark.png", 640, 150, 62, t["header"],
+    compose(3840, 1646, (1097, 493, 1097 + 1646, 493 + 661), "board-hd-2.png", 660, 150, 62, t["header"],
             seed=7, rh_range=(150, 300), out=os.path.join(HERE, "creatives", f"header-3840x1646-{lang}.png"))
     # Search Results 3840 x 2560 · zona segura 2168 x 1030 en (836, 765)
-    compose(3840, 2560, (836, 765, 836 + 2168, 765 + 1030), "03-hint-dark-es.png" if lang == "es" else "03-hint-dark.png", 1000, 196, 84, t["search"],
+    compose(3840, 2560, (836, 765, 836 + 2168, 765 + 1030), "board-hd-1.png", 1030, 196, 84, t["search"],
             seed=11, rh_range=(200, 380), out=os.path.join(HERE, "creatives", f"search-3840x2560-{lang}.png"))
