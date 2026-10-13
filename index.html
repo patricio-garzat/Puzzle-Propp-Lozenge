@@ -863,6 +863,61 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 
+/* ---------- Nivel extremo (secreto) ---------- */
+.xglow { position: absolute; inset: 4% 10%; z-index: 0; pointer-events: none; opacity: 0; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 120, 40, 0.42), rgba(214, 48, 49, 0.18) 55%, transparent); }
+body.extreme .xglow { animation: x-glow 2.6s ease-in-out infinite; }
+@keyframes x-glow { 0%, 100% { opacity: 0.35; transform: scale(0.96); } 50% { opacity: 0.85; transform: scale(1.03); } }
+body.extreme .lvl-size { background: linear-gradient(135deg, #FFB547, #E8432E); color: #FFFFFF; }
+body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E); -webkit-background-clip: text; background-clip: text; color: transparent; text-transform: uppercase; letter-spacing: 0.02em; }
+.lvl-intro.extreme { background: radial-gradient(closest-side, rgba(20, 6, 10, 0.86), rgba(20, 6, 10, 0.35) 70%, transparent); animation: li-out 0.6s ease 2.4s forwards; }
+.lvl-intro.extreme .li-k { color: #FFB547; letter-spacing: 0.32em; }
+.lvl-intro.extreme b { font-size: clamp(46px, 12vw, 86px); text-transform: uppercase; letter-spacing: 0.01em; background: linear-gradient(135deg, #FFD27A, #FF7A3C 50%, #E8432E); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 4px 18px rgba(255, 110, 50, 0.45)); animation: li-pop 0.8s cubic-bezier(.2,1.6,.4,1) 0.5s both, x-flick 2.4s steps(1) 0.5s both; }
+.lvl-intro.extreme .li-size { background: linear-gradient(135deg, #FFB547, #E8432E); color: #FFFFFF; animation-delay: 0.9s; }
+@keyframes x-flick { 0% { opacity: 0.2; } 4% { opacity: 1; } 7% { opacity: 0.5; } 10%, 100% { opacity: 1; } }
+.board-wrap.quake { animation: quake 0.9s cubic-bezier(.36,.07,.19,.97) 0.15s both; }
+@keyframes quake { 10%, 90% { transform: translate(-1px, 0); } 20%, 80% { transform: translate(2px, 1px); } 30%, 50%, 70% { transform: translate(-4px, -1px); } 40%, 60% { transform: translate(4px, 1px); } }
+.lv-secret h4 span:first-child { color: #E8742E; }
+.lv-extreme { width: 100%; display: flex; align-items: center; gap: 14px; padding: 14px 16px; border: 0; border-radius: 18px; cursor: pointer; text-align: left; color: #FFFFFF;
+  background: linear-gradient(135deg, #2A0F1A, #6B1E1E 55%, #C2481F); box-shadow: 0 0 0 1px rgba(255, 181, 71, 0.45), 0 10px 24px rgba(194, 72, 31, 0.35); font: inherit; }
+.lv-extreme .x-ico { flex: none; width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); font: 800 22px var(--f-display); color: #FFD27A; }
+.lv-extreme .x-txt { flex: 1; display: grid; gap: 2px; }
+.lv-extreme .x-txt b { font: 800 17px var(--f-display); letter-spacing: 0.01em; }
+.lv-extreme .x-txt small { font-weight: 700; font-size: 12.5px; opacity: 0.8; }
+.lv-extreme .mini svg path { fill: rgba(255, 255, 255, 0.3); }
+.lv-extreme .mini svg.on path { fill: #FFD27A; }
+.finale { position: fixed; inset: 0; z-index: 29; display: grid; place-items: center; overflow: hidden; color: #FFFFFF; text-align: center;
+  background: radial-gradient(ellipse at 50% 45%, #2A1630, #0C0716 60%, #050309); animation: fade 0.5s ease both; }
+.fi-hex { position: absolute; width: min(120vw, 820px); aspect-ratio: 1; clip-path: polygon(50% 0, 93.3% 25%, 93.3% 75%, 50% 100%, 6.7% 75%, 6.7% 25%);
+  background: conic-gradient(from 0deg, rgba(255, 196, 64, 0.16), rgba(232, 67, 46, 0.16), rgba(61, 70, 214, 0.16), rgba(255, 196, 64, 0.16)); animation: fi-spin 24s linear infinite; opacity: 0.6; }
+.finale.dark .fi-hex { background: conic-gradient(from 0deg, rgba(255, 140, 50, 0.3), rgba(160, 20, 30, 0.22), rgba(255, 140, 50, 0.3)); animation: fi-spin 9s linear infinite, x-glow 2.4s ease-in-out infinite; }
+@keyframes fi-spin { to { rotate: 360deg; } }
+.fi-step { grid-area: 1 / 1; display: grid; justify-items: center; gap: 6px; padding: 24px; position: relative; }
+.fi-a { animation: li-in 0.7s cubic-bezier(.2,1.4,.4,1) 0.2s both; }
+.finale.dark .fi-a { animation: fi-out 0.5s ease forwards; }
+.fi-b { visibility: hidden; }
+.finale.dark .fi-b { visibility: visible; }
+.finale.dark .fi-b > * { animation: li-in 0.6s cubic-bezier(.2,1.4,.4,1) both; }
+.finale.dark .fi-b > :nth-child(2) { animation: li-pop 0.9s cubic-bezier(.2,1.6,.4,1) 0.6s both, x-flick 2.4s steps(1) 0.6s both; }
+.finale.dark .fi-b > :nth-child(3) { animation-delay: 1.1s; }
+.finale.dark .fi-b > :nth-child(4) { animation-delay: 1.5s; }
+@keyframes fi-out { to { opacity: 0; transform: scale(0.9); } }
+.fi-logo { width: 110px; height: 110px; margin-bottom: 6px; filter: drop-shadow(0 12px 30px rgba(255, 196, 64, 0.35)); animation: fi-float 3s ease-in-out infinite; }
+@keyframes fi-float { 50% { transform: translateY(-8px) rotate(-3deg); } }
+.fi-k { margin: 0; font-weight: 800; font-size: 14px; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255, 255, 255, 0.7); }
+.fi-big { font-family: var(--f-display); font-weight: 800; font-size: clamp(48px, 14vw, 96px); line-height: 1; letter-spacing: -0.03em; }
+.fi-x { text-transform: uppercase; letter-spacing: 0.01em; font-size: clamp(40px, 11vw, 80px); background: linear-gradient(135deg, #FFD27A, #FF7A3C 50%, #E8432E); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 6px 24px rgba(255, 110, 50, 0.5)); }
+.fi-sub { margin: 4px 0 0; font-weight: 800; font-size: 18px; color: #FFD27A; }
+.fi-pill { margin-top: 6px; font-weight: 800; font-size: 15px; padding: 7px 16px; border-radius: 999px; background: linear-gradient(135deg, #FFB547, #E8432E); }
+.fi-actions { display: flex; gap: 10px; margin-top: 18px; }
+.fi-actions .btn { min-width: 120px; }
+#fi-later { background: rgba(255, 255, 255, 0.12); color: #FFFFFF; box-shadow: none; }
+.finale.shake { animation: fade 0.5s ease both, quake 0.9s cubic-bezier(.36,.07,.19,.97) both; }
+@media (prefers-reduced-motion: reduce) {
+  .finale *, .finale { animation: none !important; }
+  body.extreme .xglow { animation: none; opacity: 0.6; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -978,6 +1033,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       </div>
       <div class="lvl-banner" id="lvl-banner" hidden><span class="lvl-num">Nivel <b id="lvl-n">1</b></span><span class="lvl-size" id="lvl-size">2×2×2</span><span id="lvl-stars"></span></div>
       <div class="board-wrap" id="board-wrap">
+        <div class="xglow" aria-hidden="true"></div>
         <div class="lvl-intro" id="lvl-intro" hidden><span class="li-k">Nivel</span><b id="li-n">1</b><span class="li-size" id="li-size">Cubo 2×2×2</span></div>
         <div class="glow" aria-hidden="true"></div>
         <svg id="board" role="application" aria-label="Tablero hexagonal con rombos" aria-describedby="status"></svg>
@@ -1309,6 +1365,22 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 </div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="star-grad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE07A"/><stop offset="1" stop-color="#F2A812"/></linearGradient></defs></svg>
 <canvas id="confetti" aria-hidden="true"></canvas>
+<!-- Final de los 50 niveles y el nivel extremo secreto -->
+<div class="finale" id="finale" hidden role="dialog" aria-modal="true" aria-label="Completaste los 50 niveles">
+  <div class="fi-hex" aria-hidden="true"></div>
+  <div class="fi-step fi-a">
+    <svg class="logo fi-logo" id="fi-logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"></svg>
+    <p class="fi-k">Completaste</p>
+    <b class="fi-big">50 / 50</b>
+    <p class="fi-sub" id="fi-stars">★ 0/150</p>
+  </div>
+  <div class="fi-step fi-b">
+    <p class="fi-k">…pero queda uno más</p>
+    <b class="fi-big fi-x">Nivel extremo</b>
+    <span class="fi-pill">Cubo 8×8×8 · 200 movimientos</span>
+    <div class="fi-actions"><button class="btn primary" type="button" id="fi-go">Entrar</button><button class="btn" type="button" id="fi-later">Después</button></div>
+  </div>
+</div>
 
 <script>
 /*CORE*/
@@ -1728,6 +1800,8 @@ const Core = (() => {
   const ramp = (a, b, n) => Array.from({ length: n }, (_, i) => Math.round(a + ((b - a) * i) / (n - 1)));
   ramp(10, 45, 15).forEach((K) => LEVELS.push({ N: 3, K }));
   ramp(35, 130, 20).forEach((K) => LEVELS.push({ N: 4, K }));
+  // 51: nivel extremo secreto (se desbloquea al pasar el 50): 8×8×8 revuelto con 200 giros
+  LEVELS.push({ N: 8, K: 200, extreme: true });
   // Generador pseudoaleatorio con semilla: la misma mezcla en todos los dispositivos
   function seeded(seed) {
     let a = seed >>> 0;
@@ -1934,6 +2008,17 @@ const Sound = (() => {
     },
     starMiss() { pluck(196, { vol: 0.045, dur: 0.6 }); },
     coin() { pluck(523.25, { vol: 0.07, dur: 1 }); pluck(659.25, { t: 0.1, vol: 0.055, dur: 1.2 }); },
+    // Retumbo grave que se acelera (presentación del nivel extremo)
+    rumble() {
+      for (let i = 0, t = 0; i < 9; i++) { thump({ t, vol: 0.1 + i * 0.016 }); t += 0.2 - i * 0.017; }
+      breath({ dur: 1.4, vol: 0.03, from: 220, to: 600 });
+      tone(98, { dur: 1.6, vol: 0.06, attack: 0.6 });
+    },
+    // Acorde misterioso y grave para el secreto
+    secret() {
+      [196, 233.08, 293.66, 392].forEach((f, i) => pluck(f, { t: i * 0.16, vol: 0.08, dur: 2.2 }));
+      [98, 146.83].forEach((f) => tone(f, { dur: 2.6, vol: 0.04, attack: 0.5 }));
+    },
     // Cubo armado: arpegio lento sobre un acorde que respira
     win() {
       [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => pluck(f, { t: i * 0.13, vol: 0.09, dur: 1.9 }));
@@ -2055,7 +2140,7 @@ const Sound = (() => {
     $("#mix-custom").dataset.current = String(mode === "custom" || phase === "edit");
 
     const label = phase === "edit" ? "Armando" : mode === "custom" ? "Tu mezcla" : "Al azar";
-    $("#mode-chip").textContent = mode === "level" && levelNum ? `Nivel ${levelNum} · ${sizeName(st.N)}`
+    $("#mode-chip").textContent = mode === "level" && levelNum ? `${lvName(levelNum)} · ${sizeName(st.N)}`
       : mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
     $("#mix-levels").dataset.current = String(mode === "level" && phase !== "edit");
     if (mode === "level") { $("#mix-chaos").dataset.current = "false"; $("#mix-custom").dataset.current = "false"; }
@@ -2194,7 +2279,7 @@ const Sound = (() => {
     if (par !== null && mode === "level" && levelNum) {
       const lt = levelTargets(), m = hist.length, solved = Core.isSolved(st);
       $("#s-par").textContent = par;
-      $("#s-par-text").innerHTML = `Nivel ${levelNum} · meta ${par}${starsHTML(starsFor(m), "goal-stars")}`;
+      $("#s-par-text").innerHTML = `${lvName(levelNum)} · meta ${par}${starsHTML(starsFor(m), "goal-stars")}`;
       goal.classList.toggle("perfect", solved && m <= par);
       goal.classList.toggle("bound", false);
       $("#s-par-sub").textContent = `★★★ hasta ${lt.three} · ★★ hasta ${lt.two} · ★ al terminar. Pistas: ${levelHints} del nivel + ${levelProg().bank} guardadas.`;
@@ -2220,10 +2305,11 @@ const Sound = (() => {
     const lb = $("#lvl-banner");
     lb.hidden = !(mode === "level" && levelNum && phase !== "edit");
     if (!lb.hidden) {
-      $("#lvl-n").textContent = levelNum;
+      $("#lvl-n").textContent = isExtreme(levelNum) ? "extremo" : levelNum;
       $("#lvl-size").textContent = sizeName(st.N);
       $("#lvl-stars").innerHTML = starsHTML(starsFor(hist.length), "goal-stars");
     }
+    document.body.classList.toggle("extreme", mode === "level" && isExtreme(levelNum) && phase !== "edit");
     if (mode === "level" && levelNum && par !== null) mg.innerHTML = `Meta ${par}`;
     else mg.textContent = par !== null ? (parExact ? `Mínimo ${par}` : `Meta ${par}`) : "Más de 8";
     mg.classList.toggle("bound", par !== null && !parExact && mode !== "level");
@@ -2765,7 +2851,7 @@ const Sound = (() => {
     par = origin.par; parExact = origin.parExact !== false; parOver = !!origin.parOver;
     route = origin.route ? JSON.parse(JSON.stringify(origin.route)) : null;
     buildBoard(); playIntro(); Sound.shuffle();
-    if (mode === "level" && levelNum) { say(`Nivel ${levelNum} reiniciado.`); save(); return; }
+    if (mode === "level" && levelNum) { say(`${lvName(levelNum)} reiniciado.`); save(); return; }
     say(`Mezcla reiniciada: ${par !== null ? (parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`) : "más de 8 movimientos"}.`);
     save();
   }
@@ -3098,7 +3184,7 @@ const Sound = (() => {
       continueAction = resumeLevel ? "resume" : "next";
       $("#home-continue").hidden = false;
       $("#home-continue-info").textContent = resumeLevel
-        ? `Nivel ${levelNum} · ${sizeName(st.N)} · ${movs(hist.length)}`
+        ? `${lvName(levelNum)} · ${sizeName(st.N)} · ${movs(hist.length)}`
         : `Nivel ${nextLevel(pr)} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`;
     } else {
       continueAction = "resume";
@@ -3272,7 +3358,7 @@ const Sound = (() => {
     wasRunning = startedAt !== null;
     stopTimer();
     $("#pause-info").textContent = phase === "edit" ? "Armando tu mezcla"
-      : `${mode === "level" && levelNum ? `Nivel ${levelNum}` : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
+      : `${mode === "level" && levelNum ? lvName(levelNum) : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
     $("#pause-restart").hidden = !origin || phase === "edit";
     $("#pause-levels").hidden = false;
     $("#pause-new").hidden = mode === "level";
@@ -3306,7 +3392,11 @@ const Sound = (() => {
     return x;
   }
   function saveLevelProg(x) { try { localStorage.setItem(LVKEY, JSON.stringify(x)); } catch (e) {} }
-  const totalStars = (pr) => Object.values(pr.stars).reduce((a, b) => a + b, 0);
+  const EXTREME = 51;
+  const totalStars = (pr) => Object.entries(pr.stars).reduce((a, [n, b]) => a + (+n <= 50 ? b : 0), 0);
+  // Declaradas como funciones para poder usarlas desde cualquier parte (también antes de esta línea)
+  function isExtreme(n) { return n === 51; }
+  function lvName(n) { return isExtreme(n) ? "Nivel extremo" : `Nivel ${n}`; }
   const unlocked = (pr, n) => n === 1 || (pr.stars[n - 1] || 0) >= 1;
   const nextLevel = (pr) => { for (let n = 1; n <= 50; n++) if (!(pr.stars[n] >= 1)) return n; return 50; };
   function levelTargets() { const m = par || 1; return { three: m, two: Math.ceil(m * 1.5), max: m * 2 }; }
@@ -3335,19 +3425,22 @@ const Sound = (() => {
     showLevelIntro(n, L.N);
     const t = levelTargets();
     const bank = levelProg().bank;
-    say(`Nivel ${n} · ${sizeName(L.N)}: meta ${t.three} para ★★★. Tienes 3 pistas de este nivel${bank ? ` y ${bank} ${bank === 1 ? "guardada" : "guardadas"}` : ""}.`);
+    say(`${lvName(n)} · ${sizeName(L.N)}: meta ${t.three} para ★★★. Tienes 3 pistas de este nivel${bank ? ` y ${bank} ${bank === 1 ? "guardada" : "guardadas"}` : ""}.`);
     save();
   }
 
   function showLevelIntro(n, N) {
-    const el = $("#lvl-intro");
-    $("#li-n").textContent = n;
-    $("#li-size").textContent = `Cubo ${sizeName(N)}`;
+    const el = $("#lvl-intro"), x = n === EXTREME;
+    el.classList.toggle("extreme", x);
+    el.querySelector(".li-k").textContent = x ? "Nivel secreto" : "Nivel";
+    $("#li-n").textContent = x ? "Extremo" : n;
+    $("#li-size").textContent = x ? `Cubo ${sizeName(N)} · ${Core.LEVELS[n - 1].K} movimientos` : `Cubo ${sizeName(N)}`;
     el.hidden = true; void el.getBoundingClientRect(); el.hidden = false;
-    if (reduceMotion) { setTimeout(() => (el.hidden = true), 1200); return; }
     clearTimeout(showLevelIntro.t);
-    showLevelIntro.t = setTimeout(() => (el.hidden = true), 1750);
-    setTimeout(() => Sound.hint(), 120);
+    if (reduceMotion) { showLevelIntro.t = setTimeout(() => (el.hidden = true), x ? 2200 : 1200); return; }
+    showLevelIntro.t = setTimeout(() => (el.hidden = true), x ? 3000 : 1750);
+    if (x) { Sound.rumble(); setTimeout(() => Sound.secret(), 900); restart($("#board-wrap"), "quake"); buzz([30, 60, 30, 60, 60]); }
+    else setTimeout(() => Sound.hint(), 120);
   }
 
   function winLevel() {
@@ -3364,8 +3457,11 @@ const Sound = (() => {
     if (earned) { pr.bonus[levelNum] = true; pr.bank += 1; }
     saveLevelProg(pr);
     levelHints = 0;
-    const last = levelNum >= 50;
-    $("#win-title").textContent = last ? "¡Completaste los 50 niveles!" : `¡Nivel ${levelNum} completado!`;
+    const x = levelNum === EXTREME, last = levelNum >= 50;
+    // Primera vez que terminas el 50: animación final y se desbloquea el nivel extremo
+    const finale = levelNum === 50 && !pr.finale;
+    if (finale) { pr.finale = true; saveLevelProg(pr); }
+    $("#win-title").textContent = x ? "¡Leyenda! Nivel extremo completado" : levelNum === 50 ? "¡Completaste los 50 niveles!" : `¡Nivel ${levelNum} completado!`;
     $("#win-line").textContent = `${movs(moves)} · ${fmt(ms)} · meta ${t.three}`;
     $("#win-hints").hidden = true;
     $("#win-rec").hidden = true;
@@ -3376,14 +3472,15 @@ const Sound = (() => {
       el.style.setProperty("--sd", `${0.55 + i * 0.32}s`);
       el.classList.toggle("got", i < stars);
     });
-    $("#win-next").hidden = last;
+    $("#win-next").hidden = x;
+    $("#win-next").textContent = levelNum === 50 ? "Nivel extremo →" : "Siguiente nivel →";
     $("#win-again").hidden = true;
     $("#win-levels").hidden = false;
     $("#win-retry").hidden = false;
     $("#win-close").hidden = true;
     $("#win-x").hidden = true;
     winEl.hidden = false;
-    say(`¡Nivel ${levelNum} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, "good");
+    say(`¡${lvName(levelNum)} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, "good");
     if (layers.tiles) { restart(layers.tiles, "celebrate"); setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400); }
     Sound.win();
     for (let i = 0; i < 3; i++) setTimeout(() => (i < stars ? (Sound.star(i), buzz(18)) : Sound.starMiss()), 550 + 450 + i * 320);
@@ -3391,10 +3488,34 @@ const Sound = (() => {
     buzz([20, 40, 30]);
     bumpStat("solved");
     if (stars === 3) { bumpStat("perfect"); setTimeout(confetti, 1500); }
+    if (x) { setTimeout(confetti, 500); setTimeout(confetti, 2300); setTimeout(() => Sound.secret(), 1900); }
+    if (finale) setTimeout(showFinale, 2900);
     updateStats();
     if (earned) $("#hint-count").textContent = pr.bank - 1; // sube cuando llega el foquito
-    setTimeout(() => { if (!winEl.hidden) $(last ? "#win-levels" : "#win-next").focus({ preventScroll: true }); }, 600);
+    setTimeout(() => { if (!winEl.hidden) $(x ? "#win-levels" : "#win-next").focus({ preventScroll: true }); }, 600);
   }
+
+  // Animación al terminar los 50 niveles: "50 / 50" y luego se revela el nivel extremo
+  const finaleEl = $("#finale");
+  function showFinale() {
+    if (!winLocked() || levelNum !== 50) return;
+    $("#fi-logo").innerHTML = document.querySelector(".topbar .logo").innerHTML;
+    $("#fi-stars").textContent = `★ ${totalStars(levelProg())}/150`;
+    finaleEl.classList.remove("dark", "shake");
+    finaleEl.hidden = false;
+    Sound.win(); confetti(); buzz([20, 40, 20]);
+    const reveal = () => {
+      if (finaleEl.hidden) return;
+      finaleEl.classList.add("dark", "shake");
+      Sound.rumble(); setTimeout(() => Sound.secret(), 700); buzz([40, 60, 40, 60, 80]);
+      setTimeout(() => !finaleEl.hidden && $("#fi-go").focus({ preventScroll: true }), 1600);
+    };
+    clearTimeout(showFinale.t);
+    showFinale.t = setTimeout(reveal, reduceMotion ? 1200 : 3000);
+  }
+  function closeFinale() { clearTimeout(showFinale.t); finaleEl.hidden = true; }
+  $("#fi-go").addEventListener("click", () => { closeFinale(); startLevel(EXTREME); });
+  $("#fi-later").addEventListener("click", () => { closeFinale(); Sound.tick(); });
 
   // Foquito que sale de las estrellas y vuela hasta el botón de pistas
   const BULB_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z"/><path d="M6 14h4" fill="none" stroke-width="1.6" stroke-linecap="round"/></svg>';
@@ -3438,7 +3559,10 @@ const Sound = (() => {
         cells.push(`<button class="lv${n === nx && !(pr.stars[n] >= 1) ? " next" : ""}" type="button" data-lv="${n}" aria-label="Nivel ${n}, ${sN} estrellas"><b>${n}</b>${starsHTML(sN, "mini")}</button>`);
       }
       return `<div class="lv-sec"><h4><span>${sizeName(N)} · niveles ${a}–${b}</span><span>★ ${got}/${(b - a + 1) * 3}</span></h4><div class="lv-grid">${cells.join("")}</div></div>`;
-    }).join("");
+    }).join("") + (unlocked(pr, EXTREME)
+      // El nivel extremo solo aparece después de terminar el 50
+      ? `<div class="lv-sec lv-secret"><h4><span>Secreto</span><span>★ ${pr.stars[EXTREME] || 0}/3</span></h4><button class="lv-extreme" type="button" data-lv="${EXTREME}" aria-label="Nivel extremo, ${pr.stars[EXTREME] || 0} estrellas"><span class="x-ico">8³</span><span class="x-txt"><b>Nivel extremo</b><small>Cubo 8×8×8 · ${Core.LEVELS[EXTREME - 1].K} movimientos</small></span>${starsHTML(pr.stars[EXTREME] || 0, "mini")}</button></div>`
+      : "");
   }
   const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
   function openLevels() {
@@ -3462,7 +3586,7 @@ const Sound = (() => {
   });
   $("#home-levels").addEventListener("click", openLevels);
   $("#pause-levels").addEventListener("click", () => { pauseEl.hidden = true; openLevels(); });
-  $("#win-next").addEventListener("click", () => startLevel(Math.min(50, (levelNum || 0) + 1)));
+  $("#win-next").addEventListener("click", () => startLevel(levelNum === 50 ? EXTREME : Math.min(50, (levelNum || 0) + 1)));
   $("#win-retry").addEventListener("click", () => startLevel(levelNum || 1));
   $("#win-levels").addEventListener("click", () => { winEl.hidden = true; phase = "free"; openLevels(); });
   function levelInfoText() { const pr = levelProg(); const n = nextLevel(pr); return `Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`; }
