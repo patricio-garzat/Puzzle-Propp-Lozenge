@@ -580,6 +580,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 /* Intro del estudio: fondo blanco, logo de tamaño moderado al centro */
 #studio { position: fixed; inset: 0; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
+/* Mientras carga la página solo se ve el fondo blanco; el logo aparece cuando su animación ya está lista */
+#studio:not(.go) svg { visibility: hidden; }
 /* La intro del juego espera a que termine la del estudio */
 #splash.hold, #splash.hold * { animation-play-state: paused !important; }
 #splash {
@@ -3182,7 +3184,7 @@ const Sound = (() => {
       out.onfinish = () => el.remove();
     };
     themeColorHold = "#FFFFFF"; syncThemeColor();
-    if (reduceMotion || !el.animate) { setTimeout(finish, 1600); return; }
+    if (reduceMotion || !el.animate) { el.classList.add("go"); setTimeout(finish, 1600); return; }
     // Las copias de las letras para el brillo (un clipPath no admite grupos)
     const ws = q("bb-word-shape");
     el.querySelectorAll("#bb-word path").forEach((l) => { const c = l.cloneNode(); c.setAttribute("transform", "translate(560 0)"); ws.appendChild(c); });
@@ -3201,6 +3203,7 @@ const Sound = (() => {
     tl(bear, [{ transform: "rotate(0deg)" }, { transform: "rotate(-2.6deg)", offset: 0.45 }, { transform: "rotate(-2.6deg)", offset: 0.65 }, { transform: "rotate(0deg)" }], 2700, 1000, inOut, "none");
     const eye = q("bb-eye"); eye.style.transformOrigin = "center";
     tl(eye, [{ transform: "scaleY(1)" }, { transform: "scaleY(0.12)", offset: 0.5 }, { transform: "scaleY(1)" }], 3250, 200, "ease-in-out", "none");
+    el.classList.add("go"); // ya con todas las animaciones en su estado inicial
     setTimeout(finish, 4000);
   }
 
