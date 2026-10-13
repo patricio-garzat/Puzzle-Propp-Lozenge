@@ -1620,6 +1620,12 @@ const Sound = (() => {
       try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
       ensure();
     },
+    // Llama a cb cuando el audio de verdad ya está sonando (el navegador lo confirma de forma asíncrona)
+    whenRunning(cb) {
+      const c = ensure(); if (!c) return;
+      if (c.state === "running") { cb(); return; }
+      c.resume().then(() => { if (c.state === "running") cb(); }).catch(() => {});
+    },
     // ¿El navegador deja sonar sin que la persona toque primero?
     probe() {
       if (!on) return false;
@@ -2657,8 +2663,7 @@ const Sound = (() => {
 
   // El audio del navegador solo arranca después de una interacción.
   const unlock = () => Sound.unlock();
-  document.addEventListener("pointerdown", unlock, { capture: true });
-  document.addEventListener("keydown", unlock, { capture: true });
+  ["pointerdown", "touchend", "click", "keydown"].forEach((ev) => document.addEventListener(ev, unlock, { capture: true, passive: true }));
 
   document.addEventListener("keydown", (e) => {
     if (!startEl.hidden) { if (e.key === "Escape") continueSaved(); return; }
@@ -2692,12 +2697,19 @@ const Sound = (() => {
     setTimeout(done, 5550);
     if (!Sound.on) return;
     if (Sound.probe()) { Sound.intro(0); return; }
+    let sounding = false;
     const late = () => {
-      document.removeEventListener("pointerdown", late, true); document.removeEventListener("keydown", late, true);
-      if (!sp.isConnected) return;
-      Sound.unlock(); Sound.intro((performance.now() - t0) / 1000);
+      if (sounding || !sp.isConnected) return;
+      Sound.unlock();
+      // En iPhone solo cuenta al levantar el dedo: se reintenta en cada evento hasta que el audio arranca.
+      Sound.whenRunning(() => {
+        if (sounding || !sp.isConnected) return;
+        sounding = true;
+        ["pointerdown", "touchend", "click", "keydown"].forEach((ev) => document.removeEventListener(ev, late, true));
+        Sound.intro((performance.now() - t0) / 1000);
+      });
     };
-    document.addEventListener("pointerdown", late, true);
+    ["pointerdown", "touchend", "click"].forEach((ev) => document.addEventListener(ev, late, true));
     document.addEventListener("keydown", late, true);
   })();
 
