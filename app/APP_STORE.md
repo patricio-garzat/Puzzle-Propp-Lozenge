@@ -198,9 +198,10 @@ puzzle,cubo,relajante,mente,lógica,rombos,deslizar,calma,zen,niveles,sin intern
 ## Para sacar una actualización más adelante
 
 1. Haz los cambios en el juego y vuelve a generar `index.html`, igual que con la versión web.
-2. En la carpeta `app/`, ejecuta `npm run build`. Esto copia el juego al proyecto de Xcode.
-3. Abre `app/ios/App/App.xcodeproj` en Xcode y, en el target **App** → **General**, sube el número:
-   - **Build:** súbelo siempre (2, 3, …).
-   - **Version:** súbela cuando haya cambios visibles (1.0.1, 1.1, …).
-4. Elige **Any iOS Device (arm64)** → **Product → Archive** → **Distribute App**, igual que en el paso 2.
-5. En App Store Connect, crea la versión nueva con **+ Version**, elige el build, escribe **What's New** y mándala a revisión.
+2. En la carpeta `app/`, ejecuta:
+   - `./release.sh` para subir solo un build nuevo (por ejemplo 1.0 (3)), o
+   - `./release.sh 1.1` para además cambiar la versión.
+
+   El script sube el número de build, copia el juego al proyecto de Xcode, hace el archive y lo sube a App Store Connect con la clave de API. No hace falta abrir Xcode.
+   - La clave es Admin y vive solo en tu Mac, en `~/.appstoreconnect/` (`cubeswipe.env` y `private_keys/`). No se sube a git.
+3. En App Store Connect, crea la versión nueva con **+ Version**, elige el build, escribe **What's New** y mándala a revisión.
