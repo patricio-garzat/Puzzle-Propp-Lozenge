@@ -193,6 +193,9 @@ button { font: inherit; color: inherit; }
 }
 .brand p { margin: 2px 0 0; font-family: var(--f-mono); font-weight: 800; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 .top-actions { display: flex; align-items: center; gap: 8px; }
+/* Mientras se juega no se muestra el logo ni el nombre de la app (ya se vieron en el inicio) */
+.topbar .brand { display: none; }
+.topbar { justify-content: flex-end; }
 .pill {
   display: inline-flex; align-items: center; gap: 8px;
   font-weight: 600; font-size: 14px; color: var(--ink);
@@ -503,6 +506,10 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   .app { height: 100%; padding-inline: 12px; padding-block: max(10px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-bottom, 0px)); gap: 8px; }
   .tool.mobile-only { display: inline-flex; }
   .topbar { flex-wrap: nowrap; }
+  /* Celular: el botón de pausa sube a la fila de movimientos y tiempo, sin una fila propia */
+  .app { position: relative; }
+  .topbar { position: absolute; z-index: 6; right: 12px; top: max(10px, env(safe-area-inset-top, 0px)); }
+  .mstats { min-height: 38px; padding-right: 48px; }
   .logo { width: 34px; height: 34px; }
   .brand { gap: 9px; }
   .brand h1 { font-size: clamp(16px, 5vw, 19px); white-space: nowrap; }
