@@ -504,6 +504,12 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   .modal .sheet { padding: 22px 18px 18px; }
 }
 
+/* Pantallas táctiles: el sentido se elige deslizando */
+@media (pointer: coarse) {
+  #board { touch-action: none; }
+  #play-dock .seg, #play-dock .sep { display: none; }
+}
+
 /* Celulares y tabletas: sin efectos caros para que todo vaya fluido */
 @media (max-width: 719px), (pointer: coarse) {
   .bg { -webkit-mask-image: none; mask-image: none; opacity: 0.55; }
@@ -762,6 +768,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <ul class="howto">
       <li><span>Solo se levantan los <b>puntos blancos</b>, donde tres rombos forman un hexágono pequeño. Al pasar el cursor, la flecha indica hacia dónde girará.</span></li>
       <li><span>Cada toque gira el grupo 60°. Con <kbd>Shift</kbd> o clic derecho gira al revés.</span></li>
+      <li><span><b>En celular:</b> desliza el dedo sobre un punto blanco. Hacia arriba gira en sentido horario y hacia abajo, antihorario.</span></li>
       <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
       <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
       <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). Los tableros chicos no dan para tanto: en 2×2×2 solo hay Fácil (en pilas el máximo es 8 y en caos, 14), y en 3×3×3 en pilas el máximo es 27, así que Difícil solo existe en caos.</span></li>
@@ -1188,6 +1195,9 @@ const Sound = (() => {
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   // En celulares y tabletas se apagan los efectos caros (filtros y animaciones de fondo).
   const LOWFX = matchMedia("(max-width: 719px), (pointer: coarse)").matches;
+  // Pantallas táctiles: se gira deslizando el dedo (arriba = horario, abajo = antihorario).
+  const TOUCH_UI = matchMedia("(pointer: coarse)").matches;
+  const TAG_TEXT = TOUCH_UI ? "Desliza aquí" : "Toca aquí";
   const svg = $("#board");
   const wrap = $("#board-wrap");
   const winEl = $("#win");
@@ -1200,7 +1210,7 @@ const Sound = (() => {
   let elapsed = 0, startedAt = null, tick = null;
   let dir = -1;           // -1 horario, +1 antihorario
   let showDots = true;
-  let hover = null, focusKey = null, hintMove = null, hintsUsed = 0;
+  let hover = null, focusKey = null, hintMove = null, hintsUsed = 0, touchHover = false;
   let par = null;         // mínimo exacto de la mezcla actual
   let parOver = false;    // true si el mínimo es mayor que lo que se calcula al instante
   let parExact = true;    // false si par es una meta segura (no necesariamente el mínimo)
@@ -1361,7 +1371,7 @@ const Sound = (() => {
     const ok = !!Core.flippable(st, hover);
     const [cx, cy] = P(hover[0], hover[1]);
     const onHint = hintMove && sameV(hintMove.v, hover);
-    g.innerHTML = hexOutline(hover) + (ok && !onHint ? arrowMarkup(cx, cy, dir === -1) : "");
+    g.innerHTML = hexOutline(hover) + (ok && !onHint && !touchHover ? arrowMarkup(cx, cy, dir === -1) : "");
     g.setAttribute("class", ok ? "" : "bad");
     g.setAttribute("visibility", "visible");
     svg.classList.toggle("pointer", ok);
@@ -1375,7 +1385,7 @@ const Sound = (() => {
     const above = cy - S - 38, tagY = above < -(R + M) + 2 ? cy + S + 10 : above;
     g.innerHTML = hexOutline(hintMove.v) + arrowMarkup(cx, cy, hintStep(hintMove) < 0) +
       `<g class="hint-tag"><rect x="${(cx - 50).toFixed(2)}" y="${tagY.toFixed(2)}" width="100" height="28" rx="14"/>` +
-      `<text x="${cx.toFixed(2)}" y="${(tagY + 19).toFixed(2)}" text-anchor="middle">Toca aquí</text></g>`;
+      `<text x="${cx.toFixed(2)}" y="${(tagY + 19).toFixed(2)}" text-anchor="middle">${TAG_TEXT}</text></g>`;
     g.setAttribute("visibility", "visible");
   }
 
@@ -1483,7 +1493,9 @@ const Sound = (() => {
     el.classList.toggle("good", tone === "good");
     restart(el, "flash");
   }
-  const IDLE = "Toca un punto blanco para girar ese grupo de tres rombos.";
+  const IDLE = TOUCH_UI
+    ? "Desliza hacia arriba sobre un punto blanco para girar en sentido horario; hacia abajo, antihorario."
+    : "Toca un punto blanco para girar ese grupo de tres rombos.";
 
   function pushHist(v, step) {
     const last = hist[hist.length - 1];
@@ -1755,7 +1767,7 @@ const Sound = (() => {
     const extra = h.left !== undefined
       ? (h.left === 0 ? " y quedará resuelto." : h.known ? `. Siguiendo este camino te faltarán ${movs(h.left)}.` : `. Es el camino más corto: después te faltarán ${movs(h.left)}.`)
       : (h.gain > 0 ? ` y pondrá ${h.gain} ${h.gain === 1 ? "rombo" : "rombos"} en su sitio.` : " y te dejará listo para la siguiente jugada.");
-    say(`Pista: toca una vez el grupo amarillo que dice “Toca aquí”. Girará ${turn}${extra}`);
+    say(`Pista: ${TOUCH_UI ? "desliza sobre" : "toca una vez"} el grupo amarillo que dice “${TAG_TEXT}”. Girará ${turn}${extra}`);
   }
 
   /* ---------- Editor: arma tu mezcla ---------- */
@@ -1982,13 +1994,47 @@ const Sound = (() => {
   });
   window.addEventListener("pointerup", () => { painting = false; });
   window.addEventListener("pointercancel", () => { painting = false; });
+  // ---- Deslizar con el dedo ----
+  let swipe = null, lastPointer = "mouse";
+  svg.addEventListener("pointerdown", (e) => {
+    lastPointer = e.pointerType;
+    if (e.pointerType === "mouse" || painting_()) return;
+    const v = pick(e);
+    swipe = { x: e.clientX, y: e.clientY, v, done: false, id: e.pointerId };
+    touchHover = true;
+    setHover(v);
+  });
+  function handleSwipe(e) {
+    if (swipe.done) return;
+    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    if (Math.abs(dy) < 22 || Math.abs(dy) < Math.abs(dx) * 1.1) return;
+    swipe.done = true;
+    touchHover = false;
+    setHover(null);
+    const v = swipe.v;
+    if (!v) { say("Empieza a deslizar sobre un punto blanco.", "warn"); return; }
+    focusKey = null;
+    if (hintMove && sameV(hintMove.v, v)) rotate(v, hintStep(hintMove));
+    else rotate(v, dy < 0 ? -1 : 1);
+  }
+  function endSwipe(e) {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    const s0 = swipe;
+    swipe = null; touchHover = false; setHover(null);
+    if (!s0.done && Math.hypot(e.clientX - s0.x, e.clientY - s0.y) < 14)
+      say("Desliza el dedo hacia arriba (sentido horario) o hacia abajo (antihorario) sobre un punto blanco.");
+  }
+  window.addEventListener("pointerup", endSwipe);
+  window.addEventListener("pointercancel", endSwipe);
+
   svg.addEventListener("pointermove", (e) => {
+    if (swipe && e.pointerId === swipe.id) { handleSwipe(e); return; }
     if (painting_()) { if (painting) paintAt(e); return; }
     if (e.pointerType === "mouse") setHover(pick(e));
   });
-  svg.addEventListener("pointerleave", () => setHover(null));
+  svg.addEventListener("pointerleave", (e) => { if (!swipe) setHover(null); });
   svg.addEventListener("click", (e) => {
-    if (painting_()) return;
+    if (painting_() || lastPointer !== "mouse") return;
     const v = pick(e);
     if (!v) return;
     focusKey = null;
@@ -1996,7 +2042,7 @@ const Sound = (() => {
   });
   svg.addEventListener("contextmenu", (e) => {
     e.preventDefault();
-    if (painting_()) return;
+    if (painting_() || lastPointer !== "mouse") return;
     const v = pick(e);
     if (v) { focusKey = null; rotate(v, -dir); }
   });
