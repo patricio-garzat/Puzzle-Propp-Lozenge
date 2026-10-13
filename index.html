@@ -578,7 +578,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    2.9–3.8    el nombre aparece letra por letra y la franja
    hasta 5.0  logo completo para leerlo; 5.0–5.5 se desvanece */
 /* Intro del estudio: fondo blanco, logo de tamaño moderado al centro */
-#studio { position: fixed; inset: 0; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; }
+/* position: absolute a propósito: Safari pinta su barra de arriba con el color de las capas *fijas* pegadas
+   arriba; con una capa fija blanca la barra se quedaba blanca. Así la barra siempre toma el fondo de la app. */
+#studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; min-height: 100vh; z-index: 210; display: grid; place-items: center; background: #FFFFFF; padding: 16px; box-sizing: border-box; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo blanco; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
@@ -3178,12 +3180,10 @@ const Sound = (() => {
       return node.animate(frames, { delay, duration, easing, fill });
     };
     const finish = () => {
-      themeColorHold = null; syncThemeColor();
       next();
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
     };
-    themeColorHold = "#FFFFFF"; syncThemeColor();
     if (reduceMotion || !el.animate) { el.classList.add("go"); setTimeout(finish, 1600); return; }
     // Las copias de las letras para el brillo (un clipPath no admite grupos)
     const ws = q("bb-word-shape");
@@ -3254,12 +3254,11 @@ const Sound = (() => {
     else { document.documentElement.dataset.theme = settings.theme; document.documentElement.dataset.themeByApp = "1"; }
     syncThemeColor();
   }
-  // La barra de arriba del celular (y la de Safari) toma el color exacto del fondo de la app,
-  // también cuando el tema se elige en Ajustes y no en el teléfono. Durante la intro del estudio es blanca.
-  var themeColorHold; // sin valor inicial: la intro del estudio puede fijarlo antes de llegar a esta línea
+  // La barra de arriba del celular (y la de Safari) toma siempre el color exacto del fondo de la app,
+  // también cuando el tema se elige en Ajustes y no en el teléfono.
   function syncThemeColor() {
     document.documentElement.style.backgroundColor = "";
-    const col = themeColorHold || getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    const col = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
     if (!col) return;
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.removeAttribute("media"); m.setAttribute("content", col); });
   }
