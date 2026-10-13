@@ -9,7 +9,7 @@
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#F4F1FF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#F3F4F6" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#12102A" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-title" content="Lozenge">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3156,10 +3156,12 @@ const Sound = (() => {
       return node.animate(frames, { delay, duration, easing, fill });
     };
     const finish = () => {
+      themeColorHold = null; syncThemeColor();
       next();
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
     };
+    themeColorHold = "#FFFFFF"; syncThemeColor();
     if (reduceMotion || !el.animate) { setTimeout(finish, 1600); return; }
     // Las copias de las letras para el brillo (un clipPath no admite grupos)
     const ws = q("bb-word-shape");
@@ -3227,7 +3229,17 @@ const Sound = (() => {
   function applyTheme() {
     if (settings.theme === "auto") { if (document.documentElement.dataset.themeByApp) { delete document.documentElement.dataset.theme; delete document.documentElement.dataset.themeByApp; } }
     else { document.documentElement.dataset.theme = settings.theme; document.documentElement.dataset.themeByApp = "1"; }
+    syncThemeColor();
   }
+  // La barra de arriba del celular (y la de Safari) toma el color exacto del fondo de la app,
+  // también cuando el tema se elige en Ajustes y no en el teléfono. Durante la intro del estudio es blanca.
+  var themeColorHold; // sin valor inicial: la intro del estudio puede fijarlo antes de llegar a esta línea
+  function syncThemeColor() {
+    const col = themeColorHold || getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+    if (!col) return;
+    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => { m.removeAttribute("media"); m.setAttribute("content", col); });
+  }
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => syncThemeColor());
   applyTheme();
 
   // Navegación tipo iOS: pila de pantallas que entran desde la derecha
