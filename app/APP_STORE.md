@@ -6,12 +6,12 @@ Esta guía va paso a paso, desde que el build está listo hasta mandarlo a revis
 
 | Dato | Valor |
 |---|---|
-| Nombre | **Cube Swipe** |
+| Nombre en la App Store | **Cube Swipe: Calm Puzzle** (debajo del ícono en el iPhone dice "Cube Swipe") |
 | Bundle ID | `com.blubergames.cubeswipe` |
 | Equipo | Patricio Garza T (Team ID `CGW77RJS5Q`) |
 | Versión / build | 1.0 (1) |
 | Dispositivos | Solo iPhone, en vertical |
-| iOS mínimo | 14.0 |
+| iOS mínimo | 15.0 (desde la versión 1.0.1; el build 1.0 (1) se subió con 14.0) |
 | Encriptación | No usa (ya está declarado en el `Info.plist`, así que Apple no pregunta) |
 | Archive | En Xcode → Window → Organizer → Archives → **Cube Swipe 1.0 (1)** |
 
@@ -124,7 +124,7 @@ La página `https://blubergames.com/support/` tiene un formulario de contacto. P
 
 ### English (U.S.)
 
-**Name:** Cube Swipe
+**Name:** Cube Swipe: Calm Puzzle
 
 **Subtitle:** A relaxing cube puzzle
 
@@ -159,7 +159,7 @@ puzzle,cube,relax,brain,logic,tiles,swipe,calm,zen,mind,offline,levels,isometric
 
 ### Spanish (Mexico)
 
-**Nombre:** Cube Swipe
+**Nombre:** Cube Swipe: Calm Puzzle
 
 **Subtítulo:** Un puzzle de cubo relajante
 
