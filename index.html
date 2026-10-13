@@ -1102,15 +1102,6 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         <div class="demo-steps"><span id="ds1">↑ Arriba · horario</span><span id="ds2">↓ Abajo · antihorario</span></div>
       </div>
       <div class="slide">
-        <div class="ill ill-pair">
-          <svg viewBox="-1.08 -1.08 2.16 2.16" data-logo class="static-unflipped" aria-hidden="true"></svg>
-          <span class="ill-arrow">→</span>
-          <svg viewBox="-1.08 -1.08 2.16 2.16" data-logo class="static-flipped" aria-hidden="true"></svg>
-        </div>
-        <h3>Media vuelta</h3>
-        <p>Tres deslizadas en el mismo sentido dan media vuelta: el cubito de la esquina aparece o desaparece.</p>
-      </div>
-      <div class="slide">
         <div class="ill ill-goal">
           <span class="goal-chip">Meta 15</span>
           <span class="bulb"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span>
@@ -1119,7 +1110,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         <p>Cada mezcla trae una meta de movimientos: lógrala o mejórala para una partida perfecta. ¿Atorado? El foco marca un grupo con “Desliza aquí”.</p>
       </div>
     </div>
-    <div class="dots" id="slide-dots"><i class="on"></i><i></i><i></i><i></i></div>
+    <div class="dots" id="slide-dots"><i class="on"></i><i></i><i></i></div>
     <button class="big-btn primary" type="button" id="howto-next"><span>Siguiente</span></button>
   </section>
 
@@ -2706,10 +2697,11 @@ const Sound = (() => {
   // Cómo jugar: páginas deslizables
   const slides = $("#slides");
   let slideCur = 0, slideTimer = null;
+  const SLIDES = slides.querySelectorAll(".slide").length;
   function syncDots(i) {
     slideCur = i;
     document.querySelectorAll("#slide-dots i").forEach((d, j) => d.classList.toggle("on", j === i));
-    $("#howto-next span").textContent = i >= 3 ? "¡A jugar!" : "Siguiente";
+    $("#howto-next span").textContent = i >= SLIDES - 1 ? "¡A jugar!" : "Siguiente";
   }
   // Al deslizar con el dedo: cuando el carrusel se detiene, se actualiza la página actual
   slides.addEventListener("scroll", () => {
@@ -2717,7 +2709,7 @@ const Sound = (() => {
     slideTimer = setTimeout(() => syncDots(Math.round(slides.scrollLeft / Math.max(1, slides.clientWidth))), 90);
   }, { passive: true });
   $("#howto-next").addEventListener("click", () => {
-    if (slideCur < 3) {
+    if (slideCur < SLIDES - 1) {
       const i = slideCur + 1;
       syncDots(i);
       slides.scrollTo({ left: i * slides.clientWidth, behavior: reduceMotion ? "auto" : "smooth" });
