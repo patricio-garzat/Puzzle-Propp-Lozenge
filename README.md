@@ -22,6 +22,7 @@ Versión web del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores 
 ## Logo e íconos
 
 - `brand/logo-light.png` y `brand/logo-dark.png`: logo horizontal para fondos claros y oscuros.
+- `brand/logo-mark.svg` y `brand/logo-mark.png`: solo el cubo, sin fondo.
 - `icons/`: ícono de la app (SVG y PNG de 192 y 512, versión *maskable*) y favicon.
 - `manifest.webmanifest` y `apple-touch-icon.png`: para instalarla en la pantalla de inicio del celular.
 
