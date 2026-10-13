@@ -837,6 +837,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 @keyframes star-dim { from { transform: scale(0.4); opacity: 0; } }
 .win-hints { margin: 0; font-weight: 700; font-size: 14px; color: var(--ok) !important; animation: rise 0.4s ease both; animation-delay: 1.5s; }
 .win-hints.lost { color: var(--warn) !important; }
+.fly-bulb { position: fixed; z-index: 90; width: 30px; height: 30px; pointer-events: none; transform: translate(-50%, -50%); }
+.fly-bulb svg { width: 100%; height: 100%; overflow: visible; fill: #FFD166; stroke: #E8A317; stroke-width: 0.9; stroke-linejoin: round; filter: drop-shadow(0 0 8px rgba(255, 196, 64, 0.9)) drop-shadow(0 0 18px rgba(255, 196, 64, 0.5)); }
+.bulb-hit { animation: bump 0.45s cubic-bezier(.3,1.8,.5,1); }
 
 /* Nivel actual: encabezado sobre el tablero y presentación al empezar */
 .lvl-banner { display: flex; align-items: center; justify-content: center; gap: 10px; flex: none; }
@@ -1155,7 +1158,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     </div>
     <div class="home-actions">
       <button class="big-btn primary" type="button" id="home-continue" hidden><span>Continuar</span><small id="home-continue-info"></small></button>
-      <button class="big-btn primary" type="button" id="home-levels"><span>Niveles</span><small id="home-levels-info">50 niveles · de 2×2×2 a 8×8×8</small></button>
+      <button class="big-btn primary" type="button" id="home-levels"><span>Niveles</span><small id="home-levels-info">50 niveles · de 2×2×2 a 4×4×4</small></button>
       <button class="big-btn secondary" type="button" id="home-play"><span>Partida libre</span><small>Elige tamaño y dificultad</small></button>
       <button class="big-btn secondary" type="button" id="home-custom"><span>Arma tu mezcla</span></button>
       <div class="home-tiles">
@@ -1286,7 +1289,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
   <div class="sheet start-sheet" role="dialog" aria-modal="true" aria-labelledby="start-title">
     <svg class="logo start-logo" id="start-logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"></svg>
     <h3 id="start-title">Mezclar</h3>
-    <button class="big-btn primary start-lv" type="button" id="start-levels"><span>Modo niveles</span><small id="start-levels-info">50 niveles · de 2×2×2 a 8×8×8</small></button>
+    <button class="big-btn primary start-lv" type="button" id="start-levels"><span>Modo niveles</span><small id="start-levels-info">50 niveles · de 2×2×2 a 4×4×4</small></button>
     <p>O elige una partida libre:</p>
     <div class="seg start-sizes" role="group" aria-label="Tamaño del hexágono">
       <button type="button" data-start-size="2" aria-pressed="false">2×2×2</button>
@@ -1658,7 +1661,7 @@ const Core = (() => {
     return best;
   }
 
-  // Mezcla profunda para cubos grandes (4×4×4 en adelante), en tres etapas:
+  // Mezcla profunda para los niveles de 3×3×3 y 4×4×4, en tres etapas:
   // 1) Pelar: quita cubitos empezando por los que mueven rombos que aún no se han movido. Para
   //    llegar a las esquinas de cada cara hay que quitar una capa completa; se pela varias veces.
   // 2) Reconstruir una parte con otros giros, para que la forma quede irregular.
@@ -1679,7 +1682,7 @@ const Core = (() => {
     const ring = (v) => Math.max(Math.abs(v[0]), Math.abs(v[1]), Math.abs(v[0] + v[1]));
     // 1) Pelar
     let round = new Set();
-    const peelEnd = Math.round(K * (st.N >= 8 ? 0.9 : 0.75));
+    const peelEnd = Math.round(K * 0.75);
     while (used.length < peelEnd) {
       if (round.size >= n) round = new Set();
       let top = -1, pool = [];
@@ -1712,10 +1715,16 @@ const Core = (() => {
 
   /* ---- Modo niveles: 50 mezclas fijas (iguales para todos), cada vez más difíciles ---- */
   const LEVELS = [];
-  // Del 4×4×4 en adelante se revuelve todo el cubo: de K = a (primer nivel del tamaño) a b (último).
-  const ramp = (a, b) => Array.from({ length: 10 }, (_, i) => Math.round(a + ((b - a) * i) / 9));
-  [[2, [3, 4, 5, 6, 7]], [3, [6, 7, 8, 9, 10]], [4, ramp(30, 75)],
-   [5, ramp(80, 150)], [6, ramp(150, 280)], [8, ramp(300, 480)]].forEach(([N, ks]) => ks.forEach((K) => LEVELS.push({ N, K })));
+  // 1–15: 2×2×2. Posiciones fijas elegidas de entre las 693 000 posibles, con mínimo exacto
+  // de 2 a 14 giros (14 es el máximo que existe). Cada letra es un rombo: orientación y color.
+  const L2 = ["eaaiaiaieiee", "cahdaiciehde", "faageiebgcie", "dbagfifahbie", "dfcbgiecgbhd", "ddfcgchdhcbh", "dfefgaahhcch", "dbfgdbhbgcif",
+    "edfdhachhcai", "fdabihefgcah", "efediccghaah", "cchbbghdfgdf", "eedfhbcggcai", "dfedibagibbi", "efdfhbahiacg"];
+  const D2 = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 13, 14, 14];
+  L2.forEach((code, i) => LEVELS.push({ N: 2, K: D2[i], code }));
+  // 16–30: 3×3×3 y 31–50: 4×4×4, todo el cubo revuelto y cada nivel con más giros que el anterior.
+  const ramp = (a, b, n) => Array.from({ length: n }, (_, i) => Math.round(a + ((b - a) * i) / (n - 1)));
+  ramp(10, 45, 15).forEach((K) => LEVELS.push({ N: 3, K }));
+  ramp(35, 130, 20).forEach((K) => LEVELS.push({ N: 4, K }));
   // Generador pseudoaleatorio con semilla: la misma mezcla en todos los dispositivos
   function seeded(seed) {
     let a = seed >>> 0;
@@ -1724,9 +1733,16 @@ const Core = (() => {
   function level(n) {
     const L = LEVELS[n - 1];
     if (!L) return null;
+    if (L.code) {
+      const g = geom(L.N);
+      const tiles = g.ups.map(([a, b], id) => {
+        const x = L.code.charCodeAt(id) - 97;
+        return { id, c: x % 3, t1: upSum(a, b), t2: [downSum(a, b), downSum(a, b - 1), downSum(a - 1, b)][Math.floor(x / 3)] };
+      });
+      return { N: L.N, K: L.K, meta: L.K, exact: true, tiles, route: null };
+    }
     const st = createState(L.N);
-    const rand = seeded(n * 7919 + 2027);
-    const used = L.N >= 4 ? deepWalk(st, L.K, rand) : walk(st, L.K, "chaos", rand);
+    const used = deepWalk(st, L.K, seeded(n * 7919 + 2027));
     let meta = L.K, exact = false;
     if (L.N <= 3) { const r = solve(st); if (r.d !== null) { meta = r.d; exact = true; } }
     return { N: L.N, K: L.K, meta, exact, tiles: copyTiles(st.tiles), route: inverse(used) };
@@ -2182,6 +2198,7 @@ const Sound = (() => {
       : `Aún no tienes récord en ${sizeName(st.N)}.`;
     $("#undo").disabled = hist.length === 0;
     $("#hint-btn").disabled = ok === n;
+    $("#new-btn").hidden = mode === "level";
     const hc = $("#hint-count");
     hc.hidden = mode !== "level" || phase === "edit";
     if (!hc.hidden) { const b = levelHints + levelProg().bank; if (hc.textContent !== String(b)) restart(hc, "pop"); hc.textContent = b; hc.classList.toggle("zero", b <= 0); }
@@ -2278,8 +2295,10 @@ const Sound = (() => {
     });
   }
 
+  // En niveles la ventana de victoria no se cierra: solo se sale con sus botones.
+  const winLocked = () => !winEl.hidden && phase === "won" && mode === "level";
   function closeWin() {
-    if (winEl.hidden) return;
+    if (winEl.hidden || winLocked()) return;
     winEl.hidden = true;
     if (phase === "won") phase = "free";
     save();
@@ -2294,6 +2313,7 @@ const Sound = (() => {
         say("Ahí no se puede levantar: esos rombos no forman un grupo de tres. Busca un punto blanco.", "warn");
         return;
       }
+      if (winLocked()) return;
       if (phase === "won") { phase = "free"; winEl.hidden = true; }
       const editing = phase === "edit";
       if (record && phase === "playing") startTimer();
@@ -2366,6 +2386,7 @@ const Sound = (() => {
 
   function win() {
     if (mode === "level" && levelNum) return winLevel();
+    $("#win-x").hidden = false;
     $("#win-stars").hidden = true; $("#win-hints").hidden = true; $("#win-next").hidden = true; $("#win-levels").hidden = true; $("#win-retry").hidden = true;
     $("#win-again").hidden = false; $("#win-close").hidden = false;
     stopTimer();
@@ -2483,7 +2504,7 @@ const Sound = (() => {
   }
 
   function undo() {
-    if (busy || phase === "edit") return;
+    if (busy || phase === "edit" || winLocked()) return;
     const last = hist.pop();
     if (!last) return;
     if (phase === "won") { phase = "free"; winEl.hidden = true; }
@@ -2494,7 +2515,7 @@ const Sound = (() => {
     if (busy || phase === "edit" || Core.isSolved(st)) return;
     if (mode === "level" && levelNum) {
       const pr = levelProg();
-      if (levelHints <= 0 && pr.bank <= 0) { Sound.bad(); say("Ya no te quedan pistas. Gana pistas guardadas sacando 3 estrellas en un nivel.", "warn"); return; }
+      if (levelHints <= 0 && pr.bank <= 0) { Sound.bad(); say("Ya no te quedan pistas.", "warn"); return; }
     }
     // Primero el camino más corto exacto; si está demasiado lejos para calcularlo, una pista aproximada.
     const a = st.N >= 5 ? { move: null } : Core.analyze(st);
@@ -2924,6 +2945,7 @@ const Sound = (() => {
     if (e.metaKey || e.ctrlKey || e.altKey || !helpEl.hidden) return;
     if (e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
     const k = e.key.toLowerCase();
+    if (mode === "level" && (k === "n" || k === "c" || k === "e")) return;
     if (k === "h") showHint();
     else if (k === "z") undo();
     else if (k === "r") setDir(-dir);
@@ -3198,6 +3220,7 @@ const Sound = (() => {
       : `${mode === "level" && levelNum ? `Nivel ${levelNum}` : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
     $("#pause-restart").hidden = !origin || phase === "edit";
     $("#pause-levels").hidden = false;
+    $("#pause-new").hidden = mode === "level";
     $("#pause-restart span").textContent = mode === "level" ? "Reiniciar nivel" : "Reiniciar esta mezcla";
     pauseEl.hidden = false;
     Sound.tick();
@@ -3289,12 +3312,7 @@ const Sound = (() => {
     const last = levelNum >= 50;
     $("#win-title").textContent = last ? "¡Completaste los 50 niveles!" : `¡Nivel ${levelNum} completado!`;
     $("#win-line").textContent = `${movs(moves)} · ${fmt(ms)} · meta ${t.three}`;
-    const wh = $("#win-hints");
-    wh.hidden = false;
-    wh.classList.toggle("lost", stars < 3);
-    wh.textContent = earned ? `¡+1 pista por 3 estrellas! Tienes ${pr.bank} ${pr.bank === 1 ? "guardada" : "guardadas"}`
-      : stars === 3 ? `Ya ganaste la pista de este nivel · tienes ${pr.bank} ${pr.bank === 1 ? "guardada" : "guardadas"}`
-      : `Saca 3 estrellas (meta ${t.three}) para ganar 1 pista`;
+    $("#win-hints").hidden = true;
     $("#win-rec").hidden = true;
     const ws = $("#win-stars");
     ws.hidden = false;
@@ -3308,21 +3326,48 @@ const Sound = (() => {
     $("#win-levels").hidden = false;
     $("#win-retry").hidden = false;
     $("#win-close").hidden = true;
+    $("#win-x").hidden = true;
     winEl.hidden = false;
     say(`¡Nivel ${levelNum} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, "good");
     if (layers.tiles) { restart(layers.tiles, "celebrate"); setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400); }
     Sound.win();
     for (let i = 0; i < 3; i++) setTimeout(() => (i < stars ? (Sound.star(i), buzz(18)) : Sound.starMiss()), 550 + 450 + i * 320);
-    if (earned) setTimeout(() => Sound.coin(), 1650);
+    if (earned) setTimeout(flyBulb, 1650);
     buzz([20, 40, 30]);
     bumpStat("solved");
     if (stars === 3) { bumpStat("perfect"); setTimeout(confetti, 1500); }
     updateStats();
+    if (earned) $("#hint-count").textContent = pr.bank - 1; // sube cuando llega el foquito
     setTimeout(() => { if (!winEl.hidden) $(last ? "#win-levels" : "#win-next").focus({ preventScroll: true }); }, 600);
   }
 
+  // Foquito que sale de las estrellas y vuela hasta el botón de pistas
+  const BULB_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z"/><path d="M6 14h4" fill="none" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  function flyBulb() {
+    const hc = $("#hint-count"), btn = $("#hint-btn");
+    const land = () => { hc.textContent = levelProg().bank; hc.classList.remove("zero"); restart(hc, "pop"); restart(btn, "bulb-hit"); Sound.coin(); buzz(15); };
+    const from = $("#win-stars").getBoundingClientRect(), to = btn.getBoundingClientRect();
+    if (reduceMotion || !from.width || !to.width || !document.body.animate) { land(); return; }
+    const x0 = from.left + from.width / 2, y0 = from.top + from.height / 2;
+    const dx = to.left + to.width / 2 - x0, dy = to.top + to.height / 2 - y0;
+    const b = document.createElement("div");
+    b.className = "fly-bulb";
+    b.innerHTML = BULB_SVG;
+    b.style.left = `${x0}px`; b.style.top = `${y0}px`;
+    document.body.appendChild(b);
+    const at = (f, s) => `translate(calc(-50% + ${dx * f}px), calc(-50% + ${dy * f - Math.sin(Math.PI * f) * 70}px)) scale(${s})`;
+    const a = b.animate([
+      { transform: at(0, 0.2), opacity: 0 },
+      { transform: at(0, 1.25), opacity: 1, offset: 0.22 },
+      { transform: at(0.5, 1), opacity: 1, offset: 0.6 },
+      { transform: at(1, 0.55), opacity: 0.9 },
+    ], { duration: 1150, easing: "cubic-bezier(.45,0,.25,1)" });
+    Sound.hint();
+    a.onfinish = () => { b.remove(); land(); };
+  }
+
   // Lista de niveles (pantalla del celular y ventana de la computadora)
-  const SECTIONS = [[1, 5], [6, 10], [11, 20], [21, 30], [31, 40], [41, 50]];
+  const SECTIONS = [[1, 15], [16, 30], [31, 50]];
   function renderLevels(prefix) {
     const pr = levelProg(), nx = nextLevel(pr);
     $(`#${prefix}-stars`).textContent = totalStars(pr);
