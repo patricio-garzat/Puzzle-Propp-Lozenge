@@ -1,11 +1,11 @@
-# Rombos de Propp
+# Propp Lozenge (versión web)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="brand/logo-dark.png">
-  <img alt="Rombos de Propp" src="brand/logo-light.png" width="560">
+  <img alt="Propp Lozenge" src="brand/logo-light.png" width="560">
 </picture>
 
-Versión web del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores dentro de un hexágono que forman la ilusión de un cubo. Levanta grupos de tres rombos, gíralos y vuelve a dejar el cubo armado.
+Versión web no oficial del puzzle magnético **Propp Lozenge**: 27 rombos de tres colores dentro de un hexágono que forman la ilusión de un cubo. Levanta grupos de tres rombos, gíralos y vuelve a dejar el cubo armado.
 
 **Jugar:** https://patricio-garzat.github.io/Puzzle-Propp-Lozenge/
 
