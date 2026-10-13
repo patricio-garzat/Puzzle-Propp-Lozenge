@@ -763,6 +763,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .list-row .switch input:checked + .track::after { transform: translateX(18px); }
 .theme-seg button { padding: 7px 10px; font-size: 13px; }
 .danger { border: 0; background: none; color: var(--warn); font: 700 15.5px var(--f-body); padding: 6px; cursor: pointer; }
+.lv-reset { display: block; margin: 10px auto 0; font-size: 14px; }
 .best-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 14px; font-variant-numeric: tabular-nums; }
 .best-row + .best-row { border-top: 1px solid var(--line); }
 .best-row b { font-family: var(--f-display); font-weight: 700; }
@@ -1254,6 +1255,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <p class="group-title">Datos</p>
     <div class="list">
       <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#D33B30"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M3.5 5h11M7 5V3.5h4V5M5 5l.8 9.5h6.4L13 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Récords y estadísticas</span><button class="danger" type="button" id="set-reset">Borrar</button></div>
+      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#E0A100"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z" fill="currentColor"/></svg></span>Progreso de niveles</span><button class="danger" type="button" id="set-reset-levels">Borrar</button></div>
     </div>
     <p class="group-title">Acerca de</p>
     <p class="about">Propp Lozenge · versión web no oficial 1.0<br>Puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en <a href="https://puzzleguy.store/products/propp-lozenge" target="_blank" rel="noopener">Puzzle Guy Store</a>.</p>
@@ -1283,6 +1285,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
     <h3 id="levels-title">Niveles</h3>
     <div class="lv-top"><span class="lv-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.85 5.95 6.5.86-4.77 4.52 1.2 6.46L12 17.3l-5.78 3.09 1.2-6.46-4.77-4.52 6.5-.86Z"/></svg><b id="lvd-stars">0</b>/150</span><span class="lv-chip"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M6 14h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><b id="lvd-bank">0</b> guardadas</span></div>
     <div class="lv-list" id="lvd-list"></div>
+    <button class="danger lv-reset" type="button" id="lvd-reset">Borrar progreso de niveles</button>
   </div>
 </div>
 <div class="modal" id="start" hidden>
@@ -1762,7 +1765,7 @@ const Sound = (() => {
   function build(c) {
     ctx = c;
     master = ctx.createGain(); master.gain.value = 0.5;
-    const warm = ctx.createBiquadFilter(); warm.type = "lowpass"; warm.frequency.value = 5200; warm.Q.value = 0.4;
+    const warm = ctx.createBiquadFilter(); warm.type = "lowpass"; warm.frequency.value = 3400; warm.Q.value = 0.4;
     const comp = ctx.createDynamicsCompressor();
     comp.threshold.value = -20; comp.knee.value = 18; comp.ratio.value = 3; comp.attack.value = 0.004; comp.release.value = 0.25;
     master.connect(warm).connect(comp).connect(ctx.destination);
@@ -1838,32 +1841,26 @@ const Sound = (() => {
   }
   // Pequeñas variaciones en cada toque para que no suene siempre idéntico (eso cansa)
   const vary = (x, amt = 0.03) => x * (1 + (Math.random() * 2 - 1) * amt);
-  // Nota tipo kalimba: ataque suave, armónicos que se apagan antes que la fundamental
+  // Nota tipo kalimba, en tonos medios y con pocos armónicos agudos para no cansar el oído
   function pluck(f, o = {}) {
     const { t = 0, vol = 0.1, dur = 1.1 } = o;
     f = vary(f, 0.004);
-    tone(f, { t, dur, vol, attack: 0.006 });
-    tone(f * 2, { t, dur: dur * 0.45, vol: vol * 0.22, attack: 0.004 });
-    tone(f * 3.01, { t, dur: dur * 0.18, vol: vol * 0.08, attack: 0.003 });
-    noise({ t, dur: 0.018, vol: vol * 0.25, freq: f * 4, q: 1.2, attack: 0.002 });
+    tone(f, { t, dur, vol, attack: 0.01 });
+    tone(f * 2, { t, dur: dur * 0.35, vol: vol * 0.12, attack: 0.006 });
+    noise({ t, dur: 0.02, vol: vol * 0.12, freq: f * 2, q: 1.2, attack: 0.003 });
   }
-  // Toque de madera suave: un golpecito hueco y un clic apagado. Va en tonos medios porque
-  // las bocinas del celular casi no reproducen los graves.
-  function knock(o = {}) {
-    const { t = 0, vol = 0.12, f = 340 } = o;
-    const ff = vary(f, 0.05);
-    tone(ff, { t, dur: 0.09, vol, slide: 0.8, attack: 0.002 });
-    tone(ff * 0.5, { t, dur: 0.12, vol: vol * 0.5, slide: 0.8, attack: 0.002 });
-    tone(ff * 2.76, { t, dur: 0.03, vol: vol * 0.16, attack: 0.002 });
-    noise({ t, dur: 0.025, vol: vol * 0.4, freq: vary(2600, 0.15), q: 0.9, attack: 0.002 });
+  // "Thump": golpecito sordo, sin nota. Es el único sonido de cada movimiento.
+  function thump(o = {}) {
+    const { t = 0, vol = 0.2 } = o;
+    const f = vary(230, 0.08);
+    tone(f, { t, dur: 0.07, vol, slide: 0.55, attack: 0.002 });
+    noise({ t, dur: 0.05, vol: vol * 0.55, freq: vary(520, 0.12), q: 0.5, attack: 0.002, kind: "lowpass" });
   }
   // Soplo de aire: ruido suave que entra y sale despacio
   function breath(o = {}) {
     const { t = 0, dur = 0.26, vol = 0.04, from = 700, to = 1500 } = o;
     noise({ t, dur, vol, freq: vary(from, 0.08), sweep: to / from, q: 0.6, attack: dur * 0.45 });
   }
-  // Pentatónica mayor: cualquier combinación suena bien junta
-  const PENTA = [392, 440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51];
   let lastPlace = 0;
   return {
     get on() { return on; },
@@ -1893,70 +1890,54 @@ const Sound = (() => {
       } catch (e) {}
       return false;
     },
-    // Intro ASMR: un "toc" de madera por cada rombo que cae, el asentamiento y la media vuelta
+    // Intro ASMR: un "thump" por cada rombo que cae, el asentamiento y la media vuelta
     intro(from = 0) {
       const c = ensure(); if (!c) return;
       const at = (t) => t - from;
       const P = (f, o) => { if (o.t >= from) pluck(f, Object.assign({}, o, { t: at(o.t) })); };
-      const K = (o) => { if (o.t >= from) knock(Object.assign({}, o, { t: at(o.t) })); };
+      const H = (o) => { if (o.t >= from) thump(Object.assign({}, o, { t: at(o.t) })); };
       const B = (o) => { if (o.t >= from) breath(Object.assign({}, o, { t: at(o.t) })); };
-      // Cada rombo cae con un "toc" de madera y una nota muy suave que va subiendo
-      const notes = [392, 440, 523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760];
-      for (let k = 0; k < 12; k++) {
-        const t = 0.55 + k * 0.085 + 0.62 * 0.62;
-        K({ t, vol: 0.12, f: 300 + k * 9 });
-        P(notes[k], { t, vol: 0.022, dur: 0.9 });
-      }
-      K({ t: 2.12, vol: 0.12, f: 240 });                                      // asentamiento
-      B({ t: 2.36, dur: 0.75, vol: 0.04, from: 450, to: 1500 });              // se levanta y gira
-      const land = 2.35 + 0.9 * 0.84;                                         // aterriza: "toc" y campanita
-      K({ t: land, vol: 0.2, f: 300 });
-      P(1046.5, { t: land + 0.04, vol: 0.06, dur: 1.8 });
-      P(1567.98, { t: land + 0.12, vol: 0.03, dur: 1.6 });
-      [1318.51, 1760].forEach((f, i) => P(f, { t: 3.2 + i * 0.14, vol: 0.018, dur: 1.4 })); // brillo del nombre
+      // Cada rombo cae con un "thump" suave
+      for (let k = 0; k < 12; k++) H({ t: 0.55 + k * 0.085 + 0.62 * 0.62, vol: 0.13 });
+      H({ t: 2.12, vol: 0.16 });                                              // asentamiento
+      B({ t: 2.36, dur: 0.75, vol: 0.03, from: 400, to: 1000 });              // se levanta y gira
+      const land = 2.35 + 0.9 * 0.84;                                         // aterriza: thump y campanita grave
+      H({ t: land, vol: 0.22 });
+      P(392, { t: land + 0.05, vol: 0.07, dur: 1.9 });
+      P(587.33, { t: land + 0.14, vol: 0.035, dur: 1.7 });
+      [523.25, 659.25].forEach((f, i) => P(f, { t: 3.2 + i * 0.16, vol: 0.022, dur: 1.5 })); // brillo del nombre
     },
-    // Levantar el grupo: un soplo suave
-    lift() { breath({ dur: 0.24, vol: 0.07, from: 700, to: 1500 }); },
-    // Las piezas se acomodan: "toc" de madera con un pequeño eco (más suave si giras muy rápido)
+    // Cada movimiento: solo un "thump" suave (más quedito si giras muy rápido)
+    lift() {},
     place() {
       const c = ensure(); if (!c) return;
       const fast = c.currentTime - lastPlace < 0.18; lastPlace = c.currentTime;
-      knock({ vol: fast ? 0.15 : 0.22, f: 330 });
-      knock({ t: 0.05, vol: fast ? 0.035 : 0.06, f: 470 });
+      thump({ vol: fast ? 0.14 : 0.2 });
     },
-    // Avance: una nota de kalimba que sube mientras más piezas están en su lugar
-    good(level) { const f = PENTA[Math.max(0, Math.min(PENTA.length - 1, level))]; pluck(f, { t: 0.02, vol: 0.085, dur: 1.2 }); },
-    // Error: un golpecito apagado, sin regaño
-    bad() { knock({ vol: 0.11, f: 250 }); tone(311.13, { t: 0.05, dur: 0.32, vol: 0.04, slide: 0.92, attack: 0.02 }); },
-    hint() { pluck(783.99, { vol: 0.07, dur: 1.2 }); pluck(1174.66, { t: 0.13, vol: 0.05, dur: 1.4 }); },
-    // Botones: un "tap" diminuto y redondo
-    tick() { tone(vary(880, 0.04), { dur: 0.07, vol: 0.06, slide: 1.25, attack: 0.003 }); },
-    tickAt(f) { pluck(f, { vol: 0.06, dur: 0.6 }); },
-    toggle(onNow) { pluck(onNow ? 659.25 : 523.25, { vol: 0.055, dur: 0.5 }); pluck(onNow ? 987.77 : 392, { t: 0.08, vol: 0.045, dur: 0.6 }); },
-    undo() { breath({ dur: 0.2, vol: 0.045, from: 1400, to: 600 }); knock({ t: 0.12, vol: 0.1, f: 390 }); },
-    // Mezclar: lluvia de piedritas de madera que se calma
+    bad() { thump({ vol: 0.12 }); thump({ t: 0.09, vol: 0.08 }); },
+    hint() { pluck(392, { vol: 0.08, dur: 1.2 }); pluck(587.33, { t: 0.14, vol: 0.055, dur: 1.3 }); },
+    // Botones: un tap diminuto, sin nota
+    tick() { noise({ dur: 0.035, vol: 0.1, freq: 1000, q: 0.7, attack: 0.002, kind: "lowpass" }); },
+    tickAt() { thump({ vol: 0.12 }); },
+    toggle(onNow) { pluck(onNow ? 392 : 329.63, { vol: 0.06, dur: 0.6 }); pluck(onNow ? 523.25 : 261.63, { t: 0.09, vol: 0.045, dur: 0.7 }); },
+    undo() { thump({ vol: 0.14 }); },
+    // Mezclar: varios golpecitos que se calman, sin melodía
     shuffle() {
-      for (let i = 0; i < 14; i++) {
-        const t = i * 0.045 + Math.random() * 0.025;
-        knock({ t, vol: 0.12 * (1 - i / 18), f: 320 + Math.random() * 280 });
-      }
-      breath({ dur: 0.7, vol: 0.035, from: 500, to: 1600 });
-      pluck(523.25, { t: 0.72, vol: 0.06, dur: 1.2 });
+      for (let i = 0; i < 12; i++) thump({ t: i * 0.05 + Math.random() * 0.025, vol: 0.16 * (1 - i / 15) });
+      breath({ dur: 0.6, vol: 0.025, from: 400, to: 900 });
     },
-    // Estrella ganada: campanita que sube con cada estrella
+    // Estrella ganada: campanita grave que sube un poco con cada estrella
     star(i) {
-      const f = [659.25, 783.99, 1046.5][i] || 1046.5;
+      const f = [329.63, 392, 523.25][i] || 523.25;
       pluck(f, { vol: 0.1, dur: 1.6 });
-      pluck(f * 1.5, { t: 0.06, vol: 0.035, dur: 1.2 });
-      breath({ dur: 0.35, vol: 0.02, from: 3000, to: 6000 });
+      pluck(f * 1.5, { t: 0.06, vol: 0.025, dur: 1.1 });
     },
-    starMiss() { pluck(196, { vol: 0.05, dur: 0.6 }); },
-    coin() { pluck(1318.51, { vol: 0.06, dur: 0.9 }); pluck(1760, { t: 0.09, vol: 0.05, dur: 1.1 }); },
-    // Cubo armado: arpegio lento de kalimba sobre un acorde que respira
+    starMiss() { pluck(196, { vol: 0.045, dur: 0.6 }); },
+    coin() { pluck(523.25, { vol: 0.07, dur: 1 }); pluck(659.25, { t: 0.1, vol: 0.055, dur: 1.2 }); },
+    // Cubo armado: arpegio lento sobre un acorde que respira
     win() {
-      [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) => pluck(f, { t: i * 0.12, vol: 0.09, dur: 1.8 }));
-      [261.63, 392, 523.25].forEach((f) => tone(f, { dur: 2.4, vol: 0.035, attack: 0.35 }));
-      breath({ t: 0.1, dur: 1.2, vol: 0.025, from: 2500, to: 5000 });
+      [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => pluck(f, { t: i * 0.13, vol: 0.09, dur: 1.9 }));
+      [196, 261.63, 329.63].forEach((f) => tone(f, { dur: 2.4, vol: 0.03, attack: 0.4 }));
     },
   };
 })();
@@ -2388,7 +2369,6 @@ const Sound = (() => {
       render(goodIds);
       Sound.place();
       const okNow = Core.correctCount(st);
-      if (okNow > before.size && !Core.isSolved(st)) setTimeout(() => Sound.good(Math.round(okNow / st.tiles.length * 9)), 70);
       afterChange();
     });
   }
@@ -3210,7 +3190,7 @@ const Sound = (() => {
       demoSay("¡Bien! Hacia arriba gira en <b>sentido horario</b>. Ahora desliza <b>hacia abajo</b>.");
     } else if (demoStep === 1) {
       if (dir !== "down") return demoWrong("Ahora al revés: desliza <b>hacia abajo</b>.");
-      demoDeg = 0; demoCorner(demoDeg); Sound.lift(); setTimeout(() => { Sound.place(); Sound.good(8); }, 260); buzz([10, 40, 10]);
+      demoDeg = 0; demoCorner(demoDeg); Sound.lift(); setTimeout(() => Sound.place(), 260); buzz([10, 40, 10]);
       demoStep = 2;
       demo.className = "ill ill-swipe done";
       $("#ds2").className = "ok";
@@ -3256,7 +3236,9 @@ const Sound = (() => {
     $("#set-dots").checked = showDots;
     document.querySelectorAll("[data-theme-opt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeOpt === settings.theme)));
     $("#set-reset").textContent = "Borrar";
+    $("#set-reset-levels").textContent = "Borrar";
     resetArmed = false;
+    levelsResetArmed = null;
   }
   $("#set-sound").addEventListener("change", (e) => setSound(e.target.checked));
   $("#set-vibe").addEventListener("change", (e) => { settings.vibe = e.target.checked; saveSettings(); buzz(15); });
@@ -3268,6 +3250,23 @@ const Sound = (() => {
     try { localStorage.removeItem(BEST); localStorage.removeItem(STATS); } catch (e) {}
     resetArmed = false; $("#set-reset").textContent = "Borrado"; Sound.place(); updateStats();
   });
+  // Borrar el progreso de niveles (estrellas y pistas guardadas) para empezar desde cero.
+  // Se confirma tocando dos veces.
+  let levelsResetArmed = null;
+  function armLevelsReset(btn, idle) {
+    if (levelsResetArmed !== btn) { levelsResetArmed = btn; btn.textContent = "Toca otra vez para borrar"; Sound.tick(); return; }
+    levelsResetArmed = null;
+    try { localStorage.removeItem(LVKEY); } catch (e) {}
+    btn.textContent = "Borrado";
+    setTimeout(() => { if (btn.textContent === "Borrado") btn.textContent = idle; }, 1600);
+    Sound.place(); buzz(15);
+    // Si estabas en un nivel, pasa a una partida libre para no quedarte en un nivel bloqueado
+    if (mode === "level") newGame(st.N, "chaos", true);
+    if (!$("#levels-modal").hidden) renderLevels("lvd");
+    setTimeout(() => { syncHome(); updateStats(); }, 30);
+  }
+  $("#set-reset-levels").addEventListener("click", (e) => armLevelsReset(e.currentTarget, "Borrar"));
+  $("#lvd-reset").addEventListener("click", (e) => armLevelsReset(e.currentTarget, "Borrar progreso de niveles"));
   // Pausa
   function openPause() {
     wasRunning = startedAt !== null;
@@ -3426,6 +3425,7 @@ const Sound = (() => {
   const SECTIONS = [[1, 15], [16, 30], [31, 50]];
   function renderLevels(prefix) {
     const pr = levelProg(), nx = nextLevel(pr);
+    if (prefix === "lvd" && levelsResetArmed !== $("#lvd-reset")) $("#lvd-reset").hidden = !levelsStarted();
     $(`#${prefix}-stars`).textContent = totalStars(pr);
     $(`#${prefix}-bank`).textContent = pr.bank;
     $(`#${prefix}-list`).innerHTML = SECTIONS.map(([a, b]) => {
