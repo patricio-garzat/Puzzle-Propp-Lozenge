@@ -2637,6 +2637,8 @@ const Sound = (() => {
     $("#undo").disabled = hist.length === 0;
     $("#hint-btn").disabled = ok === n;
     $("#new-btn").hidden = mode === "level";
+    // En los niveles no se muestra la línea de mensajes de abajo
+    $("#status").hidden = mode === "level" && !!levelNum && phase !== "edit";
     const hc = $("#hint-count");
     hc.hidden = mode !== "level" || phase === "edit";
     if (!hc.hidden) { const b = levelHints + levelProg().bank; if (hc.textContent !== String(b)) restart(hc, "pop"); hc.textContent = b; hc.classList.toggle("zero", b <= 0); }
