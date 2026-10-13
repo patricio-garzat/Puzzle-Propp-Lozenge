@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Versión web no oficial del puzzle magnético Propp Lozenge: gira grupos de tres rombos para volver a armar el cubo.">
+<meta name="description" content="Unofficial web version of the Propp Lozenge magnetic puzzle: turn groups of three tiles to put the cube back together.">
 <title>Propp Lozenge</title>
 <link rel="icon" href="favicon.ico" sizes="32x32">
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
@@ -789,6 +789,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .theme-seg button { padding: 7px 10px; font-size: 13px; }
 .danger { border: 0; background: none; color: var(--warn); font: 700 15.5px var(--f-body); padding: 6px; cursor: pointer; }
 .lv-reset { display: block; margin: 10px auto 0; font-size: 14px; }
+/* El idioma se cambia en Ajustes en el celular; en la computadora, con este botón de la barra superior */
+.lang-pill { font-weight: 700; }
+@media (max-width: 719px), (max-height: 520px) and (pointer: coarse) { .lang-pill { display: none; } }
 .best-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 14px; font-variant-numeric: tabular-nums; }
 .best-row + .best-row { border-top: 1px solid var(--line); }
 .best-row b { font-family: var(--f-display); font-weight: 700; }
@@ -1058,6 +1061,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
         <svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="7.2" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M6.9 7a2.2 2.2 0 1 1 3.2 2c-.7.4-1.1.8-1.1 1.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="9" cy="13.2" r="1" fill="currentColor"/></svg>
         <span class="lbl">Cómo se juega</span>
       </button>
+      <button class="pill lang-pill" type="button" id="lang-btn" aria-label="Español">Español</button>
       <button class="pill icon" type="button" id="sound-btn" aria-pressed="true" aria-label="Sonido" title="Sonido (M)">
         <svg class="snd-on" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="M12.4 6.2a4 4 0 0 1 0 5.6M14.4 4.2a6.8 6.8 0 0 1 0 9.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
         <svg class="snd-off" viewBox="0 0 18 18" aria-hidden="true"><path d="M3 7h3l4-3.2v10.4L6 11H3Z" fill="currentColor"/><path d="m12.5 6.5 4 5m0-5-4 5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
@@ -1379,6 +1383,9 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
     <div class="list">
       <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#2E2A66"><svg viewBox="0 0 18 18" aria-hidden="true"><path d="M14.5 11.2A6 6 0 0 1 6.8 3.5a6 6 0 1 0 7.7 7.7Z" fill="currentColor"/></svg></span>Tema</span>
         <div class="seg theme-seg" role="group" aria-label="Tema"><button type="button" data-theme-opt="auto">Auto</button><button type="button" data-theme-opt="light">Claro</button><button type="button" data-theme-opt="dark">Oscuro</button></div>
+      </div>
+      <div class="list-row"><span class="lbl-l"><span class="ico" style="background:#1F8FD6"><svg viewBox="0 0 18 18" aria-hidden="true"><circle cx="9" cy="9" r="6.6" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M2.6 9h12.8M9 2.4c2 2 2.9 4.2 2.9 6.6S11 13.6 9 15.6C7 13.6 6.1 11.4 6.1 9S7 4.4 9 2.4Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></span>Idioma</span>
+        <div class="seg lang-seg" role="group" aria-label="Idioma"><button type="button" data-lang-opt="en">English</button><button type="button" data-lang-opt="es">Español</button></div>
       </div>
     </div>
     <p class="group-title">Datos</p>
@@ -2119,6 +2126,217 @@ const Sound = (() => {
   const $ = (s) => document.querySelector(s);
   const SQ3 = Core.SQ3;
   const R = 200, M = 34;
+  // ---------- Idioma: inglés por defecto; en Ajustes se puede cambiar a español ----------
+  let LANG = "en";
+  try { if (JSON.parse(localStorage.getItem("propp-settings-v1") || "{}").lang === "es") LANG = "es"; } catch (e) {}
+  const tr = (es, en) => (LANG === "es" ? es : en);
+  // Textos fijos de la página (escritos en español en el HTML): español -> inglés
+  const I18N = {
+    "Versión web no oficial": "Unofficial web version",
+    "Cómo se juega": "How to play",
+    "Pausa y menú": "Pause and menu",
+    "Sonido": "Sound",
+    "Sonido (M)": "Sound (M)",
+    "Tu partida": "Your game",
+    "Al azar · Fácil": "Random · Easy",
+    "Se resuelve en 0 movimientos": "Solvable in 0 moves",
+    "Es el mínimo posible.": "That's the minimum possible.",
+    "Jugadas": "Moves",
+    "Tiempo": "Time",
+    "En su sitio": "In place",
+    "Rombos en su sitio": "Tiles in place",
+    "Aún no tienes récord en 3×3×3.": "No record on 3×3×3 yet.",
+    "Atajos de teclado": "Keyboard shortcuts",
+    "Pista": "Hint",
+    "Deshacer": "Undo",
+    "Cambiar sentido de giro": "Switch turn direction",
+    "Girar al revés": "Turn the other way",
+    "Shift + clic": "Shift + click",
+    "Mezclar al azar": "Random shuffle",
+    "Arma tu mezcla": "Build your own",
+    "Mínimo 9": "Minimum 9",
+    "Nivel": "Level",
+    "Cubo 2×2×2": "Cube 2×2×2",
+    "Tablero": "Board",
+    "Tablero hexagonal con rombos": "Hexagonal board with tiles",
+    "Cerrar": "Close",
+    "¡Cubo restaurado!": "Cube restored!",
+    "Nuevo récord en este tamaño": "New record for this size",
+    "Siguiente nivel →": "Next level →",
+    "Mezclar otra vez": "Shuffle again",
+    "Reintentar": "Retry",
+    "Niveles": "Levels",
+    "Seguir jugando": "Keep playing",
+    "Herramienta": "Tool",
+    "Pintar": "Paint",
+    "Girar": "Rotate",
+    "Toca o arrastra sobre los rombos para pintarlos": "Tap or drag over the tiles to paint them",
+    "Toca los puntos blancos para mover grupos de tres": "Tap the white dots to move groups of three",
+    "Color para pintar": "Paint color",
+    "Amarillo (1)": "Yellow (1)",
+    "Rojo (2)": "Red (2)",
+    "Azul (3)": "Blue (3)",
+    "Girar al azar": "Random spin",
+    "Gira los rombos al azar; los colores se mueven con ellos": "Spins the tiles at random; colors move with them",
+    "Al azar": "Random",
+    "Acomoda todo al azar": "Shuffles everything at random",
+    "Reiniciar": "Reset",
+    "Vuelve al cubo en blanco": "Back to the blank cube",
+    "Cancelar": "Cancel",
+    "Jugar desde aquí": "Play from here",
+    "Jugar": "Play",
+    "Sentido del giro": "Turn direction",
+    "Horario": "Clockwise",
+    "Antihorario": "Counterclockwise",
+    "Cada toque gira 60° en sentido horario (R)": "Each tap turns 60° clockwise (R)",
+    "Cada toque gira 60° en sentido antihorario (R)": "Each tap turns 60° counterclockwise (R)",
+    "Deshacer el último movimiento (Z)": "Undo the last move (Z)",
+    "Marca el siguiente giro del camino más corto (H)": "Marks the next turn of the shortest path (H)",
+    "Puntos de giro": "Turn dots",
+    "Mostrar u ocultar los puntos de giro": "Show or hide the turn dots",
+    "Nueva": "New",
+    "Puntos": "Dots",
+    "Muestra los puntos donde se puede girar": "Shows the points where you can turn",
+    "Toca un punto blanco para girar ese grupo de tres rombos.": "Tap a white dot to turn that group of three tiles.",
+    "Nueva partida": "New game",
+    "Dificultad": "Difficulty",
+    "Fácil": "Easy",
+    "Intermedio": "Medium",
+    "Difícil": "Hard",
+    "Movimientos para resolver la mezcla.": "Moves needed to solve the shuffle.",
+    "50 niveles fijos con estrellas y pistas.": "50 fixed levels with stars and hints.",
+    "50 niveles con estrellas y pistas.": "50 levels with stars and hints.",
+    "Colores y orientaciones revueltos por todo el tablero.": "Colors and orientations scrambled across the whole board.",
+    "Pinta y acomoda los rombos como quieras, y juega desde ahí.": "Paint and arrange the tiles however you like, then play from there.",
+    "Tamaño del hexágono": "Hexagon size",
+    "Ver el cubo armado": "See the solved cube",
+    "Cubo armado": "Solved cube",
+    "Objetivo": "Goal",
+    "rombos,": "tiles,",
+    "de cada color.": "of each color.",
+    "Hay": "There are",
+    "formas distintas de cubrir este hexágono con rombos.": "different ways to tile this hexagon.",
+    "El tablero tiene rombos de tres colores que forman la ilusión de un cubo. Tu meta es volver a dejar el cubo armado, como en la imagen de Objetivo.": "The board has tiles in three colors that create the illusion of a cube. Your goal is to put the cube back together, like the Goal picture.",
+    "Vuelve a armar el cubo: amarillo arriba, rojo a la izquierda y azul a la derecha.": "Put the cube back together: yellow on top, red on the left and blue on the right.",
+    "Girar:": "Turn:",
+    "desliza el dedo sobre un punto blanco.": "swipe over a white dot.",
+    "Hacia arriba": "Up",
+    "gira en sentido horario y": "turns clockwise and",
+    "hacia abajo": "down",
+    ", antihorario (60° cada vez).": ", counterclockwise (60° each time).",
+    "Tres deslizadas en el mismo sentido son media vuelta.": "Three swipes in the same direction make a half turn.",
+    "Arriba": "At the top",
+    "ves tus jugadas, el tiempo, el avance y la": "you see your moves, time, progress and the",
+    "meta": "target",
+    ". Resolverlo en la meta o menos es una partida perfecta.": ". Solving it within the target is a perfect game.",
+    "Abajo:": "At the bottom:",
+    "la flecha deshace, el foco da una pista, los cuatro puntitos muestran u ocultan los puntos blancos y": "the arrow undoes, the bulb gives a hint, the four dots show or hide the white dots, and",
+    "+ Nueva": "+ New",
+    "abre dificultad, tamaño y “Arma tu mezcla”.": "opens difficulty, size and “Build your own”.",
+    "Pista:": "Hint:",
+    "desliza sobre el grupo amarillo que dice “Desliza aquí” y hace el giro completo.": "swipe over the yellow group marked “Swipe here” and it makes the whole turn.",
+    "Arma tu mezcla:": "Build your own:",
+    "pinta los rombos blancos tocando o arrastrando el dedo; cada color tiene un cupo. Toca uno del mismo color para quitarlo. Al terminar, toca “Jugar”.": "paint the white tiles by tapping or dragging; each color has a limit. Tap a tile of the same color to clear it. When you're done, tap “Play”.",
+    "Versión web no oficial del Propp Lozenge, inventado por James Propp y diseñado por Oskar van Deventer. Hay 980 formas de cubrir el hexágono de 3×3×3 con rombos (fórmula de MacMahon). El puzzle físico se vende en": "Unofficial web version of the Propp Lozenge, invented by James Propp and designed by Oskar van Deventer. There are 980 ways to tile the 3×3×3 hexagon (MacMahon's formula). The physical puzzle is sold at",
+    "Entendido": "Got it",
+    "Continuar": "Continue",
+    "50 niveles · de 2×2×2 a 4×4×4": "50 levels · from 2×2×2 to 4×4×4",
+    "Partida libre": "Free play",
+    "Elige tamaño y dificultad": "Choose size and difficulty",
+    "Cómo jugar": "How to play",
+    "Récords": "Records",
+    "Ajustes": "Settings",
+    "Inicio": "Home",
+    "Inspirado en el puzzle magnético de James Propp y Oskar van Deventer.": "Inspired by the magnetic puzzle by James Propp and Oskar van Deventer.",
+    "Atrás": "Back",
+    "Seguir la partida": "Resume game",
+    "Tamaño": "Size",
+    "6–9 movimientos": "6–9 moves",
+    "15–20 movimientos": "15–20 moves",
+    "30–35 movimientos": "30–35 moves",
+    "Pinta y acomoda los rombos tú": "Paint and arrange the tiles yourself",
+    "Todo es plano": "It's all flat",
+    "Los rombos de tres colores forman la ilusión de un cubo. Tu meta: dejar amarillo arriba, rojo a la izquierda y azul a la derecha.": "Tiles in three colors create the illusion of a cube. Your goal: yellow on top, red on the left and blue on the right.",
+    "Prueba: desliza sobre el punto blanco": "Try it: swipe over the white dot",
+    "Desliza para girar": "Swipe to turn",
+    "Pruébalo: pon el dedo sobre el punto blanco y desliza": "Try it: put your finger on the white dot and swipe",
+    "hacia arriba": "up",
+    "↑ Arriba · horario": "↑ Up · clockwise",
+    "↓ Abajo · antihorario": "↓ Down · counterclockwise",
+    "Meta 15": "Target 15",
+    "Meta y pistas": "Targets and hints",
+    "Cada mezcla trae una meta de movimientos: lógrala o mejórala para una partida perfecta. ¿Atorado? El foco marca un grupo con “Desliza aquí”.": "Every shuffle comes with a move target: meet it or beat it for a perfect game. Stuck? The bulb marks a group with “Swipe here”.",
+    "Siguiente": "Next",
+    "guardadas": "saved",
+    "Resueltas": "Solved",
+    "Perfectas": "Perfect",
+    "Mejores partidas": "Best games",
+    "Juego": "Game",
+    "Vibración": "Vibration",
+    "Apariencia": "Appearance",
+    "Tema": "Theme",
+    "Auto": "Auto",
+    "Claro": "Light",
+    "Oscuro": "Dark",
+    "Idioma": "Language",
+    "Datos": "Data",
+    "Récords y estadísticas": "Records and stats",
+    "Borrar": "Erase",
+    "Progreso de niveles": "Level progress",
+    "Acerca de": "About",
+    "Propp Lozenge · versión web no oficial 1.0": "Propp Lozenge · unofficial web version 1.0",
+    "Puzzle original de James Propp y Oskar van Deventer. El puzzle físico se vende en": "Original puzzle by James Propp and Oskar van Deventer. The physical puzzle is sold at",
+    "Pausa": "Paused",
+    "Reanudar": "Resume",
+    "Reiniciar esta mezcla": "Restart this shuffle",
+    "Borrar progreso de niveles": "Erase level progress",
+    "Mezclar": "Shuffle",
+    "Modo niveles": "Level mode",
+    "O elige una partida libre:": "Or pick a free game:",
+    "Continuar la partida guardada": "Continue the saved game",
+    "Completaste los 50 niveles": "You completed all 50 levels",
+    "Completaste": "You completed",
+    "…pero queda uno más": "…but there's one more",
+    "Nivel extremo": "Extreme level",
+    "Cubo 8×8×8 · 200 movimientos": "Cube 8×8×8 · 200 moves",
+    "Entrar": "Enter",
+    "Después": "Later"
+    };
+  const I18N_REV = Object.fromEntries(Object.entries(I18N).map(([es, en]) => [en, es]));
+  const ATTRS = ["aria-label", "title", "placeholder"];
+  const origText = new WeakMap(), origAttr = new WeakMap();
+  function translateStatic() {
+    const map = LANG === "es" ? I18N_REV : I18N;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: (n) => (n.parentNode && /^(SCRIPT|STYLE)$/.test(n.parentNode.nodeName) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT),
+    });
+    for (let n; (n = walker.nextNode()); ) {
+      const raw = n.nodeValue, t = raw.trim();
+      if (!t) continue;
+      // Al volver al español se restaura el texto original exacto
+      if (LANG === "es" && origText.has(n)) { n.nodeValue = origText.get(n); continue; }
+      if (!(t in map)) continue;
+      if (LANG === "en" && !origText.has(n)) origText.set(n, raw);
+      n.nodeValue = raw.replace(t, map[t]);
+    }
+    for (const el of document.querySelectorAll("[aria-label],[title],[placeholder]")) {
+      const saved = origAttr.get(el) || {};
+      for (const a of ATTRS) {
+        const v = el.getAttribute(a);
+        if (!v) continue;
+        if (LANG === "es" && a in saved) { el.setAttribute(a, saved[a]); continue; }
+        if (!(v in map)) continue;
+        if (LANG === "en" && !(a in saved)) saved[a] = v;
+        el.setAttribute(a, map[v]);
+      }
+      origAttr.set(el, saved);
+    }
+    document.documentElement.lang = LANG;
+    const lb = document.getElementById("lang-btn");
+    if (lb) { lb.textContent = LANG === "es" ? "English" : "Español"; lb.setAttribute("aria-label", lb.textContent); }
+  }
+  translateStatic();
+
   const STORE = "rombos-propp-v1", BEST = "rombos-propp-best-v1";
   const TILINGS = { 2: "20", 3: "980", 4: "232 848", 5: "267 227 532", 6: "1 478 619 421 136", 8: "5 055 160 684 040 254 910 720" };
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -2126,7 +2344,7 @@ const Sound = (() => {
   const LOWFX = matchMedia("(max-width: 719px), (pointer: coarse)").matches;
   // Pantallas táctiles: se gira deslizando el dedo (arriba = horario, abajo = antihorario).
   const TOUCH_UI = matchMedia("(pointer: coarse)").matches;
-  const TAG_TEXT = TOUCH_UI ? "Desliza aquí" : "Toca aquí";
+  const tagText = () => (TOUCH_UI ? tr("Desliza aquí", "Swipe here") : tr("Toca aquí", "Tap here"));
   const svg = $("#board");
   const wrap = $("#board-wrap");
   const winEl = $("#win");
@@ -2148,13 +2366,17 @@ const Sound = (() => {
   let route = null;       // solución conocida desde la posición actual: [{v, k}]
   let editGen = null;     // mezcla al azar del editor sin cambios: {par, exact, route}
   let generating = false;
-  const LEVEL_NAMES = { easy: "Fácil", mid: "Intermedio", hard: "Difícil" };
+  const LEVEL_NAMES = { get easy() { return tr("Fácil", "Easy"); }, get mid() { return tr("Intermedio", "Medium"); }, get hard() { return tr("Difícil", "Hard"); } };
   let tool = "paint", paintColor = 1, painting = false, editBackup = null;
-  const COLOR_NAMES = { 1: ["amarillo", "amarillos"], 0: ["rojo", "rojos"], 2: ["azul", "azules"] };
+  const COLOR_NAMES = {
+    get 1() { return tr(["amarillo", "amarillos"], ["yellow", "yellow"]); },
+    get 0() { return tr(["rojo", "rojos"], ["red", "red"]); },
+    get 2() { return tr(["azul", "azules"], ["blue", "blue"]); },
+  };
   let layers = {};
   let lastShown = { moves: null, ok: null };
 
-  const movs = (n) => `${n} ${n === 1 ? "movimiento" : "movimientos"}`;
+  const movs = (n) => tr(`${n} ${n === 1 ? "movimiento" : "movimientos"}`, `${n} ${n === 1 ? "move" : "moves"}`);
   const P = (a, b) => { const [x, y] = Core.screen(a, b); return [x * S, y * S]; };
   const pts = (arr) => arr.map((p) => p[0].toFixed(2) + "," + p[1].toFixed(2)).join(" ");
   const hexPts = (r) => [[0, -r], [r * SQ3 / 2, -r / 2], [r * SQ3 / 2, r / 2], [0, r], [-r * SQ3 / 2, r / 2], [-r * SQ3 / 2, -r / 2]];
@@ -2208,6 +2430,12 @@ const Sound = (() => {
       (main ? `<g id="dots"></g><g id="hits"></g><g id="hint" visibility="hidden"></g><g id="hlg" visibility="hidden"></g><g id="lift"${LOWFX ? "" : ' filter="url(#f-lift)"'}></g>` : "");
   }
 
+  // Etiqueta del modo actual (panel de la computadora)
+  function syncModeChip() {
+    const label = phase === "edit" ? tr("Armando", "Building") : mode === "custom" ? tr("Tu mezcla", "Your shuffle") : tr("Al azar", "Random");
+    $("#mode-chip").textContent = mode === "level" && levelNum ? `${lvName(levelNum)} · ${sizeName(st.N)}`
+      : mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
+  }
   function buildBoard() {
     S = R / st.N;
     const hw = R * SQ3 / 2 + M, hh = R + M;
@@ -2227,9 +2455,7 @@ const Sound = (() => {
     $("#mix-chaos").dataset.current = String(mode === "chaos" && phase !== "edit");
     $("#mix-custom").dataset.current = String(mode === "custom" || phase === "edit");
 
-    const label = phase === "edit" ? "Armando" : mode === "custom" ? "Tu mezcla" : "Al azar";
-    $("#mode-chip").textContent = mode === "level" && levelNum ? `${lvName(levelNum)} · ${sizeName(st.N)}`
-      : mode === "custom" || phase === "edit" ? `${label} · ${sizeName(st.N)}` : `${label} · ${LEVEL_NAMES[level]}`;
+    syncModeChip();
     $("#mix-levels").dataset.current = String(mode === "level" && phase !== "edit");
     if (mode === "level") { $("#mix-chaos").dataset.current = "false"; $("#mix-custom").dataset.current = "false"; }
     syncLevels();
@@ -2261,7 +2487,7 @@ const Sound = (() => {
     for (const v of Core.movesOf(st)) {
       const [x, y] = P(v[0], v[1]);
       if (showDots && !(phase === "edit" && tool === "paint")) dots += `<circle class="dot" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(S * 0.07).toFixed(2)}"/>`;
-      hits += `<circle class="hit" tabindex="0" role="button" aria-label="Girar el grupo de tres rombos" data-v="${vkey(v)}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(S * 0.5).toFixed(2)}"/>`;
+      hits += `<circle class="hit" tabindex="0" role="button" aria-label="${tr("Girar el grupo de tres rombos", "Turn the group of three tiles")}" data-v="${vkey(v)}" cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="${(S * 0.5).toFixed(2)}"/>`;
     }
     layers.dots.innerHTML = dots;
     layers.hits.innerHTML = hits;
@@ -2318,7 +2544,7 @@ const Sound = (() => {
     const above = cy - S - 38, tagY = above < -(R + M) + 2 ? cy + S + 10 : above;
     g.innerHTML = hexOutline(hintMove.v) + arrowMarkup(cx, cy, hintStep(hintMove) < 0) +
       `<g class="hint-tag"><rect x="${(cx - 50).toFixed(2)}" y="${tagY.toFixed(2)}" width="100" height="28" rx="14"/>` +
-      `<text x="${cx.toFixed(2)}" y="${(tagY + 19).toFixed(2)}" text-anchor="middle">${TAG_TEXT}</text></g>`;
+      `<text x="${cx.toFixed(2)}" y="${(tagY + 19).toFixed(2)}" text-anchor="middle">${tagText()}</text></g>`;
     g.setAttribute("visibility", "visible");
   }
 
@@ -2361,26 +2587,27 @@ const Sound = (() => {
     goal.classList.toggle("over", par === null && parOver);
     if (par === null && parOver) {
       $("#s-par").textContent = "8+";
-      $("#s-par-text").textContent = "Más de 8 movimientos";
-      $("#s-par-sub").textContent = Core.isSolved(st) ? "¡Resuelto! Era una mezcla difícil." : "Está tan lejos del cubo que el mínimo exacto no se calcula al instante.";
+      $("#s-par-text").textContent = tr("Más de 8 movimientos", "More than 8 moves");
+      $("#s-par-sub").textContent = Core.isSolved(st) ? tr("¡Resuelto! Era una mezcla difícil.", "Solved! That was a tough shuffle.") : tr("Está tan lejos del cubo que el mínimo exacto no se calcula al instante.", "It's so far from the cube that the exact minimum can't be computed instantly.");
     }
     if (par !== null && mode === "level" && levelNum) {
       const lt = levelTargets(), m = hist.length, solved = Core.isSolved(st);
       $("#s-par").textContent = par;
-      $("#s-par-text").innerHTML = `${lvName(levelNum)} · meta ${par}${starsHTML(starsFor(m), "goal-stars")}`;
+      $("#s-par-text").innerHTML = `${lvName(levelNum)} · ${tr("meta", "target")} ${par}${starsHTML(starsFor(m), "goal-stars")}`;
       goal.classList.toggle("perfect", solved && m <= par);
       goal.classList.toggle("bound", false);
-      $("#s-par-sub").textContent = `★★★ hasta ${lt.three} · ★★ hasta ${lt.two} · ★ al terminar. Pistas: ${levelHints} del nivel + ${levelProg().bank} guardadas.`;
+      $("#s-par-sub").textContent = tr(`★★★ hasta ${lt.three} · ★★ hasta ${lt.two} · ★ al terminar. Pistas: ${levelHints} del nivel + ${levelProg().bank} guardadas.`,
+        `★★★ up to ${lt.three} · ★★ up to ${lt.two} · ★ for finishing. Hints: ${levelHints} for this level + ${levelProg().bank} saved.`);
     } else if (par !== null) {
       $("#s-par").textContent = par;
-      $("#s-par-text").textContent = parExact ? `Mínimo: ${movs(par)}` : `Se puede en ${movs(par)}`;
+      $("#s-par-text").textContent = parExact ? tr(`Mínimo: ${movs(par)}`, `Minimum: ${movs(par)}`) : tr(`Se puede en ${movs(par)}`, `Solvable in ${movs(par)}`);
       const left = par - hist.length, solved = Core.isSolved(st);
       goal.classList.toggle("perfect", solved && hist.length <= par);
       goal.classList.toggle("bound", !parExact && !(solved && hist.length <= par));
       $("#s-par-sub").textContent = solved
-        ? (hist.length <= par ? (parExact ? "¡Partida perfecta! Lo hiciste en el mínimo." : "¡Meta cumplida!") : (parExact ? "Resuelto. Ese era el mínimo posible." : "Resuelto. Esa era la meta."))
-        : left > 0 ? (parExact ? `Es el mínimo exacto. Te quedan ${left} para una partida perfecta.` : `Meta segura. Te quedan ${left}; quizá exista un camino un poco más corto.`)
-        : (parExact ? "Ya pasaste el mínimo, pero todavía puedes resolverlo." : "Ya pasaste la meta, pero todavía puedes resolverlo.");
+        ? (hist.length <= par ? (parExact ? tr("¡Partida perfecta! Lo hiciste en el mínimo.", "Perfect game! You did it in the minimum.") : tr("¡Meta cumplida!", "Target reached!")) : (parExact ? tr("Resuelto. Ese era el mínimo posible.", "Solved. That was the minimum possible.") : tr("Resuelto. Esa era la meta.", "Solved. That was the target.")))
+        : left > 0 ? (parExact ? tr(`Es el mínimo exacto. Te quedan ${left} para una partida perfecta.`, `That's the exact minimum. ${left} left for a perfect game.`) : tr(`Meta segura. Te quedan ${left}; quizá exista un camino un poco más corto.`, `Safe target. ${left} left; there may be a slightly shorter path.`))
+        : (parExact ? tr("Ya pasaste el mínimo, pero todavía puedes resolverlo.", "You're past the minimum, but you can still solve it.") : tr("Ya pasaste la meta, pero todavía puedes resolverlo.", "You're past the target, but you can still solve it."));
     }
     // Barra compacta del celular
     $("#m-moves").innerHTML = par !== null ? `${hist.length}<small>/${par}</small>` : String(hist.length);
@@ -2393,20 +2620,20 @@ const Sound = (() => {
     const lb = $("#lvl-banner");
     lb.hidden = !(mode === "level" && levelNum && phase !== "edit");
     if (!lb.hidden) {
-      $("#lvl-n").textContent = isExtreme(levelNum) ? "extremo" : levelNum;
+      $("#lvl-n").textContent = isExtreme(levelNum) ? tr("extremo", "extreme") : levelNum;
       $("#lvl-size").textContent = sizeName(st.N);
       $("#lvl-stars").innerHTML = starsHTML(starsFor(hist.length), "goal-stars");
     }
     document.body.classList.toggle("extreme", mode === "level" && isExtreme(levelNum) && phase !== "edit");
-    if (mode === "level" && levelNum && par !== null) mg.innerHTML = `Meta ${par}`;
-    else mg.textContent = par !== null ? (parExact ? `Mínimo ${par}` : `Meta ${par}`) : "Más de 8";
+    if (mode === "level" && levelNum && par !== null) mg.innerHTML = `${tr("Meta", "Target")} ${par}`;
+    else mg.textContent = par !== null ? (parExact ? `${tr("Mínimo", "Min")} ${par}` : `${tr("Meta", "Target")} ${par}`) : tr("Más de 8", "More than 8");
     mg.classList.toggle("bound", par !== null && !parExact && mode !== "level");
     mg.classList.toggle("lvl", mode === "level" && !!levelNum);
     mg.classList.toggle("over", par === null && parOver);
     const b = readBest()[st.N];
     $("#s-best").innerHTML = b
-      ? `Récord en ${sizeName(st.N)}: <b>${movs(b.moves)}</b> · ${fmt(b.ms)}`
-      : `Aún no tienes récord en ${sizeName(st.N)}.`;
+      ? `${tr("Récord en", "Record on")} ${sizeName(st.N)}: <b>${movs(b.moves)}</b> · ${fmt(b.ms)}`
+      : tr(`Aún no tienes récord en ${sizeName(st.N)}.`, `No record on ${sizeName(st.N)} yet.`);
     $("#undo").disabled = hist.length === 0;
     $("#hint-btn").disabled = ok === n;
     $("#new-btn").hidden = mode === "level";
@@ -2421,7 +2648,8 @@ const Sound = (() => {
         const sw = document.querySelector(`.sw[data-color="${c}"]`);
         sw.classList.toggle("done", left <= 0);
         sw.classList.remove("off");
-        sw.title = left > 0 ? `${COLOR_NAMES[c][0][0].toUpperCase() + COLOR_NAMES[c][0].slice(1)}: quedan ${left} por poner` : `Ya pusiste los ${need} ${COLOR_NAMES[c][1]}`;
+        const cName = COLOR_NAMES[c][0][0].toUpperCase() + COLOR_NAMES[c][0].slice(1);
+        sw.title = left > 0 ? tr(`${cName}: quedan ${left} por poner`, `${cName}: ${left} left to place`) : tr(`Ya pusiste los ${need} ${COLOR_NAMES[c][1]}`, `All ${need} ${COLOR_NAMES[c][1]} placed`);
         sw.setAttribute("aria-label", sw.title);
       }
       $("#edit-play").classList.toggle("locked", blanks() > 0);
@@ -2447,9 +2675,9 @@ const Sound = (() => {
     el.classList.toggle("good", tone === "good");
     restart(el, "flash");
   }
-  const IDLE = TOUCH_UI
-    ? "Desliza hacia arriba sobre un punto blanco para girar en sentido horario; hacia abajo, antihorario."
-    : "Toca un punto blanco para girar ese grupo de tres rombos.";
+  const idleMsg = () => (TOUCH_UI
+    ? tr("Desliza hacia arriba sobre un punto blanco para girar en sentido horario; hacia abajo, antihorario.", "Swipe up over a white dot to turn clockwise; swipe down for counterclockwise.")
+    : tr("Toca un punto blanco para girar ese grupo de tres rombos.", "Tap a white dot to turn that group of three tiles."));
 
   function pushHist(v, step) {
     const last = hist[hist.length - 1];
@@ -2521,7 +2749,7 @@ const Sound = (() => {
       if (!ids) {
         Sound.bad();
         restart(wrap, "shake");
-        say("Ahí no se puede levantar: esos rombos no forman un grupo de tres. Busca un punto blanco.", "warn");
+        say(tr("Ahí no se puede levantar: esos rombos no forman un grupo de tres. Busca un punto blanco.", "Can't lift there: those tiles don't form a group of three. Look for a white dot."), "warn");
         return;
       }
       if (winLocked()) return;
@@ -2551,13 +2779,13 @@ const Sound = (() => {
     if (phase === "edit") { sayEdit(); save(); return; }
     if (phase === "playing" && Core.isSolved(st)) { win(); }
     else if (phase === "playing" && mode === "level" && levelNum && hist.length === levelTargets().two + 1) {
-      say("Ya no alcanzas 2 estrellas, pero termina el nivel para desbloquear el siguiente. Siempre puedes reintentarlo.", "warn");
+      say(tr("Ya no alcanzas 2 estrellas, pero termina el nivel para desbloquear el siguiente. Siempre puedes reintentarlo.", "2 stars are out of reach now, but finish the level to unlock the next one. You can always retry it."), "warn");
     }
     else if (phase === "playing") {
       const left = st.tiles.length - Core.correctCount(st);
-      say(left <= 3 ? `Ya casi: ${left === 1 ? "falta 1 rombo" : `faltan ${left} rombos`}.` : IDLE);
-    } else if (Core.isSolved(st)) say("El cubo está armado. Elige una mezcla para jugar.", "good");
-    else say(IDLE);
+      say(left <= 3 ? tr(`Ya casi: ${left === 1 ? "falta 1 rombo" : `faltan ${left} rombos`}.`, `Almost there: ${left === 1 ? "1 tile" : `${left} tiles`} to go.`) : idleMsg());
+    } else if (Core.isSolved(st)) say(tr("El cubo está armado. Elige una mezcla para jugar.", "The cube is solved. Pick a shuffle to play."), "good");
+    else say(idleMsg());
     save();
   }
 
@@ -2611,14 +2839,14 @@ const Sound = (() => {
     const isRecord = !prev || moves < prev.moves || (moves === prev.moves && ms < prev.ms);
     if (isRecord) { best[st.N] = { moves, ms }; try { localStorage.setItem(BEST, JSON.stringify(best)); } catch (e) {} }
     const perfect = par !== null && moves <= par;
-    $("#win-title").textContent = perfect ? (parExact ? "¡Partida perfecta!" : "¡Meta cumplida!") : "¡Cubo restaurado!";
+    $("#win-title").textContent = perfect ? (parExact ? tr("¡Partida perfecta!", "Perfect game!") : tr("¡Meta cumplida!", "Target reached!")) : tr("¡Cubo restaurado!", "Cube restored!");
     let line = `${movs(moves)} · ${fmt(ms)}`;
-    if (par !== null) line = perfect ? `${parExact ? "Lo hiciste en el mínimo posible" : "Dentro de la meta"}: ${line}` : `${parExact ? "El mínimo era" : "La meta era"} ${par}. Tú: ${line}`;
-    if (hintsUsed) line += ` · ${hintsUsed} ${hintsUsed === 1 ? "pista" : "pistas"}`;
+    if (par !== null) line = perfect ? `${parExact ? tr("Lo hiciste en el mínimo posible", "You did it in the minimum possible") : tr("Dentro de la meta", "Within the target")}: ${line}` : `${parExact ? tr("El mínimo era", "The minimum was") : tr("La meta era", "The target was")} ${par}. ${tr("Tú", "You")}: ${line}`;
+    if (hintsUsed) line += ` · ${hintsUsed} ${hintsUsed === 1 ? tr("pista", "hint") : tr("pistas", "hints")}`;
     $("#win-line").textContent = line;
     $("#win-rec").hidden = !(isRecord && prev);
     winEl.hidden = false;
-    say(perfect ? "¡Perfecto! Resuelto en el mínimo de movimientos." : "¡Resuelto! Puedes seguir girando libremente o mezclar otra vez.", "good");
+    say(perfect ? tr("¡Perfecto! Resuelto en el mínimo de movimientos.", "Perfect! Solved in the minimum number of moves.") : tr("¡Resuelto! Puedes seguir girando libremente o mezclar otra vez.", "Solved! Keep turning freely or shuffle again."), "good");
     if (layers.tiles) {
       restart(layers.tiles, "celebrate");
       setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400);
@@ -2645,7 +2873,7 @@ const Sound = (() => {
     if (m === "pile") m = "chaos"; // las mezclas siempre son al azar
     generating = true;
     mode = m;
-    if (!quiet) { say(`Mezclando (${LEVEL_NAMES[level].toLowerCase()})…`); svg.classList.add("busy-board"); }
+    if (!quiet) { say(tr(`Mezclando (${LEVEL_NAMES[level].toLowerCase()})…`, `Shuffling (${LEVEL_NAMES[level].toLowerCase()})…`)); svg.classList.add("busy-board"); }
     // Deja que la pantalla muestre "Mezclando…" antes del cálculo.
     setTimeout(() => {
       try {
@@ -2660,9 +2888,10 @@ const Sound = (() => {
         buildBoard();
         playIntro();
         if (!quiet) Sound.shuffle();
-        const name = `Al azar, ${LEVEL_NAMES[level].toLowerCase()}`;
-        const note = want !== level ? ` (En ${sizeName(N)} el máximo es ${Core.maxFor(N, m)} movimientos, así que usé ${LEVEL_NAMES[level]}.)` : "";
-        say(`${name}: ${parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.${note}`);
+        const name = tr(`Al azar, ${LEVEL_NAMES[level].toLowerCase()}`, `Random, ${LEVEL_NAMES[level].toLowerCase()}`);
+        const note = want !== level ? tr(` (En ${sizeName(N)} el máximo es ${Core.maxFor(N, m)} movimientos, así que usé ${LEVEL_NAMES[level]}.)`, ` (On ${sizeName(N)} the maximum is ${Core.maxFor(N, m)} moves, so I used ${LEVEL_NAMES[level]}.)`) : "";
+        say(tr(`${name}: ${parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.${note}`,
+          `${name}: ${parExact ? `minimum ${movs(par)}` : `solvable in ${movs(par)}`}. Your first turn starts the clock.${note}`));
         save();
       } finally {
         generating = false;
@@ -2693,8 +2922,8 @@ const Sound = (() => {
     }
     const max = Core.maxFor(st.N, m);
     $("#level-note").textContent = max < Core.rangesOf(st.N).hard[1]
-      ? `En ${sizeName(st.N)} el máximo es ${max} movimientos.`
-      : "Movimientos para resolver la mezcla.";
+      ? tr(`En ${sizeName(st.N)} el máximo es ${max} movimientos.`, `On ${sizeName(st.N)} the maximum is ${max} moves.`)
+      : tr("Movimientos para resolver la mezcla.", "Moves needed to solve the shuffle.");
   }
 
   function setLevel(lv) {
@@ -2712,7 +2941,7 @@ const Sound = (() => {
     buildBoard();
     playIntro();
     Sound.place();
-    say("Este es el cubo armado. Solo el punto del centro se puede girar: equivale a quitar la esquina.", "good");
+    say(tr("Este es el cubo armado. Solo el punto del centro se puede girar: equivale a quitar la esquina.", "This is the solved cube. Only the center dot can turn: it's like removing the corner."), "good");
     save();
   }
 
@@ -2728,14 +2957,14 @@ const Sound = (() => {
     if (busy || phase === "edit" || Core.isSolved(st)) return;
     if (mode === "level" && levelNum) {
       const pr = levelProg();
-      if (levelHints <= 0 && pr.bank <= 0) { Sound.bad(); say("Ya no te quedan pistas.", "warn"); return; }
+      if (levelHints <= 0 && pr.bank <= 0) { Sound.bad(); say(tr("Ya no te quedan pistas.", "You're out of hints."), "warn"); return; }
     }
     // Primero el camino más corto exacto; si está demasiado lejos para calcularlo, una pista aproximada.
     const a = st.N >= 5 ? { move: null } : Core.analyze(st);
     const h = a.move ? { v: a.move.v, k: a.move.k, left: a.d - 1 }
       : route && route.length ? { v: route[0].v, k: route[0].k, left: route.length - 1, known: true }
       : Core.hint(st, hist[hist.length - 1]);
-    if (!h) { say("No hay ningún grupo que se pueda girar.", "warn"); return; }
+    if (!h) { say(tr("No hay ningún grupo que se pueda girar.", "There's no group that can turn."), "warn"); return; }
     hintMove = { v: h.v, k: h.k };
     hintsUsed++;
     // Primero se gastan las 3 del nivel y después las guardadas
@@ -2747,11 +2976,12 @@ const Sound = (() => {
     drawHint();
     Sound.hint();
     const stp = hintStep(hintMove);
-    const turn = Math.abs(stp) === 3 ? "media vuelta (180°)" : `${Math.abs(stp) * 60}° en sentido ${stp < 0 ? "horario" : "antihorario"}`;
+    const turn = Math.abs(stp) === 3 ? tr("media vuelta (180°)", "make a half turn (180°)") : tr(`${Math.abs(stp) * 60}° en sentido ${stp < 0 ? "horario" : "antihorario"}`, `turn ${Math.abs(stp) * 60}° ${stp < 0 ? "clockwise" : "counterclockwise"}`);
     const extra = h.left !== undefined
-      ? (h.left === 0 ? " y quedará resuelto." : h.known ? `. Siguiendo este camino te faltarán ${movs(h.left)}.` : `. Es el camino más corto: después te faltarán ${movs(h.left)}.`)
-      : (h.gain > 0 ? ` y pondrá ${h.gain} ${h.gain === 1 ? "rombo" : "rombos"} en su sitio.` : " y te dejará listo para la siguiente jugada.");
-    say(`Pista: ${TOUCH_UI ? "desliza sobre" : "toca una vez"} el grupo amarillo que dice “${TAG_TEXT}”. Girará ${turn}${extra}`);
+      ? (h.left === 0 ? tr(" y quedará resuelto.", " and it will be solved.") : h.known ? tr(`. Siguiendo este camino te faltarán ${movs(h.left)}.`, `. Following this path, ${movs(h.left)} will be left.`) : tr(`. Es el camino más corto: después te faltarán ${movs(h.left)}.`, `. It's the shortest path: ${movs(h.left)} will be left after it.`))
+      : (h.gain > 0 ? tr(` y pondrá ${h.gain} ${h.gain === 1 ? "rombo" : "rombos"} en su sitio.`, ` and put ${h.gain} ${h.gain === 1 ? "tile" : "tiles"} in place.`) : tr(" y te dejará listo para la siguiente jugada.", " and set you up for the next move."));
+    say(tr(`Pista: ${TOUCH_UI ? "desliza sobre" : "toca una vez"} el grupo amarillo que dice “${tagText()}”. Girará ${turn}${extra}`,
+      `Hint: ${TOUCH_UI ? "swipe over" : "tap once on"} the yellow group marked “${tagText()}”. It will ${turn}${extra}`));
   }
 
   /* ---------- Editor: arma tu mezcla ---------- */
@@ -2768,13 +2998,13 @@ const Sound = (() => {
   function sayEdit() {
     if (blanks() > 0) {
       const parts = [1, 0, 2].filter((c) => leftOf(c) > 0).map((c) => `${leftOf(c)} ${colorName(c, leftOf(c))}`);
-      const list = parts.length > 1 ? parts.slice(0, -1).join(", ") + " y " + parts[parts.length - 1] : parts[0];
-      if (tool === "rotate") say(`Toca los puntos blancos para mover grupos de tres. Te faltan por pintar: ${list}.`);
-      else say(`Pintando con ${colorName(paintColor, 1)}: toca o arrastra sobre los rombos blancos. Te faltan ${list}.`);
+      const list = parts.length > 1 ? parts.slice(0, -1).join(", ") + tr(" y ", " and ") + parts[parts.length - 1] : parts[0];
+      if (tool === "rotate") say(tr(`Toca los puntos blancos para mover grupos de tres. Te faltan por pintar: ${list}.`, `Tap the white dots to move groups of three. Still to paint: ${list}.`));
+      else say(tr(`Pintando con ${colorName(paintColor, 1)}: toca o arrastra sobre los rombos blancos. Te faltan ${list}.`, `Painting ${colorName(paintColor, 1)}: tap or drag over the white tiles. Still to go: ${list}.`));
     } else if (tool === "paint") {
-      say("¡Ya pusiste todos los colores! Toca un rombo de su mismo color para quitarlo, usa “Girar” para moverlos o presiona “Jugar desde aquí”.", "good");
+      say(tr("¡Ya pusiste todos los colores! Toca un rombo de su mismo color para quitarlo, usa “Girar” para moverlos o presiona “Jugar desde aquí”.", "All colors placed! Tap a tile of the same color to clear it, use “Rotate” to move them, or press “Play from here”."), "good");
     } else {
-      say("Toca los puntos blancos para mover grupos de tres rombos. Cuando quieras, presiona “Jugar desde aquí”.", "good");
+      say(tr("Toca los puntos blancos para mover grupos de tres rombos. Cuando quieras, presiona “Jugar desde aquí”.", "Tap the white dots to move groups of three tiles. Whenever you're ready, press “Play from here”."), "good");
     }
   }
 
@@ -2841,7 +3071,7 @@ const Sound = (() => {
         if (first || t.c < 0) {
           Sound.bad();
           g.classList.remove("nope"); void g.getBoundingClientRect(); g.classList.add("nope");
-          say(`Ya pusiste los ${st.tiles.length / 3} ${colorName(paintColor, 2)}. Toca uno de ellos para quitarlo o elige otro color.`, "warn");
+          say(tr(`Ya pusiste los ${st.tiles.length / 3} ${colorName(paintColor, 2)}. Toca uno de ellos para quitarlo o elige otro color.`, `All ${st.tiles.length / 3} ${colorName(paintColor, 2)} are placed. Tap one to clear it or pick another color.`), "warn");
         }
         return;
       }
@@ -2858,7 +3088,7 @@ const Sound = (() => {
     render(null, t.id);
     if (advanced) {
       Sound.toggle(true);
-      say(`¡Listo con ese color! Ahora sigue el ${colorName(paintColor, 1)}: te faltan ${leftOf(paintColor)}.`);
+      say(tr(`¡Listo con ese color! Ahora sigue el ${colorName(paintColor, 1)}: te faltan ${leftOf(paintColor)}.`, `Done with that color! Now ${colorName(paintColor, 1)}: ${leftOf(paintColor)} to go.`));
     } else sayEdit();
     save();
   }
@@ -2866,14 +3096,15 @@ const Sound = (() => {
   function editRandom() {
     if (generating) return;
     generating = true;
-    say(`Mezclando al azar (${LEVEL_NAMES[level].toLowerCase()})…`);
+    say(tr(`Mezclando al azar (${LEVEL_NAMES[level].toLowerCase()})…`, `Random shuffle (${LEVEL_NAMES[level].toLowerCase()})…`));
     setTimeout(() => {
       try {
         const r = Core.scramble(st, "chaos", level);
         level = r.level;
         editGen = { par: r.par, exact: r.exact, route: r.route };
         syncLevels(); render(); playIntro(); Sound.shuffle();
-        say(`Mezcla al azar, ${LEVEL_NAMES[level].toLowerCase()}: ${r.exact ? `mínimo ${movs(r.par)}` : `se puede en ${movs(r.par)}`}. Puedes retocarla o presionar “Jugar desde aquí”.`);
+        say(tr(`Mezcla al azar, ${LEVEL_NAMES[level].toLowerCase()}: ${r.exact ? `mínimo ${movs(r.par)}` : `se puede en ${movs(r.par)}`}. Puedes retocarla o presionar “Jugar desde aquí”.`,
+          `Random shuffle, ${LEVEL_NAMES[level].toLowerCase()}: ${r.exact ? `minimum ${movs(r.par)}` : `solvable in ${movs(r.par)}`}. Touch it up or press “Play from here”.`));
         save();
       } finally { generating = false; }
     }, 30);
@@ -2890,8 +3121,8 @@ const Sound = (() => {
     editGen = null;
     render(); playIntro(); Sound.shuffle(); buzz(12);
     say(blanks() > 0
-      ? "Rombos girados al azar. Ahora píntalos; los colores se quedan en el rombo donde los pongas."
-      : "Rombos girados al azar: cada color se movió con su rombo.");
+      ? tr("Rombos girados al azar. Ahora píntalos; los colores se quedan en el rombo donde los pongas.", "Tiles spun at random. Now paint them; each color stays on the tile where you put it.")
+      : tr("Rombos girados al azar: cada color se movió con su rombo.", "Tiles spun at random: each color moved with its tile."));
     save();
   }
 
@@ -2907,12 +3138,12 @@ const Sound = (() => {
     const cnt = colorCounts(), need = st.tiles.length / 3;
     if (blanks() > 0) {
       Sound.bad(); restart(wrap, "shake");
-      say(`Todavía hay ${blanks()} ${blanks() === 1 ? "rombo blanco" : "rombos blancos"}. Píntalos todos para empezar a jugar.`, "warn");
+      say(tr(`Todavía hay ${blanks()} ${blanks() === 1 ? "rombo blanco" : "rombos blancos"}. Píntalos todos para empezar a jugar.`, `There ${blanks() === 1 ? "is still 1 white tile" : `are still ${blanks()} white tiles`}. Paint them all to start playing.`), "warn");
       return;
     }
     if (cnt.some((c) => c !== need)) { Sound.bad(); restart(wrap, "shake"); sayEdit(); return; }
-    if (Core.isSolved(st)) { Sound.bad(); restart(wrap, "shake"); say("Así ya es el cubo armado. Pinta o gira algunos rombos antes de jugar.", "warn"); return; }
-    say("Calculando el mínimo de movimientos…");
+    if (Core.isSolved(st)) { Sound.bad(); restart(wrap, "shake"); say(tr("Así ya es el cubo armado. Pinta o gira algunos rombos antes de jugar.", "That's already the solved cube. Paint or turn some tiles before playing."), "warn"); return; }
+    say(tr("Calculando el mínimo de movimientos…", "Working out the minimum number of moves…"));
     const gen = editGen;
     const a = gen ? null : Core.analyze(st);
     mode = "custom";
@@ -2928,8 +3159,9 @@ const Sound = (() => {
     playIntro();
     Sound.shuffle();
     say(par !== null
-      ? `¡Listo! Tu mezcla ${parExact ? `se resuelve en mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.`
-      : "¡Listo! Tu mezcla necesita más de 8 movimientos. Tu primer giro arranca el reloj.");
+      ? tr(`¡Listo! Tu mezcla ${parExact ? `se resuelve en mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`}. Tu primer giro arranca el reloj.`,
+        `Ready! Your shuffle ${parExact ? `takes at least ${movs(par)}` : `is solvable in ${movs(par)}`}. Your first turn starts the clock.`)
+      : tr("¡Listo! Tu mezcla necesita más de 8 movimientos. Tu primer giro arranca el reloj.", "Ready! Your shuffle needs more than 8 moves. Your first turn starts the clock."));
     save();
   }
 
@@ -2942,8 +3174,9 @@ const Sound = (() => {
     par = origin.par; parExact = origin.parExact !== false; parOver = !!origin.parOver;
     route = origin.route ? JSON.parse(JSON.stringify(origin.route)) : null;
     buildBoard(); playIntro(); Sound.shuffle();
-    if (mode === "level" && levelNum) { say(`${lvName(levelNum)} reiniciado.`); save(); return; }
-    say(`Mezcla reiniciada: ${par !== null ? (parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`) : "más de 8 movimientos"}.`);
+    if (mode === "level" && levelNum) { say(tr(`${lvName(levelNum)} reiniciado.`, `${lvName(levelNum)} restarted.`)); save(); return; }
+    say(tr(`Mezcla reiniciada: ${par !== null ? (parExact ? `mínimo ${movs(par)}` : `se puede resolver en ${movs(par)}`) : "más de 8 movimientos"}.`,
+      `Shuffle restarted: ${par !== null ? (parExact ? `minimum ${movs(par)}` : `solvable in ${movs(par)}`) : "more than 8 moves"}.`));
     save();
   }
 
@@ -3035,7 +3268,7 @@ const Sound = (() => {
     touchHover = false;
     setHover(null);
     const v = swipe.v;
-    if (!v) { say("Empieza a deslizar sobre un punto blanco.", "warn"); return; }
+    if (!v) { say(tr("Empieza a deslizar sobre un punto blanco.", "Start your swipe on a white dot."), "warn"); return; }
     focusKey = null;
     if (hintMove && sameV(hintMove.v, v)) rotate(v, hintStep(hintMove));
     else rotate(v, dy < 0 ? -1 : 1);
@@ -3045,7 +3278,7 @@ const Sound = (() => {
     const s0 = swipe;
     swipe = null; touchHover = false; setHover(null);
     if (!s0.done && Math.hypot(e.clientX - s0.x, e.clientY - s0.y) < 14)
-      say("Desliza el dedo hacia arriba (sentido horario) o hacia abajo (antihorario) sobre un punto blanco.");
+      say(tr("Desliza el dedo hacia arriba (sentido horario) o hacia abajo (antihorario) sobre un punto blanco.", "Swipe up (clockwise) or down (counterclockwise) over a white dot."));
   }
   window.addEventListener("pointerup", endSwipe);
   window.addEventListener("pointercancel", endSwipe);
@@ -3087,7 +3320,7 @@ const Sound = (() => {
     $("#dir-cw").setAttribute("aria-pressed", String(d === -1));
     $("#dir-ccw").setAttribute("aria-pressed", String(d === 1));
     if (layers.hlg) { drawHover(); drawHint(); }
-    if (!quiet) { Sound.tick(); say(d === -1 ? "Cada toque girará 60° en sentido horario." : "Cada toque girará 60° en sentido antihorario."); }
+    if (!quiet) { Sound.tick(); say(d === -1 ? tr("Cada toque girará 60° en sentido horario.", "Each tap will turn 60° clockwise.") : tr("Cada toque girará 60° en sentido antihorario.", "Each tap will turn 60° counterclockwise.")); }
     save();
   }
   function setSound(onNow) {
@@ -3110,7 +3343,7 @@ const Sound = (() => {
     $("#dots-btn").setAttribute("aria-pressed", String(on));
     if (quiet) return;
     Sound.tick(); render(); save();
-    say(on ? "Puntos de giro visibles." : "Puntos de giro ocultos. Puedes seguir girando en los mismos lugares.");
+    say(on ? tr("Puntos de giro visibles.", "Turn dots shown.") : tr("Puntos de giro ocultos. Puedes seguir girando en los mismos lugares.", "Turn dots hidden. You can still turn in the same places."));
   }
   $("#show-dots").addEventListener("change", (e) => setDots(e.target.checked));
   $("#dots-btn").addEventListener("click", () => setDots(!showDots));
@@ -3326,12 +3559,12 @@ const Sound = (() => {
       continueAction = resumeLevel ? "resume" : "next";
       $("#home-continue-info").textContent = resumeLevel
         ? `${lvName(levelNum)} · ${sizeName(st.N)} · ${movs(hist.length)}`
-        : `Nivel ${nextLevel(pr)} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`;
+        : levelInfoText();
     }
     // Una partida libre a medias se sigue desde "Partida libre"
     const freeInGame = inGame && mode !== "level";
-    const freeInfo = freeInGame ? `${mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}` : "";
-    $("#home-play-info").textContent = freeInGame ? `En curso: ${freeInfo}` : "Elige tamaño y dificultad";
+    const freeInfo = freeInGame ? `${mode === "custom" ? tr("Tu mezcla", "Your shuffle") : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)}` : "";
+    $("#home-play-info").textContent = freeInGame ? `${tr("En curso", "In progress")}: ${freeInfo}` : tr("Elige tamaño y dificultad", "Choose size and difficulty");
     $("#sel-resume").hidden = !freeInGame;
     $("#sel-resume-info").textContent = freeInfo;
   }
@@ -3349,7 +3582,7 @@ const Sound = (() => {
       const r = Core.rangeFor(selN, "chaos", lv);
       const b = document.querySelector(`[data-sel-level="${lv}"]`);
       b.disabled = !r;
-      $(`#sel-${lv}`).textContent = r ? `${r[0]}–${r[1]} movimientos` : `No hay en ${sizeName(selN)}`;
+      $(`#sel-${lv}`).textContent = r ? `${r[0]}–${r[1]} ${tr("movimientos", "moves")}` : tr(`No hay en ${sizeName(selN)}`, `Not on ${sizeName(selN)}`);
     }
   }
   document.querySelectorAll("[data-sel-size]").forEach((b) => b.addEventListener("click", () => { selN = +b.dataset.selSize; Sound.tick(); syncSelect(selN); }));
@@ -3371,7 +3604,7 @@ const Sound = (() => {
   function syncDots(i) {
     slideCur = i;
     document.querySelectorAll("#slide-dots i").forEach((d, j) => d.classList.toggle("on", j === i));
-    $("#howto-next span").textContent = i >= SLIDES - 1 ? "¡A jugar!" : "Siguiente";
+    $("#howto-next span").textContent = i >= SLIDES - 1 ? tr("¡A jugar!", "Let's play!") : tr("Siguiente", "Next");
   }
   // Al deslizar con el dedo: cuando el carrusel se detiene, se actualiza la página actual
   slides.addEventListener("scroll", () => {
@@ -3403,7 +3636,7 @@ const Sound = (() => {
     if (g) { g.style.transition = "none"; g.style.transform = "rotate(0deg)"; }
     demo.className = "ill ill-swipe want-up";
     $("#ds1").className = "now"; $("#ds2").className = "";
-    demoSay("Pruébalo: pon el dedo sobre el punto blanco y desliza <b>hacia arriba</b>.");
+    demoSay(tr("Pruébalo: pon el dedo sobre el punto blanco y desliza <b>hacia arriba</b>.", "Try it: put your finger on the white dot and swipe <b>up</b>."));
   }
   function demoWrong(msg) {
     Sound.bad(); buzz(25);
@@ -3412,19 +3645,19 @@ const Sound = (() => {
   }
   function demoSwipe(dir) {
     if (demoStep === 0) {
-      if (dir !== "up") return demoWrong("Casi: primero desliza <b>hacia arriba</b>.");
+      if (dir !== "up") return demoWrong(tr("Casi: primero desliza <b>hacia arriba</b>.", "Almost: swipe <b>up</b> first."));
       demoDeg = 60; demoCorner(demoDeg); Sound.lift(); setTimeout(() => Sound.place(), 260); buzz(10);
       demoStep = 1;
       demo.className = "ill ill-swipe want-down";
       $("#ds1").className = "ok"; $("#ds2").className = "now";
-      demoSay("¡Bien! Hacia arriba gira en <b>sentido horario</b>. Ahora desliza <b>hacia abajo</b>.");
+      demoSay(tr("¡Bien! Hacia arriba gira en <b>sentido horario</b>. Ahora desliza <b>hacia abajo</b>.", "Nice! Up turns <b>clockwise</b>. Now swipe <b>down</b>."));
     } else if (demoStep === 1) {
-      if (dir !== "down") return demoWrong("Ahora al revés: desliza <b>hacia abajo</b>.");
+      if (dir !== "down") return demoWrong(tr("Ahora al revés: desliza <b>hacia abajo</b>.", "Now the other way: swipe <b>down</b>."));
       demoDeg = 0; demoCorner(demoDeg); Sound.lift(); setTimeout(() => Sound.place(), 260); buzz([10, 40, 10]);
       demoStep = 2;
       demo.className = "ill ill-swipe done";
       $("#ds2").className = "ok";
-      demoSay("¡Perfecto! Hacia abajo gira en <b>sentido antihorario</b>. Cada deslizada gira 60°. Puedes seguir practicando.");
+      demoSay(tr("¡Perfecto! Hacia abajo gira en <b>sentido antihorario</b>. Cada deslizada gira 60°. Puedes seguir practicando.", "Perfect! Down turns <b>counterclockwise</b>. Each swipe turns 60°. Keep practicing if you like."));
     } else {
       demoDeg += dir === "up" ? 60 : -60; demoCorner(demoDeg); Sound.lift(); setTimeout(() => Sound.place(), 260); buzz(8);
     }
@@ -3443,7 +3676,7 @@ const Sound = (() => {
   const demoEnd = (e) => {
     if (!demoTouch || e.pointerId !== demoTouch.id) return;
     if (!demoTouch.done && Math.hypot(e.clientX - demoTouch.x, e.clientY - demoTouch.y) < 14 && demoStep < 2)
-      demoSay(`No basta con tocar: desliza el dedo <b>${demoStep === 0 ? "hacia arriba" : "hacia abajo"}</b>.`);
+      demoSay(tr(`No basta con tocar: desliza el dedo <b>${demoStep === 0 ? "hacia arriba" : "hacia abajo"}</b>.`, `A tap isn't enough: swipe <b>${demoStep === 0 ? "up" : "down"}</b>.`));
     demoTouch = null;
   };
   demo.addEventListener("pointerup", demoEnd);
@@ -3455,7 +3688,7 @@ const Sound = (() => {
     $("#st-played").textContent = x.played; $("#st-solved").textContent = x.solved; $("#st-perfect").textContent = x.perfect;
     $("#st-best").innerHTML = [2, 3, 4].map((N) => {
       const b = best[N];
-      return `<div class="best-row"><b>${sizeName(N)}</b><span>${b ? `${movs(b.moves)} · ${fmt(b.ms)}` : "Sin récord todavía"}</span></div>`;
+      return `<div class="best-row"><b>${sizeName(N)}</b><span>${b ? `${movs(b.moves)} · ${fmt(b.ms)}` : tr("Sin récord todavía", "No record yet")}</span></div>`;
     }).join("");
   }
   // Ajustes
@@ -3465,8 +3698,9 @@ const Sound = (() => {
     $("#row-vibe").hidden = !("vibrate" in navigator);
     $("#set-dots").checked = showDots;
     document.querySelectorAll("[data-theme-opt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.themeOpt === settings.theme)));
-    $("#set-reset").textContent = "Borrar";
-    $("#set-reset-levels").textContent = "Borrar";
+    $("#set-reset").textContent = tr("Borrar", "Erase");
+    $("#set-reset-levels").textContent = tr("Borrar", "Erase");
+    document.querySelectorAll("[data-lang-opt]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.langOpt === LANG)));
     resetArmed = false;
     levelsResetArmed = null;
   }
@@ -3474,39 +3708,58 @@ const Sound = (() => {
   $("#set-vibe").addEventListener("change", (e) => { settings.vibe = e.target.checked; saveSettings(); buzz(15); });
   $("#set-dots").addEventListener("change", (e) => setDots(e.target.checked));
   document.querySelectorAll("[data-theme-opt]").forEach((b) => b.addEventListener("click", () => { settings.theme = b.dataset.themeOpt; saveSettings(); applyTheme(); syncSettings(); Sound.tick(); }));
+  // Cambiar el idioma: textos fijos y todo lo que se dibuja con datos
+  function setLang(l) {
+    if (l === LANG) return;
+    LANG = l; settings.lang = l; saveSettings();
+    translateStatic();
+    updateStats(); syncHome(); syncSettings(); syncSelect(true); syncLevels(); renderStats(); syncDots(slideCur);
+    if (st) { render(); syncModeChip(); }
+    if (!$("#levels-modal").hidden) renderLevels("lvd");
+    if (document.querySelector("#scr-levels.on, #scr-levels.active")) renderLevels("lvm");
+    $("#start-levels-info").textContent = levelInfoText();
+    $("#start-levels span").textContent = levelsStarted() ? tr("Continuar niveles", "Continue levels") : tr("Modo niveles", "Level mode");
+    syncStart();
+    resetDemo();
+    say(phase === "edit" ? tr("Idioma: español.", "Language: English.") : idleMsg());
+    Sound.tick();
+  }
+  document.querySelectorAll("[data-lang-opt]").forEach((b) => b.addEventListener("click", () => setLang(b.dataset.langOpt)));
+  $("#lang-btn").addEventListener("click", () => setLang(LANG === "es" ? "en" : "es"));
   let resetArmed = false;
   $("#set-reset").addEventListener("click", () => {
-    if (!resetArmed) { resetArmed = true; $("#set-reset").textContent = "Toca otra vez para borrar"; Sound.tick(); return; }
+    if (!resetArmed) { resetArmed = true; $("#set-reset").textContent = tr("Toca otra vez para borrar", "Tap again to erase"); Sound.tick(); return; }
     try { localStorage.removeItem(BEST); localStorage.removeItem(STATS); } catch (e) {}
-    resetArmed = false; $("#set-reset").textContent = "Borrado"; Sound.place(); updateStats();
+    resetArmed = false; $("#set-reset").textContent = tr("Borrado", "Erased"); Sound.place(); updateStats();
   });
   // Borrar el progreso de niveles (estrellas y pistas guardadas) para empezar desde cero.
   // Se confirma tocando dos veces.
   let levelsResetArmed = null;
   function armLevelsReset(btn, idle) {
-    if (levelsResetArmed !== btn) { levelsResetArmed = btn; btn.textContent = "Toca otra vez para borrar"; Sound.tick(); return; }
+    if (levelsResetArmed !== btn) { levelsResetArmed = btn; btn.textContent = tr("Toca otra vez para borrar", "Tap again to erase"); Sound.tick(); return; }
     levelsResetArmed = null;
     try { localStorage.removeItem(LVKEY); } catch (e) {}
-    btn.textContent = "Borrado";
-    setTimeout(() => { if (btn.textContent === "Borrado") btn.textContent = idle; }, 1600);
+    const done = tr("Borrado", "Erased");
+    btn.textContent = done;
+    setTimeout(() => { if (btn.textContent === done) btn.textContent = idle(); }, 1600);
     Sound.place(); buzz(15);
     // Si estabas en un nivel, pasa a una partida libre para no quedarte en un nivel bloqueado
     if (mode === "level") newGame(st.N, "chaos", true);
     if (!$("#levels-modal").hidden) renderLevels("lvd");
     setTimeout(() => { syncHome(); updateStats(); }, 30);
   }
-  $("#set-reset-levels").addEventListener("click", (e) => armLevelsReset(e.currentTarget, "Borrar"));
-  $("#lvd-reset").addEventListener("click", (e) => armLevelsReset(e.currentTarget, "Borrar progreso de niveles"));
+  $("#set-reset-levels").addEventListener("click", (e) => armLevelsReset(e.currentTarget, () => tr("Borrar", "Erase")));
+  $("#lvd-reset").addEventListener("click", (e) => armLevelsReset(e.currentTarget, () => tr("Borrar progreso de niveles", "Erase level progress")));
   // Pausa
   function openPause() {
     wasRunning = startedAt !== null;
     stopTimer();
-    $("#pause-info").textContent = phase === "edit" ? "Armando tu mezcla"
-      : `${mode === "level" && levelNum ? lvName(levelNum) : mode === "custom" ? "Tu mezcla" : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
+    $("#pause-info").textContent = phase === "edit" ? tr("Armando tu mezcla", "Building your shuffle")
+      : `${mode === "level" && levelNum ? lvName(levelNum) : mode === "custom" ? tr("Tu mezcla", "Your shuffle") : LEVEL_NAMES[level]} · ${sizeName(st.N)} · ${movs(hist.length)} · ${fmt(nowElapsed())}`;
     $("#pause-restart").hidden = !origin || phase === "edit";
     $("#pause-levels").hidden = false;
     $("#pause-new").hidden = mode === "level";
-    $("#pause-restart span").textContent = mode === "level" ? "Reiniciar nivel" : "Reiniciar esta mezcla";
+    $("#pause-restart span").textContent = mode === "level" ? tr("Reiniciar nivel", "Restart level") : tr("Reiniciar esta mezcla", "Restart this shuffle");
     pauseEl.hidden = false;
     Sound.tick();
   }
@@ -3540,7 +3793,7 @@ const Sound = (() => {
   const totalStars = (pr) => Object.entries(pr.stars).reduce((a, [n, b]) => a + (+n <= 50 ? b : 0), 0);
   // Declaradas como funciones para poder usarlas desde cualquier parte (también antes de esta línea)
   function isExtreme(n) { return n === 51; }
-  function lvName(n) { return isExtreme(n) ? "Nivel extremo" : `Nivel ${n}`; }
+  function lvName(n) { return isExtreme(n) ? tr("Nivel extremo", "Extreme level") : `${tr("Nivel", "Level")} ${n}`; }
   const unlocked = (pr, n) => n === 1 || (pr.stars[n - 1] || 0) >= 1;
   const nextLevel = (pr) => { for (let n = 1; n <= 50; n++) if (!(pr.stars[n] >= 1)) return n; return 50; };
   function levelTargets() { const m = par || 1; return { three: m, two: Math.ceil(m * 1.5), max: m * 2 }; }
@@ -3569,16 +3822,17 @@ const Sound = (() => {
     showLevelIntro(n, L.N);
     const t = levelTargets();
     const bank = levelProg().bank;
-    say(`${lvName(n)} · ${sizeName(L.N)}: meta ${t.three} para ★★★. Tienes 3 pistas de este nivel${bank ? ` y ${bank} ${bank === 1 ? "guardada" : "guardadas"}` : ""}.`);
+    say(tr(`${lvName(n)} · ${sizeName(L.N)}: meta ${t.three} para ★★★. Tienes 3 pistas de este nivel${bank ? ` y ${bank} ${bank === 1 ? "guardada" : "guardadas"}` : ""}.`,
+      `${lvName(n)} · ${sizeName(L.N)}: target ${t.three} for ★★★. You have 3 hints for this level${bank ? ` and ${bank} saved` : ""}.`));
     save();
   }
 
   function showLevelIntro(n, N) {
     const el = $("#lvl-intro"), x = n === EXTREME;
     el.classList.toggle("extreme", x);
-    el.querySelector(".li-k").textContent = x ? "Nivel secreto" : "Nivel";
-    $("#li-n").textContent = x ? "Extremo" : n;
-    $("#li-size").textContent = x ? `Cubo ${sizeName(N)} · ${Core.LEVELS[n - 1].K} movimientos` : `Cubo ${sizeName(N)}`;
+    el.querySelector(".li-k").textContent = x ? tr("Nivel secreto", "Secret level") : tr("Nivel", "Level");
+    $("#li-n").textContent = x ? tr("Extremo", "Extreme") : n;
+    $("#li-size").textContent = x ? `${tr("Cubo", "Cube")} ${sizeName(N)} · ${movs(Core.LEVELS[n - 1].K)}` : `${tr("Cubo", "Cube")} ${sizeName(N)}`;
     el.hidden = true; void el.getBoundingClientRect(); el.hidden = false;
     clearTimeout(showLevelIntro.t);
     if (reduceMotion) { showLevelIntro.t = setTimeout(() => (el.hidden = true), x ? 2200 : 1200); return; }
@@ -3605,8 +3859,8 @@ const Sound = (() => {
     // Primera vez que terminas el 50: animación final y se desbloquea el nivel extremo
     const finale = levelNum === 50 && !pr.finale;
     if (finale) { pr.finale = true; saveLevelProg(pr); }
-    $("#win-title").textContent = x ? "¡Leyenda! Nivel extremo completado" : levelNum === 50 ? "¡Completaste los 50 niveles!" : `¡Nivel ${levelNum} completado!`;
-    $("#win-line").textContent = `${movs(moves)} · ${fmt(ms)} · meta ${t.three}`;
+    $("#win-title").textContent = x ? tr("¡Leyenda! Nivel extremo completado", "Legend! Extreme level complete") : levelNum === 50 ? tr("¡Completaste los 50 niveles!", "You completed all 50 levels!") : tr(`¡Nivel ${levelNum} completado!`, `Level ${levelNum} complete!`);
+    $("#win-line").textContent = `${movs(moves)} · ${fmt(ms)} · ${tr("meta", "target")} ${t.three}`;
     $("#win-hints").hidden = true;
     $("#win-rec").hidden = true;
     const ws = $("#win-stars");
@@ -3617,14 +3871,14 @@ const Sound = (() => {
       el.classList.toggle("got", i < stars);
     });
     $("#win-next").hidden = x;
-    $("#win-next").textContent = levelNum === 50 ? "Nivel extremo →" : "Siguiente nivel →";
+    $("#win-next").textContent = levelNum === 50 ? tr("Nivel extremo →", "Extreme level →") : tr("Siguiente nivel →", "Next level →");
     $("#win-again").hidden = true;
     $("#win-levels").hidden = false;
     $("#win-retry").hidden = false;
     $("#win-close").hidden = true;
     $("#win-x").hidden = true;
     winEl.hidden = false;
-    say(`¡${lvName(levelNum)} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, "good");
+    say(tr(`¡${lvName(levelNum)} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, `${lvName(levelNum)} complete with ${stars} ${stars === 1 ? "star" : "stars"}!`), "good");
     if (layers.tiles) { restart(layers.tiles, "celebrate"); setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400); }
     Sound.win();
     for (let i = 0; i < 3; i++) setTimeout(() => (i < stars ? (Sound.star(i), buzz(18)) : Sound.starMiss()), 550 + 450 + i * 320);
@@ -3699,13 +3953,13 @@ const Sound = (() => {
       const cells = [];
       for (let n = a; n <= b; n++) {
         const sN = pr.stars[n] || 0; got += sN;
-        if (!unlocked(pr, n)) { cells.push(`<button class="lv locked" type="button" disabled aria-label="Nivel ${n} bloqueado"><b>${n}</b>${LOCK_SVG}</button>`); continue; }
-        cells.push(`<button class="lv${n === nx && !(pr.stars[n] >= 1) ? " next" : ""}" type="button" data-lv="${n}" aria-label="Nivel ${n}, ${sN} estrellas"><b>${n}</b>${starsHTML(sN, "mini")}</button>`);
+        if (!unlocked(pr, n)) { cells.push(`<button class="lv locked" type="button" disabled aria-label="${tr(`Nivel ${n} bloqueado`, `Level ${n} locked`)}"><b>${n}</b>${LOCK_SVG}</button>`); continue; }
+        cells.push(`<button class="lv${n === nx && !(pr.stars[n] >= 1) ? " next" : ""}" type="button" data-lv="${n}" aria-label="${tr(`Nivel ${n}, ${sN} estrellas`, `Level ${n}, ${sN} stars`)}"><b>${n}</b>${starsHTML(sN, "mini")}</button>`);
       }
-      return `<div class="lv-sec"><h4><span>${sizeName(N)} · niveles ${a}–${b}</span><span>★ ${got}/${(b - a + 1) * 3}</span></h4><div class="lv-grid">${cells.join("")}</div></div>`;
+      return `<div class="lv-sec"><h4><span>${sizeName(N)} · ${tr("niveles", "levels")} ${a}–${b}</span><span>★ ${got}/${(b - a + 1) * 3}</span></h4><div class="lv-grid">${cells.join("")}</div></div>`;
     }).join("") + (unlocked(pr, EXTREME)
       // El nivel extremo solo aparece después de terminar el 50
-      ? `<div class="lv-sec lv-secret"><h4><span>Secreto</span><span>★ ${pr.stars[EXTREME] || 0}/3</span></h4><button class="lv-extreme" type="button" data-lv="${EXTREME}" aria-label="Nivel extremo, ${pr.stars[EXTREME] || 0} estrellas"><span class="x-ico">8³</span><span class="x-txt"><b>Nivel extremo</b><small>Cubo 8×8×8 · ${Core.LEVELS[EXTREME - 1].K} movimientos</small></span>${starsHTML(pr.stars[EXTREME] || 0, "mini")}</button></div>`
+      ? `<div class="lv-sec lv-secret"><h4><span>${tr("Secreto", "Secret")}</span><span>★ ${pr.stars[EXTREME] || 0}/3</span></h4><button class="lv-extreme" type="button" data-lv="${EXTREME}" aria-label="${tr("Nivel extremo", "Extreme level")}, ${pr.stars[EXTREME] || 0} ${tr("estrellas", "stars")}"><span class="x-ico">8³</span><span class="x-txt"><b>${tr("Nivel extremo", "Extreme level")}</b><small>${tr("Cubo", "Cube")} 8×8×8 · ${movs(Core.LEVELS[EXTREME - 1].K)}</small></span>${starsHTML(pr.stars[EXTREME] || 0, "mini")}</button></div>`
       : "");
   }
   const LOCK_SVG = '<svg class="lock" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
@@ -3733,7 +3987,11 @@ const Sound = (() => {
   $("#win-next").addEventListener("click", () => startLevel(levelNum === 50 ? EXTREME : Math.min(50, (levelNum || 0) + 1)));
   $("#win-retry").addEventListener("click", () => startLevel(levelNum || 1));
   $("#win-levels").addEventListener("click", () => { winEl.hidden = true; phase = "free"; openLevels(); });
-  function levelInfoText() { const pr = levelProg(); const n = nextLevel(pr); return `Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`; }
+  function levelInfoText() {
+    const pr = levelProg(), n = nextLevel(pr);
+    return tr(`Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`,
+      `Level ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} saved ${pr.bank === 1 ? "hint" : "hints"}`);
+  }
 
   /* ---------- Ventana inicial: Mezclar ---------- */
   let startN = 3;
@@ -3743,12 +4001,12 @@ const Sound = (() => {
       const r = Core.rangeFor(startN, "chaos", lv);
       const b = document.querySelector(`[data-start-level="${lv}"]`);
       b.disabled = !r;
-      $(`#sl-${lv}`).textContent = r ? `${r[0]}–${r[1]} movimientos` : `No hay en ${sizeName(startN)}`;
+      $(`#sl-${lv}`).textContent = r ? `${r[0]}–${r[1]} ${tr("movimientos", "moves")}` : tr(`No hay en ${sizeName(startN)}`, `Not on ${sizeName(startN)}`);
     }
   }
   function openStart() {
     $("#start-levels-info").textContent = levelInfoText();
-    $("#start-levels span").textContent = levelsStarted() ? "Continuar niveles" : "Modo niveles";
+    $("#start-levels span").textContent = levelsStarted() ? tr("Continuar niveles", "Continue levels") : tr("Modo niveles", "Level mode");
     startN = st ? st.N : 3;
     $("#start-logo").innerHTML = document.querySelector(".topbar .logo").innerHTML;
     $("#start-continue").hidden = !(st && phase === "playing" && hist.length > 0 && !Core.isSolved(st));

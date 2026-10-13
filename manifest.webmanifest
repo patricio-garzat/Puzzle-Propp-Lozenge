@@ -1,8 +1,8 @@
 {
   "name": "Propp Lozenge",
   "short_name": "Lozenge",
-  "description": "Versión web no oficial del puzzle magnético Propp Lozenge: gira grupos de tres rombos para volver a armar el cubo.",
-  "lang": "es",
+  "description": "Unofficial web version of the Propp Lozenge magnetic puzzle: turn groups of three tiles to put the cube back together.",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
