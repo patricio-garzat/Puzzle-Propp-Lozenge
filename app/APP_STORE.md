@@ -81,8 +81,9 @@ La respuesta es correcta porque el juego no tiene cuentas, analítica ni anuncio
 ## Paso 6. La versión 1.0 (iOS App → 1.0 Prepare for Submission)
 
 1. **Previews and Screenshots**
-   - En **iPhone 6.9" Display**, arrastra las 5 imágenes de `app/store/appstore-6.9/en/` en orden (1 a 5).
-   - Apple usa esas mismas imágenes para los demás tamaños de iPhone.
+   - En la pestaña **iPhone with Dynamic Island (medium display)** (6.1"/6.3", 1206 × 2622), arrastra las 5 imágenes de `app/store/appstore-6.3/en/` en orden (1 a 5).
+   - Si también aparece una pestaña de **6.9"**, usa las de `app/store/appstore-6.9/en/`.
+   - Las pestañas de iPad y Apple Watch no aplican: la app es solo para iPhone.
 2. **Promotional Text, Description y Keywords:** cópialos del final de esta guía.
 3. **URLs:**
    - **Support URL:** `https://blubergames.com/support/`
@@ -100,7 +101,7 @@ La respuesta es correcta porque el juego no tiene cuentas, analítica ni anuncio
 
 1. Arriba a la derecha, en el selector de idioma (dice **English (U.S.)**), elige **Add Language → Spanish (Mexico)**. Si quieres, también **Spanish (Spain)**.
 2. Llena el nombre, el subtítulo, el texto promocional, la descripción y las palabras clave en español (están abajo).
-3. En las capturas, sube las de `app/store/appstore-6.9/es/`.
+3. En las capturas, sube las de `app/store/appstore-6.3/es/` (y `appstore-6.9/es/` si te pide 6.9").
 
 ## Paso 8. Mandar a revisión
 
