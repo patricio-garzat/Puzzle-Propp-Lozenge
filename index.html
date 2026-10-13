@@ -1658,11 +1658,64 @@ const Core = (() => {
     return best;
   }
 
+  // Mezcla profunda para cubos grandes (4×4×4 en adelante), en tres etapas:
+  // 1) Pelar: quita cubitos empezando por los que mueven rombos que aún no se han movido. Para
+  //    llegar a las esquinas de cada cara hay que quitar una capa completa; se pela varias veces.
+  // 2) Reconstruir una parte con otros giros, para que la forma quede irregular.
+  // 3) Revolver: giros libres que sacan rombos de su sitio.
+  // En cada giro se elige la rotación que deja más rombos fuera de su sitio.
+  function deepWalk(st, K, rand) {
+    const n = st.tiles.length, used = [];
+    const order = (c, t1, t2) => {
+      const t = { t1, t2 }, u = k2(upDown(t)[0]), T = type(t), s = st.solvedType.get(u);
+      return (T === s && c === T ? 3 : 0) + (c === s ? 1 : 0);
+    };
+    const gain = (v, k) => flippable(st, v).reduce((s, id) => { const t = st.tiles[id]; return s + order(t.c, rotSum(t.t1, v, k), rotSum(t.t2, v, k)) - order(t.c, t.t1, t.t2); }, 0);
+    // No repetir un punto sin un giro vecino en medio (se fusionarían en uno solo)
+    const legal = (v) => { for (let j = used.length - 1; j >= 0; j--) if (adjacent(used[j].v, v)) return !(used[j].v[0] === v[0] && used[j].v[1] === v[1]); return true; };
+    const apply = (v, k) => { applyMove(st, v, k); used.push({ v: [...v], k }); };
+    const bestK = (v, ks) => { let b = Infinity, kk = ks[0]; for (const k of ks) { const g = gain(v, k) + rand() * 0.8; if (g < b) { b = g; kk = k; } } return { k: kk, g: b }; };
+    const bestMove = (ok, ks) => { let b = Infinity, p = null; for (const v of movesOf(st)) if (legal(v) && ok(v)) { const r = bestK(v, ks); if (r.g < b) { b = r.g; p = { v, k: r.k }; } } return p; };
+    const ring = (v) => Math.max(Math.abs(v[0]), Math.abs(v[1]), Math.abs(v[0] + v[1]));
+    // 1) Pelar
+    let round = new Set();
+    const peelEnd = Math.round(K * (st.N >= 8 ? 0.9 : 0.75));
+    while (used.length < peelEnd) {
+      if (round.size >= n) round = new Set();
+      let top = -1, pool = [];
+      for (const v of movesOf(st)) {
+        if (!legal(v) || cubeDelta(st, v) !== 1) continue;
+        const s = flippable(st, v).filter((id) => !round.has(id)).length * 100 + ring(v);
+        if (s > top) { top = s; pool = [v]; } else if (s === top) pool.push(v);
+      }
+      if (!pool.length) break;
+      const v = pool[Math.floor(rand() * pool.length)];
+      for (const id of flippable(st, v)) round.add(id);
+      apply(v, bestK(v, [1, 3, 5]).k);
+    }
+    // 2) Reconstruir una parte, con cambios de color de vez en cuando
+    const buildEnd = used.length + Math.round((K - used.length) * 0.6);
+    while (used.length < buildEnd) {
+      if (rand() < 0.3) { const p = bestMove(() => true, [2, 4]); if (p && gain(p.v, p.k) < 0) { apply(p.v, p.k); continue; } }
+      const p = bestMove((v) => cubeDelta(st, v) === -1, [1, 3, 5]);
+      if (!p) break;
+      apply(p.v, p.k);
+    }
+    // 3) Revolver
+    while (used.length < K) {
+      let p = bestMove(() => true, [1, 2, 3, 4, 5]);
+      if (!p) { const all = movesOf(st); p = { v: all[Math.floor(rand() * all.length)], k: 1 + Math.floor(rand() * 5) }; }
+      apply(p.v, p.k);
+    }
+    return used;
+  }
+
   /* ---- Modo niveles: 50 mezclas fijas (iguales para todos), cada vez más difíciles ---- */
   const LEVELS = [];
-  [[2, [3, 4, 5, 6, 7]], [3, [6, 7, 8, 9, 10]], [4, Array.from({ length: 10 }, (_, i) => 10 + i)],
-   [5, Array.from({ length: 10 }, (_, i) => 18 + i)], [6, Array.from({ length: 10 }, (_, i) => 26 + i)],
-   [8, Array.from({ length: 10 }, (_, i) => 36 + i)]].forEach(([N, ks]) => ks.forEach((K) => LEVELS.push({ N, K })));
+  // Del 4×4×4 en adelante se revuelve todo el cubo: de K = a (primer nivel del tamaño) a b (último).
+  const ramp = (a, b) => Array.from({ length: 10 }, (_, i) => Math.round(a + ((b - a) * i) / 9));
+  [[2, [3, 4, 5, 6, 7]], [3, [6, 7, 8, 9, 10]], [4, ramp(30, 75)],
+   [5, ramp(80, 150)], [6, ramp(150, 280)], [8, ramp(300, 480)]].forEach(([N, ks]) => ks.forEach((K) => LEVELS.push({ N, K })));
   // Generador pseudoaleatorio con semilla: la misma mezcla en todos los dispositivos
   function seeded(seed) {
     let a = seed >>> 0;
@@ -1672,7 +1725,8 @@ const Core = (() => {
     const L = LEVELS[n - 1];
     if (!L) return null;
     const st = createState(L.N);
-    const used = walk(st, L.K, "chaos", seeded(n * 7919 + 2027));
+    const rand = seeded(n * 7919 + 2027);
+    const used = L.N >= 4 ? deepWalk(st, L.K, rand) : walk(st, L.K, "chaos", rand);
     let meta = L.K, exact = false;
     if (L.N <= 3) { const r = solve(st); if (r.d !== null) { meta = r.d; exact = true; } }
     return { N: L.N, K: L.K, meta, exact, tiles: copyTiles(st.tiles), route: inverse(used) };
