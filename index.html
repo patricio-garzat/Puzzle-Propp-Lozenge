@@ -838,6 +838,25 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .win-hints { margin: 0; font-weight: 700; font-size: 14px; color: var(--ok) !important; animation: rise 0.4s ease both; animation-delay: 1.5s; }
 .win-hints.lost { color: var(--warn) !important; }
 
+/* Nivel actual: encabezado sobre el tablero y presentación al empezar */
+.lvl-banner { display: flex; align-items: center; justify-content: center; gap: 10px; flex: none; }
+.lvl-num { font-family: var(--f-display); font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+.lvl-num b { font-weight: 800; }
+.lvl-size { font-weight: 800; font-size: 13px; padding: 4px 10px; border-radius: 999px; background: var(--ink); color: var(--bg); }
+#lvl-stars .goal-stars svg { width: 18px; height: 18px; }
+.lvl-intro { position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: 2px; pointer-events: none; text-align: center;
+  background: radial-gradient(closest-side, var(--scrim), transparent); animation: li-out 0.45s ease 1.25s forwards; }
+.lvl-intro .li-k { font-family: var(--f-mono); font-weight: 800; font-size: 14px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); animation: li-in 0.45s cubic-bezier(.2,1.4,.4,1) both; }
+.lvl-intro b { font-family: var(--f-display); font-weight: 800; font-size: clamp(64px, 16vw, 110px); line-height: 1; letter-spacing: -0.04em; color: var(--ink); animation: li-pop 0.6s cubic-bezier(.2,1.6,.4,1) 0.08s both; }
+.lvl-intro .li-size { margin-top: 8px; font-weight: 800; font-size: 16px; padding: 6px 14px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); animation: li-in 0.45s cubic-bezier(.2,1.4,.4,1) 0.25s both; }
+@keyframes li-pop { from { transform: scale(0.4); opacity: 0; } }
+@keyframes li-in { from { transform: translateY(10px); opacity: 0; } }
+@keyframes li-out { to { opacity: 0; transform: scale(1.06); } }
+@media (max-width: 719px), (max-height: 520px) and (pointer: coarse) {
+  .lvl-num { font-size: 18px; }
+  .stage { gap: 6px; }
+}
+
 #confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -953,7 +972,9 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         <span class="m-bar"><span id="m-bar"></span></span>
         <span class="m-goal" id="m-goal" hidden>Mínimo 9</span>
       </div>
+      <div class="lvl-banner" id="lvl-banner" hidden><span class="lvl-num">Nivel <b id="lvl-n">1</b></span><span class="lvl-size" id="lvl-size">2×2×2</span><span id="lvl-stars"></span></div>
       <div class="board-wrap" id="board-wrap">
+        <div class="lvl-intro" id="lvl-intro" hidden><span class="li-k">Nivel</span><b id="li-n">1</b><span class="li-size" id="li-size">Cubo 2×2×2</span></div>
         <div class="glow" aria-hidden="true"></div>
         <svg id="board" role="application" aria-label="Tablero hexagonal con rombos" aria-describedby="status"></svg>
         <div class="scrim" id="win" hidden>
@@ -2089,7 +2110,14 @@ const Sound = (() => {
     mb.classList.toggle("done", ok === n);
     const mg = $("#m-goal");
     mg.hidden = phase === "edit" || (par === null && !parOver);
-    if (mode === "level" && levelNum && par !== null) mg.innerHTML = `N${levelNum}${starsHTML(starsFor(hist.length), "goal-stars")}`;
+    const lb = $("#lvl-banner");
+    lb.hidden = !(mode === "level" && levelNum && phase !== "edit");
+    if (!lb.hidden) {
+      $("#lvl-n").textContent = levelNum;
+      $("#lvl-size").textContent = sizeName(st.N);
+      $("#lvl-stars").innerHTML = starsHTML(starsFor(hist.length), "goal-stars");
+    }
+    if (mode === "level" && levelNum && par !== null) mg.innerHTML = `Meta ${par}`;
     else mg.textContent = par !== null ? (parExact ? `Mínimo ${par}` : `Meta ${par}`) : "Más de 8";
     mg.classList.toggle("bound", par !== null && !parExact && mode !== "level");
     mg.classList.toggle("lvl", mode === "level" && !!levelNum);
@@ -3172,10 +3200,22 @@ const Sound = (() => {
     bumpStat("played");
     closeLevels(); closeShell(); pauseEl.hidden = true; wasRunning = false;
     buildBoard(); playIntro(); Sound.shuffle();
+    showLevelIntro(n, L.N);
     const t = levelTargets();
     const bank = levelProg().bank;
     say(`Nivel ${n} · ${sizeName(L.N)}: meta ${t.three} para ★★★. Tienes 3 pistas de este nivel${bank ? ` y ${bank} ${bank === 1 ? "guardada" : "guardadas"}` : ""}.`);
     save();
+  }
+
+  function showLevelIntro(n, N) {
+    const el = $("#lvl-intro");
+    $("#li-n").textContent = n;
+    $("#li-size").textContent = `Cubo ${sizeName(N)}`;
+    el.hidden = true; void el.getBoundingClientRect(); el.hidden = false;
+    if (reduceMotion) { setTimeout(() => (el.hidden = true), 1200); return; }
+    clearTimeout(showLevelIntro.t);
+    showLevelIntro.t = setTimeout(() => (el.hidden = true), 1750);
+    setTimeout(() => Sound.hint(), 120);
   }
 
   function winLevel() {
