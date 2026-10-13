@@ -820,7 +820,7 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
       <li><span><b>En celular:</b> desliza el dedo sobre un punto blanco. Hacia arriba gira en sentido horario y hacia abajo, antihorario.</span></li>
       <li><span>Tres toques seguidos son 180°: equivale a quitar o poner un cubito.</span></li>
       <li><span>Toques seguidos en el mismo punto cuentan como un solo movimiento, igual que con la herramienta magnética.</span></li>
-      <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). Los tableros chicos no dan para tanto: en 2×2×2 solo hay Fácil (en pilas el máximo es 8 y en caos, 14), y en 3×3×3 en pilas el máximo es 27, así que Difícil solo existe en caos.</span></li>
+      <li><span>Elige la <b>dificultad</b>: Fácil (6–9 movimientos), Intermedio (15–20) o Difícil (30–35). En 4×4×4 los rangos son más grandes: Fácil 9–15, Intermedio 21–35 y Difícil 40–60. Los tableros chicos no dan para tanto: en 2×2×2 solo hay Fácil (en pilas el máximo es 8 y en caos, 14), y en 3×3×3 en pilas el máximo es 27, así que Difícil solo existe en caos.</span></li>
       <li><span>Cada mezcla te dice en cuántos movimientos se puede resolver. Cuando dice “mínimo”, es el mínimo exacto. En caos Intermedio y Difícil de 3×3×3 y 4×4×4 es una meta segura: seguro se puede en esa cantidad, aunque quizá exista un camino un poco más corto. Lograrlo en ese número o menos es una partida perfecta.</span></li>
       <li><span><b>Arma tu mezcla:</b> el cubo empieza en blanco. Elige un color y toca o arrastra sobre los rombos para pintarlos: cada color tiene un cupo (9 en 3×3×3) y no puedes poner más. Cuando se acaba uno, pasa solo al siguiente. Toca un rombo de su mismo color para quitarlo. Con “Girar” mueves grupos de tres. Cuando todo esté pintado, presiona “Jugar desde aquí”.</span></li>
       <li><span><b>Pista:</b> marca en amarillo un grupo con la etiqueta “Toca aquí”. Tócalo una vez y hace el giro del camino más corto.</span></li>
@@ -1065,11 +1065,14 @@ const Core = (() => {
   }
 
   /* ---- Mezclas por dificultad ---- */
-  const RANGES = { easy: [6, 9], mid: [15, 20], hard: [30, 35] };
+  // Rangos de movimientos por dificultad; el 4×4×4 tiene los suyos.
+  const RANGES_BASE = { easy: [6, 9], mid: [15, 20], hard: [30, 35] };
+  const RANGES_4 = { easy: [9, 15], mid: [21, 35], hard: [40, 60] };
+  const rangesOf = (N) => (N === 4 ? RANGES_4 : RANGES_BASE);
   // Mayor mínimo posible: en pilas, los cubitos de la caja; en caos, 14 para 2×2×2.
   const maxFor = (N, mode) => (mode === "pile" ? N * N * N : N === 2 ? 14 : Infinity);
   function rangeFor(N, mode, level) {
-    const [lo, hi] = RANGES[level], m = maxFor(N, mode);
+    const [lo, hi] = rangesOf(N)[level], m = maxFor(N, mode);
     return lo > m ? null : [lo, Math.min(hi, m)];
   }
   const adjacent = (a, b) => { const da = a[0] - b[0], db = a[1] - b[1]; return Math.abs(da) <= 1 && Math.abs(db) <= 1 && Math.abs(da + db) <= 1; };
@@ -1160,7 +1163,7 @@ const Core = (() => {
     return best;
   }
 
-  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve, rangeFor, maxFor };
+  return { SQ3, k2, triVerts, screen, upDown, type, hexTris, createState, clone, isValid, flippable, applyMove, isCorrect, correctCount, isSolved, movesOf, scramble, hint, cubeDelta, analyze, solve, rangeFor, maxFor, rangesOf };
 })();
 /*END CORE*/
 
@@ -1767,7 +1770,7 @@ const Sound = (() => {
       $(`#lv-${lv}`).textContent = r ? (r[0] === r[1] ? `${r[0]}` : `${r[0]}–${r[1]}`) : "—";
     }
     const max = Core.maxFor(st.N, m);
-    $("#level-note").textContent = max < 35
+    $("#level-note").textContent = max < Core.rangesOf(st.N).hard[1]
       ? `En ${sizeName(st.N)} ${m === "pile" ? "en pilas" : "en caos"} el máximo es ${max} movimientos.`
       : "Movimientos para resolver la mezcla.";
   }
