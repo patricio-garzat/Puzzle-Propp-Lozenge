@@ -717,7 +717,19 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .ill svg { width: 100%; height: auto; filter: drop-shadow(0 14px 18px var(--shadow)); }
 .static-unflipped .lg-corner { animation: none; transform: rotate(0deg); }
 .static-flipped .lg-corner { animation: none; transform: rotate(180deg); }
-.ill-swipe .finger { position: absolute; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.25), 0 6px 14px var(--shadow-strong); animation: finger 2.2s cubic-bezier(.5,0,.3,1) infinite; }
+.ill-swipe { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.ill-swipe.nope { animation: shake 0.32s ease; }
+.demo-dot { position: absolute; left: 50%; top: 50%; width: 18px; height: 18px; margin: -9px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 3px rgba(18, 20, 36, 0.6), 0 0 0 10px rgba(255, 255, 255, 0.28); animation: demo-pulse 1.6s ease-in-out infinite; pointer-events: none; }
+.ill-swipe.done .demo-dot { animation: none; }
+@keyframes demo-pulse { 50% { box-shadow: 0 0 0 3px rgba(18, 20, 36, 0.6), 0 0 0 16px rgba(255, 255, 255, 0.12); } }
+.demo-steps { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+.demo-steps span { padding: 7px 12px; border-radius: 999px; background: var(--card-2); border: 1.5px solid var(--line); font-weight: 700; font-size: 13px; color: var(--muted); transition: background-color 0.25s ease, color 0.25s ease, transform 0.25s cubic-bezier(.3,1.6,.5,1); }
+.demo-steps span.ok { background: #17A06B; border-color: #17A06B; color: #FFFFFF; transform: scale(1.06); }
+.demo-steps span.now { color: var(--ink); border-color: var(--ink); }
+.ill-swipe .finger { position: absolute; pointer-events: none; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px; border-radius: 50%; background: rgba(255, 255, 255, 0.85); box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.25), 0 6px 14px var(--shadow-strong); animation: finger 2.2s cubic-bezier(.5,0,.3,1) infinite; }
+.ill-swipe.want-down .finger { animation-name: finger-down; }
+.ill-swipe.done .finger { display: none; }
+@keyframes finger-down { 0%, 15% { transform: translateY(-18px); opacity: 0; } 25% { opacity: 1; } 60% { transform: translateY(34px); opacity: 1; } 75%, 100% { transform: translateY(34px); opacity: 0; } }
 @keyframes finger { 0%, 15% { transform: translateY(18px); opacity: 0; } 25% { opacity: 1; } 60% { transform: translateY(-34px); opacity: 1; } 75%, 100% { transform: translateY(-34px); opacity: 0; } }
 .ill-pair { width: min(84vw, 320px); aspect-ratio: auto; grid-template-columns: 1fr auto 1fr; gap: 10px; }
 .ill-arrow { font-family: var(--f-display); font-weight: 800; font-size: 28px; color: var(--muted); }
@@ -1080,12 +1092,14 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
         <p>Los rombos de tres colores forman la ilusión de un cubo. Tu meta: dejar amarillo arriba, rojo a la izquierda y azul a la derecha.</p>
       </div>
       <div class="slide">
-        <div class="ill ill-swipe">
+        <div class="ill ill-swipe want-up" id="demo" aria-label="Prueba: desliza sobre el punto blanco">
           <svg viewBox="-1.08 -1.08 2.16 2.16" data-logo class="static-unflipped" aria-hidden="true"></svg>
+          <span class="demo-dot"></span>
           <span class="finger"></span>
         </div>
         <h3>Desliza para girar</h3>
-        <p>Pon el dedo sobre un punto blanco y desliza: <b>hacia arriba</b> gira en sentido horario y <b>hacia abajo</b>, antihorario. Cada deslizada gira 60°.</p>
+        <p id="demo-text" aria-live="polite">Pruébalo: pon el dedo sobre el punto blanco y desliza <b>hacia arriba</b>.</p>
+        <div class="demo-steps"><span id="ds1">↑ Arriba · horario</span><span id="ds2">↓ Abajo · antihorario</span></div>
       </div>
       <div class="slide">
         <div class="ill ill-pair">
@@ -2634,7 +2648,7 @@ const Sound = (() => {
     if (id === "scr-stats") renderStats();
     if (id === "scr-settings") syncSettings();
     if (id === "scr-home") syncHome();
-    if (id === "scr-howto") { $("#slides").scrollLeft = 0; syncDots(0); try { localStorage.setItem("propp-seen-howto", "1"); } catch (e) {} }
+    if (id === "scr-howto") { $("#slides").scrollLeft = 0; syncDots(0); resetDemo(); try { localStorage.setItem("propp-seen-howto", "1"); } catch (e) {} }
     Sound.tick();
   }
   function popScreen() {
@@ -2710,6 +2724,69 @@ const Sound = (() => {
       Sound.tick();
     } else popScreen();
   });
+  // Prueba interactiva: deslizar arriba (horario) y luego abajo (antihorario)
+  const demo = $("#demo");
+  let demoStep = 0, demoDeg = 0, demoTouch = null;
+  function demoCorner(deg) {
+    const g = demo.querySelector(".lg-corner");
+    if (!g) return;
+    g.style.transition = "transform 0.5s cubic-bezier(.3,1.45,.5,1)";
+    g.style.transform = `rotate(${deg}deg)`;
+  }
+  function demoSay(html) { $("#demo-text").innerHTML = html; }
+  function resetDemo() {
+    demoStep = 0; demoDeg = 0;
+    fillLogos(shell);
+    const g = demo.querySelector(".lg-corner");
+    if (g) { g.style.transition = "none"; g.style.transform = "rotate(0deg)"; }
+    demo.className = "ill ill-swipe want-up";
+    $("#ds1").className = "now"; $("#ds2").className = "";
+    demoSay("Pruébalo: pon el dedo sobre el punto blanco y desliza <b>hacia arriba</b>.");
+  }
+  function demoWrong(msg) {
+    Sound.bad(); buzz(25);
+    demo.classList.remove("nope"); void demo.getBoundingClientRect(); demo.classList.add("nope");
+    demoSay(msg);
+  }
+  function demoSwipe(dir) {
+    if (demoStep === 0) {
+      if (dir !== "up") return demoWrong("Casi: primero desliza <b>hacia arriba</b>.");
+      demoDeg = 60; demoCorner(demoDeg); Sound.lift(); setTimeout(() => Sound.place(), 260); buzz(10);
+      demoStep = 1;
+      demo.className = "ill ill-swipe want-down";
+      $("#ds1").className = "ok"; $("#ds2").className = "now";
+      demoSay("¡Bien! Hacia arriba gira en <b>sentido horario</b>. Ahora desliza <b>hacia abajo</b>.");
+    } else if (demoStep === 1) {
+      if (dir !== "down") return demoWrong("Ahora al revés: desliza <b>hacia abajo</b>.");
+      demoDeg = 0; demoCorner(demoDeg); Sound.lift(); setTimeout(() => { Sound.place(); Sound.good(8); }, 260); buzz([10, 40, 10]);
+      demoStep = 2;
+      demo.className = "ill ill-swipe done";
+      $("#ds2").className = "ok";
+      demoSay("¡Perfecto! Hacia abajo gira en <b>sentido antihorario</b>. Cada deslizada gira 60°. Puedes seguir practicando.");
+    } else {
+      demoDeg += dir === "up" ? 60 : -60; demoCorner(demoDeg); Sound.lift(); setTimeout(() => Sound.place(), 260); buzz(8);
+    }
+  }
+  demo.addEventListener("pointerdown", (e) => {
+    demoTouch = { x: e.clientX, y: e.clientY, id: e.pointerId, done: false };
+    try { demo.setPointerCapture(e.pointerId); } catch (err) {}
+  });
+  demo.addEventListener("pointermove", (e) => {
+    if (!demoTouch || demoTouch.done || e.pointerId !== demoTouch.id) return;
+    const dx = e.clientX - demoTouch.x, dy = e.clientY - demoTouch.y;
+    if (Math.abs(dy) < 22 || Math.abs(dy) < Math.abs(dx) * 1.1) return;
+    demoTouch.done = true;
+    demoSwipe(dy < 0 ? "up" : "down");
+  });
+  const demoEnd = (e) => {
+    if (!demoTouch || e.pointerId !== demoTouch.id) return;
+    if (!demoTouch.done && Math.hypot(e.clientX - demoTouch.x, e.clientY - demoTouch.y) < 14 && demoStep < 2)
+      demoSay(`No basta con tocar: desliza el dedo <b>${demoStep === 0 ? "hacia arriba" : "hacia abajo"}</b>.`);
+    demoTouch = null;
+  };
+  demo.addEventListener("pointerup", demoEnd);
+  demo.addEventListener("pointercancel", demoEnd);
+
   // Récords
   function renderStats() {
     const x = readStats(), best = readBest();
