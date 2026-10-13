@@ -3848,11 +3848,17 @@ const Sound = (() => {
     const moves = hist.length, ms = elapsed, t = levelTargets();
     const stars = starsFor(moves);
     const pr = levelProg();
+    const firstClear = !(pr.stars[levelNum] >= 1);
     pr.stars[levelNum] = Math.max(pr.stars[levelNum] || 0, stars);
-    // 3 estrellas = +1 pista guardada (una vez por nivel); las 3 del nivel se pierden al terminar
+    // Pistas que se guardan para los siguientes niveles:
+    // · las del nivel que no usaste (solo la primera vez que lo terminas, para que repetir niveles no regale pistas)
+    // · +1 la primera vez que sacas 3 estrellas
     pr.bonus = pr.bonus || {};
     const earned = stars === 3 && !pr.bonus[levelNum];
-    if (earned) { pr.bonus[levelNum] = true; pr.bank += 1; }
+    if (earned) pr.bonus[levelNum] = true;
+    const kept = firstClear ? levelHints : 0;
+    const gained = kept + (earned ? 1 : 0);
+    pr.bank += gained;
     saveLevelProg(pr);
     levelHints = 0;
     const x = levelNum === EXTREME, last = levelNum >= 50;
@@ -3882,14 +3888,15 @@ const Sound = (() => {
     if (layers.tiles) { restart(layers.tiles, "celebrate"); setTimeout(() => layers.tiles && layers.tiles.classList.remove("celebrate"), 1400); }
     Sound.win();
     for (let i = 0; i < 3; i++) setTimeout(() => (i < stars ? (Sound.star(i), buzz(18)) : Sound.starMiss()), 550 + 450 + i * 320);
-    if (earned) setTimeout(flyBulb, 1650);
+    // Un foquito por cada pista que se guarda
+    for (let i = 0; i < gained; i++) setTimeout(() => flyBulb(pr.bank - gained + i + 1), 1650 + i * 260);
     buzz([20, 40, 30]);
     bumpStat("solved");
     if (stars === 3) { bumpStat("perfect"); setTimeout(confetti, 1500); }
     if (x) { setTimeout(confetti, 500); setTimeout(confetti, 2300); setTimeout(() => Sound.secret(), 1900); }
     if (finale) setTimeout(showFinale, 2900);
     updateStats();
-    if (earned) $("#hint-count").textContent = pr.bank - 1; // sube cuando llega el foquito
+    if (gained) $("#hint-count").textContent = pr.bank - gained; // sube con cada foquito que llega
     setTimeout(() => { if (!winEl.hidden) $(x ? "#win-levels" : "#win-next").focus({ preventScroll: true }); }, 600);
   }
 
@@ -3917,9 +3924,9 @@ const Sound = (() => {
 
   // Foquito que sale de las estrellas y vuela hasta el botón de pistas
   const BULB_SVG = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.8a4.4 4.4 0 0 0-2.6 8V11.5h5.2V9.8A4.4 4.4 0 0 0 8 1.8Z"/><path d="M6 14h4" fill="none" stroke-width="1.6" stroke-linecap="round"/></svg>';
-  function flyBulb() {
+  function flyBulb(count) {
     const hc = $("#hint-count"), btn = $("#hint-btn");
-    const land = () => { hc.textContent = levelProg().bank; hc.classList.remove("zero"); restart(hc, "pop"); restart(btn, "bulb-hit"); Sound.coin(); buzz(15); };
+    const land = () => { hc.textContent = count; hc.classList.remove("zero"); restart(hc, "pop"); restart(btn, "bulb-hit"); Sound.coin(); buzz(15); };
     const from = $("#win-stars").getBoundingClientRect(), to = btn.getBoundingClientRect();
     if (reduceMotion || !from.width || !to.width || !document.body.animate) { land(); return; }
     const x0 = from.left + from.width / 2, y0 = from.top + from.height / 2;
