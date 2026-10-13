@@ -593,16 +593,17 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    2.0–2.85   la esquina se levanta, da media vuelta y aterriza (onda expansiva)
    2.9–3.8    el nombre aparece letra por letra y la franja
    hasta 5.0  logo completo para leerlo; 5.0–5.5 se desvanece */
-/* Intro del estudio: fondo blanco, logo de tamaño moderado al centro */
+/* Intro del estudio: fondo del tema, logo de tamaño moderado al centro */
 /* position: absolute a propósito: Safari pinta su barra de arriba con el color de las capas *fijas* pegadas
    arriba; con una capa fija blanca la barra se quedaba blanca. Así la barra siempre toma el fondo de la app. */
 /* Alto = lo que de verdad se ve (100dvh); con 100vh Safari cuenta el área de sus barras y el logo quedaba abajo */
 #studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; z-index: 210; display: grid; place-items: center; background: var(--bg); padding: 16px; box-sizing: border-box; overflow: hidden; transition: background-color 0.45s ease; }
-/* Safari toma el color de su barra de arriba al terminar de cargar: la intro empieza con el fondo del tema
-   y se vuelve blanca justo después, así la barra queda del color del tema y no blanca */
-#studio.paper { background: #FFFFFF; }
+/* La intro usa el fondo del tema (nunca blanco): Safari pinta sus barras de arriba y de abajo con ese color,
+   así no queda ninguna franja de otro color. En modo oscuro va la versión del logo para fondo oscuro */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #bb-word { fill: #B6E3FF; } }
+:root[data-theme="dark"] #bb-word { fill: #B6E3FF; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
-/* Mientras carga la página solo se ve el fondo blanco; el logo aparece cuando su animación ya está lista */
+/* Mientras carga la página solo se ve el fondo; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
 /* La intro del juego espera a que termine la del estudio */
 #splash.hold, #splash.hold * { animation-play-state: paused !important; }
@@ -3439,13 +3440,12 @@ const Sound = (() => {
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
     };
-    // Espera a que la página termine de cargar, pasa a blanco y entonces empieza la animación
+    // Espera a que la página termine de cargar y entonces empieza la animación
     let begun = false;
     const begin = () => {
       if (begun) return;
       begun = true;
-      el.classList.add("paper");
-      setTimeout(run, 450);
+      setTimeout(run, 200);
     };
     if (document.readyState === "complete") setTimeout(begin, 250);
     else window.addEventListener("load", () => setTimeout(begin, 250), { once: true });
