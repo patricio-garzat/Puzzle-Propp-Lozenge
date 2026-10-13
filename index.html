@@ -593,15 +593,15 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
    2.0–2.85   la esquina se levanta, da media vuelta y aterriza (onda expansiva)
    2.9–3.8    el nombre aparece letra por letra y la franja
    hasta 5.0  logo completo para leerlo; 5.0–5.5 se desvanece */
-/* Intro del estudio: fondo del tema, logo de tamaño moderado al centro */
+/* Intro del estudio: fondo blanco, logo de tamaño moderado al centro */
 /* position: absolute a propósito: Safari pinta su barra de arriba con el color de las capas *fijas* pegadas
    arriba; con una capa fija blanca la barra se quedaba blanca. Así la barra siempre toma el fondo de la app. */
 /* Alto = lo que de verdad se ve (100dvh); con 100vh Safari cuenta el área de sus barras y el logo quedaba abajo */
 #studio { position: absolute; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; z-index: 210; display: grid; place-items: center; background: var(--bg); padding: 16px; box-sizing: border-box; overflow: hidden; transition: background-color 0.45s ease; }
-/* La intro usa el fondo del tema (nunca blanco): Safari pinta sus barras de arriba y de abajo con ese color,
-   así no queda ninguna franja de otro color. En modo oscuro va la versión del logo para fondo oscuro */
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) #bb-word { fill: #B6E3FF; } }
-:root[data-theme="dark"] #bb-word { fill: #B6E3FF; }
+/* Safari toma el color de su barra al terminar de cargar: la intro empieza con el fondo del tema y se vuelve
+   blanca justo después. Mientras dura, <html> también va en blanco para que no se asome el fondo oscuro
+   en la franja de abajo del iPhone (el alto visible no siempre llega hasta el borde) */
+#studio.paper { background: #FFFFFF; }
 #studio svg { width: min(56vw, 34vh, 300px); height: auto; overflow: visible; }
 /* Mientras carga la página solo se ve el fondo; el logo aparece cuando su animación ya está lista */
 #studio:not(.go) svg { visibility: hidden; }
@@ -3436,16 +3436,19 @@ const Sound = (() => {
       return node.animate(frames, { delay, duration, easing, fill });
     };
     const finish = () => {
+      document.documentElement.style.backgroundColor = ""; // de vuelta al fondo del tema
       next();
       const out = el.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 450, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
       out.onfinish = () => el.remove();
     };
-    // Espera a que la página termine de cargar y entonces empieza la animación
+    // Espera a que la página termine de cargar, pasa a blanco (también <html>) y entonces empieza la animación
     let begun = false;
     const begin = () => {
       if (begun) return;
       begun = true;
-      setTimeout(run, 200);
+      el.classList.add("paper");
+      document.documentElement.style.backgroundColor = "#FFFFFF";
+      setTimeout(run, 450);
     };
     if (document.readyState === "complete") setTimeout(begin, 250);
     else window.addEventListener("load", () => setTimeout(begin, 250), { once: true });
