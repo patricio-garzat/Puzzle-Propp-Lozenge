@@ -2009,6 +2009,7 @@ const Sound = (() => {
   // sonido mudo con un elemento <audio> durante un toque pone la sesión en modo "reproducción",
   // así el juego se oye aunque el interruptor de silencio esté activado (como un video).
   const SILENT = "data:audio/wav;base64,UklGRkQDAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YSADAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";
+  function isNativeApp() { return document.documentElement.classList.contains("native"); }
   let primed = false;
   function primeMedia() {
     if (primed) return;
@@ -2083,10 +2084,13 @@ const Sound = (() => {
     set(v) { on = v; try { localStorage.setItem(KEY, v ? "1" : "0"); } catch (e) {} },
     unlock() {
       unlocked = true;
-      // Safari: tratar el sonido del juego como reproducción (no lo silencia el interruptor de silencio)
-      try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
+      // Safari: tratar el sonido del juego como reproducción (no lo silencia el interruptor de silencio).
+      // En la app de iOS va en modo ambiente, como los juegos: se mezcla con la música, respeta el modo
+      // silencio y no aparece en la Dynamic Island como si fuera música.
+      const type = isNativeApp() ? "ambient" : "playback";
+      try { if (navigator.audioSession && navigator.audioSession.type !== type) navigator.audioSession.type = type; } catch (e) {}
       if (on && ctx && !healthy()) rebuild();
-      if (on) primeMedia();
+      if (on && !isNativeApp()) primeMedia();
       ensure();
     },
     // Llama a cb cuando el audio de verdad ya está sonando (el navegador lo confirma de forma asíncrona)
@@ -2098,8 +2102,8 @@ const Sound = (() => {
     // ¿El navegador deja sonar sin que la persona toque primero?
     probe() {
       if (!on) return false;
-      // En la app de iOS sí se puede sonar sin toque: primero se pide modo reproducción (como en unlock)
-      if (document.documentElement.classList.contains("native")) { try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {} }
+      // En la app de iOS sí se puede sonar sin toque: primero se pide el modo de audio (como en unlock)
+      if (isNativeApp()) { try { if (navigator.audioSession) navigator.audioSession.type = "ambient"; } catch (e) {} }
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return false;
       try {
