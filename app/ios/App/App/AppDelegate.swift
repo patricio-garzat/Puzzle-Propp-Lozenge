@@ -39,6 +39,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         scrollView.setZoomScale(1, animated: false)
         scrollView.pinchGestureRecognizer?.isEnabled = false
         scrollView.bouncesZoom = false
+        // Es un juego: sin vista previa de links al dejar presionado
+        bridge.webView?.allowsLinkPreview = false
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

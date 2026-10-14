@@ -226,6 +226,11 @@ button { font: inherit; color: inherit; }
   animation: spin 28s linear infinite; animation-play-state: var(--motion);
 }
 @keyframes spin { to { rotate: 360deg; } }
+/* Es un juego, no una página: sin selección de texto, lupa, menú de copiar, vista previa de links,
+   arrastrar imágenes ni sombreado al tocar (los campos de texto, si los hubiera, sí se pueden usar) */
+html, body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+input[type="text"], input[type="search"], textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
+img, svg, a { -webkit-user-drag: none; user-drag: none; }
 #board { touch-action: manipulation; user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent; filter: drop-shadow(0 24px 30px var(--shadow-strong)); }
 #board.pointer { cursor: pointer; }
 .board-wrap.shake #board { animation: shake 0.32s ease; }
@@ -3632,6 +3637,12 @@ const Sound = (() => {
     }
     if (navigator.vibrate) { try { navigator.vibrate(ms); } catch (e) {} }
   };
+  // Dejar presionado no abre menús ni selecciona nada (en celular y en la app; en computadora el clic derecho del tablero sigue igual)
+  if (isNative() || matchMedia("(pointer: coarse)").matches) {
+    document.addEventListener("contextmenu", (e) => { if (!e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault(); });
+  }
+  document.addEventListener("selectstart", (e) => { if (!e.target.closest || !e.target.closest("input, textarea, [contenteditable='true']")) e.preventDefault(); });
+  document.addEventListener("dragstart", (e) => e.preventDefault());
   // App de iOS: un toque háptico ligero al presionar cualquier botón (como en las apps nativas).
   // No aplica en el tablero (los giros ya tienen su propia vibración) ni en botones desactivados.
   if (isNative()) {
