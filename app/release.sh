@@ -2,6 +2,8 @@
 # Arma y sube un build nuevo de Cube Swipe a App Store Connect (TestFlight), sin abrir Xcode.
 # Uso:  ./release.sh            → sube el número de build en 1 y lo sube
 #       ./release.sh 1.1        → además cambia la versión a 1.1
+# Ojo: si una versión ya fue aprobada por Apple, no acepta builds nuevos con ese número:
+#      hay que subir con una versión mayor (por ejemplo ./release.sh 1.0.3).
 # Necesita ~/.appstoreconnect/cubeswipe.env con ASC_KEY_ID, ASC_ISSUER_ID y ASC_KEY_PATH (clave Admin).
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -22,4 +24,5 @@ xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release -de
 rm -rf build/export
 xcodebuild -exportArchive -archivePath "$ARCH" -exportOptionsPlist ExportOptions.plist -exportPath build/export "${AUTH[@]}" \
   | grep -E 'error:|Upload succeeded|EXPORT (SUCCEEDED|FAILED)|Uploaded'
-echo "Listo: Cube Swipe $VERSION ($BUILD) subido. Apple lo procesa en 5–30 min."
+echo "Subido Cube Swipe $VERSION ($BUILD). Esperando a que Apple lo procese…"
+node tools/asc-status.js "$BUILD" 25
