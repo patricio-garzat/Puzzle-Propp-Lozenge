@@ -378,6 +378,8 @@ img, svg, a { -webkit-user-drag: none; user-drag: none; }
 .hl-arc { fill: none; stroke: var(--halo); stroke-width: 3.2; stroke-linecap: round; }
 .hl-head { fill: var(--halo); }
 #hlg, #hint { pointer-events: none; }
+/* El grupo se resalta, pero sin la flechita de giro */
+#hlg .hl-arc, #hlg .hl-head { display: none; }
 #hlg.bad .hl-poly { fill: none; stroke: var(--face-left); stroke-dasharray: 5 6; stroke-width: 3; }
 #hlg.bad .hl-arc, #hlg.bad .hl-head { display: none; }
 #hint .hl-poly { fill: none; stroke: var(--face-top); stroke-width: 4.5; }
@@ -1273,6 +1275,41 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
 @media (prefers-reduced-motion: reduce) {
   #scr-home::before, #scr-home::after, .home-float .ft, .home-hero::before, .big-btn.primary::after, .lv.next, .screen.enter > *, #scr-home.enter .home-actions > *, .scrim:not([hidden]) .win { animation: none !important; }
 }
+
+/* Instrucciones en computadora: dos dedos deslizando en el trackpad giran el grupo del centro */
+.swipe2-demo { display: flex; align-items: center; justify-content: center; gap: 28px; margin: 14px 0 30px; }
+.s2-cube { position: relative; width: 132px; }
+.s2-cube svg { width: 100%; height: auto; display: block; filter: drop-shadow(0 12px 18px var(--shadow)); }
+.s2-cube .lg-corner { animation: s2-turn 8s cubic-bezier(.65, 0, .35, 1) infinite; }
+.s2-dot { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; margin: -6px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 2.5px var(--dot-ring), 0 0 0 9px rgba(255, 255, 255, 0.28); animation: s2-dot 8s ease-in-out infinite; }
+@keyframes s2-turn {
+  0%, 30% { transform: rotate(180deg) scale(1); }
+  36% { transform: rotate(210deg) scale(1.1); }
+  42%, 70% { transform: rotate(240deg) scale(1); }
+  76% { transform: rotate(210deg) scale(1.1); }
+  82%, 100% { transform: rotate(180deg) scale(1); }
+}
+@keyframes s2-dot { 0%, 100% { transform: scale(1); } 10%, 22%, 60%, 72% { transform: scale(1.25); } }
+.s2-pad { position: relative; width: 150px; height: 112px; overflow: visible !important; border-radius: 18px; background: linear-gradient(180deg, var(--card), var(--card-2)); border: 1.5px solid var(--line); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), var(--lift, 0 8px 20px var(--shadow)); overflow: hidden; }
+.s2-f { position: absolute; top: 50%; width: 24px; height: 24px; margin-top: -12px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #FFFFFF, #DCEBFF); box-shadow: 0 0 0 3px rgba(80, 175, 234, 0.75), 0 6px 14px rgba(0, 0, 0, 0.25); opacity: 0; animation: s2-finger 8s ease-in-out infinite; }
+.s2-f.a { left: 47px; } .s2-f.b { left: 79px; animation-delay: 0.04s; }
+@keyframes s2-finger {
+  0%, 8% { transform: translateY(30px); opacity: 0; }
+  14% { transform: translateY(26px); opacity: 1; }
+  38% { transform: translateY(-30px); opacity: 1; }
+  46%, 52% { transform: translateY(-34px); opacity: 0; }
+  56% { transform: translateY(-26px); opacity: 1; }
+  78% { transform: translateY(30px); opacity: 1; }
+  86%, 100% { transform: translateY(34px); opacity: 0; }
+}
+.s2-cap { position: absolute; left: -20px; right: -20px; bottom: -26px; text-align: center; font: 700 11.5px var(--f-body); color: var(--muted); opacity: 0; animation: s2-cap 8s ease-in-out infinite; }
+.s2-cap.down { animation-name: s2-cap2; }
+@keyframes s2-cap { 0%, 10% { opacity: 0; } 16%, 44% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes s2-cap2 { 0%, 52% { opacity: 0; } 58%, 86% { opacity: 1; } 92%, 100% { opacity: 0; } }
+.steps2 { counter-reset: st; list-style: none; padding: 0; margin: 10px 0 4px; display: grid; gap: 10px; }
+.steps2 li { counter-increment: st; display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
+.steps2 li::before { transform: none; content: counter(st); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 800 12.5px var(--f-display); color: #FFFFFF; background: var(--g-blue, #5371E6); margin-top: 1px; }
+@media (prefers-reduced-motion: reduce) { .s2-cube .lg-corner, .s2-dot, .s2-f, .s2-cap { animation: none; } .s2-f, .s2-cap.up { opacity: 1; } }
 </style>
 </head>
 <body>
@@ -1413,7 +1450,6 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
         <ul class="keys">
           <li><span>Pista</span><kbd>H</kbd></li>
           <li><span>Deshacer</span><kbd>Z</kbd></li>
-          <li><span>Cambiar sentido de giro</span><kbd>R</kbd></li>
           <li><span>Girar</span><kbd>2 dedos ↑ ↓</kbd></li>
           <li><span>Mezclar al azar</span><kbd>N</kbd></li>
           <li><span>Arma tu mezcla</span><kbd>E</kbd></li>
@@ -1495,7 +1531,7 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
       </div>
 
       <div class="dock" id="play-dock">
-        <div class="seg" role="group" aria-label="Sentido del giro">
+        <div class="seg" role="group" aria-label="Sentido del giro" hidden>
           <button type="button" id="dir-cw" aria-pressed="true" aria-label="Horario" title="Cada toque gira 60° en sentido horario (R)">
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M12.6 1.6v3.3H9.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             <span class="lbl">Horario</span>
@@ -1505,7 +1541,6 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
             <span class="lbl">Antihorario</span>
           </button>
         </div>
-        <span class="sep" aria-hidden="true"></span>
         <button class="tool" type="button" id="undo" aria-label="Deshacer" title="Deshacer el último movimiento (Z)">
           <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 2.5 6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 6h6.5a4 4 0 0 1 0 8H7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
           <span class="lbl">Deshacer</span>
@@ -1592,8 +1627,19 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="help-title">
     <button class="x" id="help-x" type="button" aria-label="Cerrar">×</button>
     <h3 id="help-title">Cómo se juega</h3>
-    <p class="for-mouse">El tablero tiene rombos de tres colores que forman la ilusión de un cubo. Tu meta es volver a dejar el cubo armado, como en la imagen de Objetivo.</p>
+    <p class="for-mouse">Los rombos de tres colores forman la ilusión de un cubo. Gira grupos de tres hasta que quede armado.</p>
     <p class="for-touch">Vuelve a armar el cubo: amarillo arriba, rojo a la izquierda y azul a la derecha.</p>
+    <div class="for-mouse swipe2-demo" aria-hidden="true">
+      <div class="s2-cube"><svg class="logo" data-help-logo viewBox="-1.08 -1.08 2.16 2.16"></svg><span class="s2-dot"></span></div>
+      <div class="s2-pad"><span class="s2-f a"></span><span class="s2-f b"></span><span class="s2-cap up">↑ Horario</span><span class="s2-cap down">↓ Antihorario</span></div>
+    </div>
+    <ol class="howto steps2 for-mouse">
+      <li><span><b>Meta:</b> vuelve a armar el cubo: amarillo arriba, rojo a la izquierda y azul a la derecha.</span></li>
+      <li><span><b>Elige un grupo:</b> pon el cursor sobre un punto blanco; se iluminan los tres rombos que lo rodean.</span></li>
+      <li><span><b>Gíralo:</b> desliza <b>con dos dedos</b> en el trackpad (o la rueda del mouse). <b>Hacia arriba</b> gira 60° en sentido horario y <b>hacia abajo</b>, antihorario. Cada deslizada es un giro.</span></li>
+      <li><span><b>¿Atorado?</b> El foco da una pista (H) y la flecha deshace (Z).</span></li>
+    </ol>
+
     <ul class="howto for-touch">
       <li><span><b>Girar:</b> desliza el dedo sobre un punto blanco. <b>Hacia arriba</b> gira en sentido horario y <b>hacia abajo</b>, antihorario (60° cada vez).</span></li>
       <li><span>Tres deslizadas en el mismo sentido son media vuelta.</span></li>
@@ -2674,6 +2720,22 @@ const Sound = (() => {
     "Borrar": "Erase",
     "Progreso de niveles": "Level progress",
     "Acerca de": "About",
+    "Los rombos de tres colores forman la ilusión de un cubo. Gira grupos de tres hasta que quede armado.": "Tiles in three colors create the illusion of a cube. Turn groups of three until it's rebuilt.",
+    "↑ Horario": "↑ Clockwise",
+    "↓ Antihorario": "↓ Counterclockwise",
+    "Meta:": "Goal:",
+    "vuelve a armar el cubo: amarillo arriba, rojo a la izquierda y azul a la derecha.": "rebuild the cube: yellow on top, red on the left and blue on the right.",
+    "Elige un grupo:": "Pick a group:",
+    "pon el cursor sobre un punto blanco; se iluminan los tres rombos que lo rodean.": "hover a white dot; the three tiles around it light up.",
+    "Gíralo:": "Turn it:",
+    "desliza": "swipe",
+    "con dos dedos": "with two fingers",
+    "en el trackpad (o la rueda del mouse).": "on the trackpad (or use the mouse wheel).",
+    "gira 60° en sentido horario y": "turns 60° clockwise and",
+    "abajo": "down",
+    ", antihorario. Cada deslizada es un giro.": ", counterclockwise. Each swipe is one turn.",
+    "¿Atorado?": "Stuck?",
+    "El foco da una pista (H) y la flecha deshace (Z).": "The bulb gives a hint (H) and the arrow undoes (Z).",
     "Pinta y arma tu propio reto": "Paint and build your own challenge",
     "Versión": "Version",
     "Sitio web": "Website",
@@ -3756,7 +3818,10 @@ const Sound = (() => {
   }
   function openSheet() { document.body.classList.add("sheet-open"); Sound.tick(); }
   function closeSheet() { document.body.classList.remove("sheet-open"); }
-  function openHelp() { helpEl.hidden = false; Sound.tick(); setTimeout(() => $("#help-ok").focus({ preventScroll: true }), 50); }
+  function openHelp() {
+    const hl = helpEl.querySelector("[data-help-logo]"), src = document.querySelector(".topbar .logo");
+    if (hl && src && !hl.innerHTML) hl.innerHTML = src.innerHTML.replace(/id="(lg[TLR])"/g, 'id="$1h"').replace(/url\(#(lg[TLR])\)/g, "url(#$1h)");
+    helpEl.hidden = false; Sound.tick(); setTimeout(() => $("#help-ok").focus({ preventScroll: true }), 50); }
   function closeHelp() { if (!helpEl.hidden) { helpEl.hidden = true; $("#help-btn").focus({ preventScroll: true }); } }
 
   $("#dir-cw").addEventListener("click", () => setDir(-1));
