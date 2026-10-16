@@ -2986,7 +2986,7 @@ const Sound = (() => {
     const ok = !!Core.flippable(st, hover);
     const [cx, cy] = P(hover[0], hover[1]);
     const onHint = hintMove && sameV(hintMove.v, hover);
-    g.innerHTML = hexOutline(hover) + (ok && !onHint && !touchHover ? arrowMarkup(cx, cy, dir === -1) : "");
+    g.innerHTML = hexOutline(hover); // sin flecha: solo se ilumina el grupo
     g.setAttribute("class", ok ? "" : "bad");
     g.setAttribute("visibility", "visible");
     svg.classList.toggle("pointer", ok);
@@ -2998,7 +2998,7 @@ const Sound = (() => {
     const [cx, cy] = P(hintMove.v[0], hintMove.v[1]);
     // Etiqueta arriba del grupo; si no cabe, abajo.
     const above = cy - S - 38, tagY = above < -(R + M) + 2 ? cy + S + 10 : above;
-    g.innerHTML = hexOutline(hintMove.v) + arrowMarkup(cx, cy, hintStep(hintMove) < 0) +
+    g.innerHTML = hexOutline(hintMove.v) +
       `<g class="hint-tag"><rect x="${(cx - 50).toFixed(2)}" y="${tagY.toFixed(2)}" width="100" height="28" rx="14"/>` +
       `<text x="${cx.toFixed(2)}" y="${(tagY + 19).toFixed(2)}" text-anchor="middle">${tagText()}</text></g>`;
     g.setAttribute("visibility", "visible");
