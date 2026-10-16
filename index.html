@@ -2357,6 +2357,22 @@ const Sound = (() => {
     tone(f * 2, { t, dur: dur * 0.35, vol: vol * 0.12, attack: 0.006 });
     noise({ t, dur: 0.02, vol: vol * 0.12, freq: f * 2, q: 1.2, attack: 0.003 });
   }
+  // Marimba suave de madera: nota corta y cálida, sin la "cola" larga de campana
+  function mallet(f, o = {}) {
+    const { t = 0, vol = 0.08, dur = 0.45 } = o;
+    f = vary(f, 0.006);
+    tone(f, { t, dur, vol, attack: 0.004 });
+    tone(f * 3.9, { t, dur: dur * 0.12, vol: vol * 0.05, attack: 0.002 });
+    noise({ t, dur: 0.018, vol: vol * 0.2, freq: f * 1.5, q: 0.8, attack: 0.002, kind: "lowpass" });
+  }
+  // Colchón cálido que entra y sale despacio (para momentos de premio)
+  function pad(fs, o = {}) {
+    const { t = 0, dur = 2.2, vol = 0.022 } = o;
+    fs.forEach((f) => tone(vary(f, 0.004), { t, dur, vol, attack: dur * 0.35 }));
+  }
+  // Escala pentatónica grave: cualquier combinación suena bien y nunca se repite igual
+  const PENTA = [196, 220, 261.63, 293.66, 329.63, 392, 440];
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
   // "Thump": golpecito sordo, sin nota. Es el único sonido de cada movimiento.
   function thump(o = {}) {
     const { t = 0, vol = 0.2 } = o;
@@ -2434,7 +2450,12 @@ const Sound = (() => {
       thump({ vol: fast ? 0.14 : 0.2 });
     },
     bad() { thump({ vol: 0.12 }); thump({ t: 0.09, vol: 0.08 }); },
-    hint() { pluck(392, { vol: 0.08, dur: 1.2 }); pluck(587.33, { t: 0.14, vol: 0.055, dur: 1.3 }); },
+    // Pista: dos golpecitos de marimba con notas que cambian cada vez y un soplo suave
+    hint() { const i = Math.floor(Math.random() * 4); mallet(PENTA[i + 2], { vol: 0.07 }); mallet(PENTA[i + 3], { t: 0.11, vol: 0.05 }); breath({ dur: 0.35, vol: 0.018, from: 900, to: 1600 }); },
+    // Empieza un nivel: soplo y un acorde cálido muy suave (sin campana)
+    levelStart() { breath({ dur: 0.7, vol: 0.03, from: 350, to: 900 }); pad([pick([196, 220]), 293.66, pick([392, 440])], { t: 0.05, dur: 1.6, vol: 0.016 }); },
+    // Foquito que vuela: solo un soplo
+    whoosh() { breath({ dur: 0.5, vol: 0.026, from: 500, to: 1400 }); },
     // Botones: un tap diminuto, sin nota
     tick() { noise({ dur: 0.035, vol: 0.1, freq: 1000, q: 0.7, attack: 0.002, kind: "lowpass" }); },
     tickAt() { thump({ vol: 0.12 }); },
@@ -2447,12 +2468,13 @@ const Sound = (() => {
     },
     // Estrella ganada: campanita grave que sube un poco con cada estrella
     star(i) {
-      const f = [329.63, 392, 523.25][i] || 523.25;
-      pluck(f, { vol: 0.1, dur: 1.6 });
-      pluck(f * 1.5, { t: 0.06, vol: 0.025, dur: 1.1 });
+      const f = [261.63, 329.63, 392][i] || 392;
+      mallet(f, { vol: 0.085, dur: 0.6 });
+      mallet(f * 1.5, { t: 0.05, vol: 0.03, dur: 0.4 });
     },
-    starMiss() { pluck(196, { vol: 0.045, dur: 0.6 }); },
-    coin() { pluck(523.25, { vol: 0.07, dur: 1 }); pluck(659.25, { t: 0.1, vol: 0.055, dur: 1.2 }); },
+    starMiss() { thump({ vol: 0.08 }); },
+    // El foquito llega a las pistas: golpecito de madera, más agudito pero corto
+    coin() { mallet(pick([392, 440, 523.25]), { vol: 0.06, dur: 0.3 }); },
     // Intro del estudio: el oso aparece con un soplo y una nota grave, golpecitos suaves por letra
     studio(from = 0) {
       const c = ensure(); if (!c) return;
@@ -2480,9 +2502,11 @@ const Sound = (() => {
       [98, 146.83].forEach((f) => tone(f, { dur: 2.6, vol: 0.04, attack: 0.5 }));
     },
     // Cubo armado: arpegio lento sobre un acorde que respira
+    // Cubo armado: marimba que sube por notas al azar de la escala, sobre un colchón cálido (distinto cada vez)
     win() {
-      [261.63, 329.63, 392, 523.25, 659.25].forEach((f, i) => pluck(f, { t: i * 0.13, vol: 0.09, dur: 1.9 }));
-      [196, 261.63, 329.63].forEach((f) => tone(f, { dur: 2.4, vol: 0.03, attack: 0.4 }));
+      const start = Math.floor(Math.random() * 2);
+      [0, 1, 2, 3, 4].map((k) => PENTA[Math.min(PENTA.length - 1, start + k + (k > 2 ? Math.round(Math.random()) : 0))]).forEach((f, i) => mallet(f, { t: i * 0.11, vol: 0.07, dur: 0.55 }));
+      pad([196, 261.63, 329.63], { t: 0.1, dur: 2.4, vol: 0.022 });
     },
   };
 })();
@@ -4385,7 +4409,7 @@ const Sound = (() => {
     if (reduceMotion) { showLevelIntro.t = setTimeout(() => (el.hidden = true), x ? 2200 : 1200); return; }
     showLevelIntro.t = setTimeout(() => (el.hidden = true), x ? 3000 : 1750);
     if (x) { Sound.rumble(); setTimeout(() => Sound.secret(), 900); restart($("#board-wrap"), "quake"); buzz([30, 60, 30, 60, 60]); }
-    else setTimeout(() => Sound.hint(), 120);
+    else setTimeout(() => Sound.levelStart(), 120);
   }
 
   function winLevel() {
@@ -4491,7 +4515,7 @@ const Sound = (() => {
       { transform: at(0.5, 1), opacity: 1, offset: 0.6 },
       { transform: at(1, 0.55), opacity: 0.9 },
     ], { duration: 1150, easing: "cubic-bezier(.45,0,.25,1)" });
-    Sound.hint();
+    Sound.whoosh();
     a.onfinish = () => { b.remove(); land(); };
   }
 
