@@ -1414,7 +1414,7 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
           <li><span>Pista</span><kbd>H</kbd></li>
           <li><span>Deshacer</span><kbd>Z</kbd></li>
           <li><span>Cambiar sentido de giro</span><kbd>R</kbd></li>
-          <li><span>Girar al revés</span><kbd>Shift + clic</kbd></li>
+          <li><span>Girar</span><kbd>2 dedos ↑ ↓</kbd></li>
           <li><span>Mezclar al azar</span><kbd>N</kbd></li>
           <li><span>Arma tu mezcla</span><kbd>E</kbd></li>
           <li><span>Sonido</span><kbd>M</kbd></li>
@@ -1525,7 +1525,7 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
         </button>
         <label class="switch" title="Muestra los puntos donde se puede girar"><input type="checkbox" id="show-dots" checked><span class="track"></span>Puntos</label>
       </div>
-      <p class="status" id="status" aria-live="polite">Toca un punto blanco para girar ese grupo de tres rombos.</p>
+      <p class="status" id="status" aria-live="polite">Pon el cursor sobre un punto blanco y desliza con dos dedos hacia arriba (horario) o hacia abajo (antihorario).</p>
     </section>
 
     <div class="sheet-scrim mobile-only" id="sheet-scrim"></div>
@@ -2540,7 +2540,8 @@ const Sound = (() => {
     "Deshacer": "Undo",
     "Cambiar sentido de giro": "Switch turn direction",
     "Girar al revés": "Turn the other way",
-    "Shift + clic": "Shift + click",
+    "Girar": "Turn",
+    "2 dedos ↑ ↓": "2 fingers ↑ ↓",
     "Mezclar al azar": "Random shuffle",
     "Arma tu mezcla": "Build your own",
     "Mínimo 9": "Minimum 9",
@@ -2586,7 +2587,7 @@ const Sound = (() => {
     "Nueva": "New",
     "Puntos": "Dots",
     "Muestra los puntos donde se puede girar": "Shows the points where you can turn",
-    "Toca un punto blanco para girar ese grupo de tres rombos.": "Tap a white dot to turn that group of three tiles.",
+    "Pon el cursor sobre un punto blanco y desliza con dos dedos hacia arriba (horario) o hacia abajo (antihorario).": "Hover a white dot and swipe up with two fingers to turn clockwise, or down for counterclockwise.",
     "Nueva partida": "New game",
     "Dificultad": "Difficulty",
     "Fácil": "Easy",
@@ -3072,7 +3073,7 @@ const Sound = (() => {
   }
   const idleMsg = () => (TOUCH_UI
     ? tr("Desliza hacia arriba sobre un punto blanco para girar en sentido horario; hacia abajo, antihorario.", "Swipe up over a white dot to turn clockwise; swipe down for counterclockwise.")
-    : tr("Toca un punto blanco para girar ese grupo de tres rombos.", "Tap a white dot to turn that group of three tiles."));
+    : tr("Pon el cursor sobre un punto blanco y desliza con dos dedos hacia arriba (horario) o hacia abajo (antihorario).", "Hover a white dot and swipe up with two fingers to turn clockwise, or down for counterclockwise."));
 
   function pushHist(v, step) {
     const last = hist[hist.length - 1];
@@ -3692,19 +3693,41 @@ const Sound = (() => {
     if (e.pointerType === "mouse") setHover(pick(e));
   });
   svg.addEventListener("pointerleave", (e) => { if (!swipe) setHover(null); });
+  // En computadora se gira igual que en el celular: deslizando (dos dedos en el trackpad, o la rueda del mouse)
+  // sobre el punto blanco que está bajo el cursor. Arriba = horario, abajo = antihorario. Un gesto = un giro.
   svg.addEventListener("click", (e) => {
     if (painting_() || lastPointer !== "mouse") return;
+    if (pick(e)) say(idleMsg());
+  });
+  svg.addEventListener("contextmenu", (e) => e.preventDefault());
+  const NATURAL = /Mac/i.test(navigator.platform || navigator.userAgent);
+  let wheel = { acc: 0, locked: false, quietT: null, lastAbs: 0, firedAt: 0 };
+  svg.addEventListener("wheel", (e) => {
+    if (e.ctrlKey || painting_()) return; // pellizco del trackpad o pintando
     const v = pick(e);
+    if (!v && !wheel.locked) return;    // fuera de un punto: la página se desplaza normal
+    e.preventDefault();
+    const d = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+    // Dirección de los dedos: con desplazamiento natural (Mac) los dedos hacia arriba dan deltaY > 0
+    const inverted = e.webkitDirectionInvertedFromDevice !== undefined ? e.webkitDirectionInvertedFromDevice : NATURAL;
+    const fingerUp = inverted ? d > 0 : d < 0;
+    const abs = Math.abs(d), now = performance.now();
+    clearTimeout(wheel.quietT);
+    wheel.quietT = setTimeout(() => { wheel.locked = false; wheel.acc = 0; wheel.lastAbs = 0; }, 170);
+    // Un gesto nuevo mientras sigue la inercia del anterior: el movimiento vuelve a crecer de golpe
+    if (wheel.locked && now - wheel.firedAt > 140 && abs > 6 && abs > wheel.lastAbs * 1.8) { wheel.locked = false; wheel.acc = 0; }
+    wheel.lastAbs = abs;
+    if (wheel.locked) return;
+    wheel.acc += fingerUp ? abs : -abs;
+    if (Math.abs(wheel.acc) < 24) return;
+    wheel.locked = true; wheel.firedAt = now;
+    const up = wheel.acc > 0; wheel.acc = 0;
     if (!v) return;
     focusKey = null;
-    tap(v, e.shiftKey);
-  });
-  svg.addEventListener("contextmenu", (e) => {
-    e.preventDefault();
-    if (painting_() || lastPointer !== "mouse") return;
-    const v = pick(e);
-    if (v) { focusKey = null; rotate(v, -dir); }
-  });
+    setHover(v);
+    if (hintMove && sameV(hintMove.v, v)) rotate(v, hintStep(hintMove));
+    else rotate(v, up ? -1 : 1);
+  }, { passive: false });
   svg.addEventListener("focusin", (e) => {
     const k = e.target.dataset && e.target.dataset.v;
     if (k) { focusKey = k; setHover(k.split(":").map(Number)); }
