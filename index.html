@@ -2437,10 +2437,9 @@ const Sound = (() => {
     set(v) { on = v; try { localStorage.setItem(KEY, v ? "1" : "0"); } catch (e) {} },
     unlock() {
       unlocked = true;
-      // Safari: tratar el sonido del juego como reproducción (no lo silencia el interruptor de silencio).
-      // En la app de iOS va en modo ambiente, como los juegos: se mezcla con la música, respeta el modo
-      // silencio y no aparece en la Dynamic Island como si fuera música.
-      const type = isNativeApp() ? "ambient" : "playback";
+      // Tratar el sonido del juego como reproducción, en la web y en la app: suena aunque el iPhone esté
+      // en modo silencio (así lo pidió el usuario); se apaga desde Ajustes.
+      const type = "playback";
       try { if (navigator.audioSession && navigator.audioSession.type !== type) navigator.audioSession.type = type; } catch (e) {}
       if (on && ctx && !healthy()) rebuild();
       if (on && !isNativeApp()) primeMedia();
@@ -2459,7 +2458,7 @@ const Sound = (() => {
       if (isNativeApp()) {
         // La app permite sonar sin toque, pero iOS crea el audio "suspendido" un instante:
         // se arranca de una vez (resume) en lugar de esperar a que la persona toque la pantalla
-        try { if (navigator.audioSession) navigator.audioSession.type = "ambient"; } catch (e) {}
+        try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
         try { const AC = window.AudioContext || window.webkitAudioContext; const c = new AC(); build(c); watch(c); unlocked = true; c.resume().catch(() => {}); return true; } catch (e) { return false; }
       }
       const AC = window.AudioContext || window.webkitAudioContext;
