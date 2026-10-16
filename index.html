@@ -2443,7 +2443,7 @@ const Sound = (() => {
       unlocked = true;
       // Web: sonido como reproducción (se oye aunque el iPhone esté en silencio).
       // App de iOS: modo ambiente, el sonido se queda dentro de la app: no aparece en la Dynamic Island
-      // como si fuera música, no pausa Spotify y respeta el modo silencio.
+      // como si fuera música, no pausa Spotify y respeta el modo silencio (decisión del usuario, 16 oct 2026).
       const type = isNativeApp() ? "ambient" : "playback";
       try { if (navigator.audioSession && navigator.audioSession.type !== type) navigator.audioSession.type = type; } catch (e) {}
       if (on && ctx && !healthy()) rebuild();
