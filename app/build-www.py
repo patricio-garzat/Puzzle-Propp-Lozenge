@@ -1,7 +1,7 @@
 """Arma la carpeta www/ de la app de iOS a partir del juego web (../index.html).
 
 Diferencias con la versión web:
-- La fuente Nunito va incluida en la app (sin internet no carga Google Fonts).
+- La fuente Plus Jakarta Sans va incluida en la app (sin internet no carga Google Fonts).
 - Se quitan el manifest y los íconos web: en la app no sirven.
 
 Uso: python3 build-www.py   (o npm run build, que además copia www/ al proyecto de Xcode)
@@ -13,15 +13,15 @@ import shutil
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "..", "index.html")
 WWW = os.path.join(HERE, "www")
-FONTS = os.path.join(HERE, "node_modules", "@fontsource", "nunito", "files")
-WEIGHTS = (500, 600, 700, 800, 900)
+FONTS = os.path.join(HERE, "node_modules", "@fontsource", "plus-jakarta-sans", "files")
+WEIGHTS = (500, 600, 700, 800)
 
 html = open(SRC, encoding="utf-8").read()
 
 # Fuente local en lugar de Google Fonts
 font_css = "\n".join(
-    f'@font-face {{ font-family: "Nunito"; font-style: normal; font-weight: {w}; font-display: block; '
-    f'src: url("fonts/nunito-latin-{w}-normal.woff2") format("woff2"); }}'
+    f'@font-face {{ font-family: "Plus Jakarta Sans"; font-style: normal; font-weight: {w}; font-display: block; '
+    f'src: url("fonts/plus-jakarta-sans-latin-{w}-normal.woff2") format("woff2"); }}'
     for w in WEIGHTS
 )
 html, n = re.subn(
@@ -68,6 +68,6 @@ assert n == 1, "no encontré la versión en Ajustes"
 shutil.rmtree(WWW, ignore_errors=True)
 os.makedirs(os.path.join(WWW, "fonts"))
 for w in WEIGHTS:
-    shutil.copy(os.path.join(FONTS, f"nunito-latin-{w}-normal.woff2"), os.path.join(WWW, "fonts"))
+    shutil.copy(os.path.join(FONTS, f"plus-jakarta-sans-latin-{w}-normal.woff2"), os.path.join(WWW, "fonts"))
 open(os.path.join(WWW, "index.html"), "w", encoding="utf-8").write(html)
 print("www/ listo:", len(html) // 1024, "KB · versión", version, f"({build})")

@@ -39,7 +39,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap">
 <style>
 /* Layout: consola de juego a pantalla completa. Barra superior; tres columnas en escritorio (tu partida · tablero · nueva partida); en móvil se apila y hace scroll */
 :root {
@@ -89,9 +89,9 @@
   --sheen: rgba(255, 255, 255, 0.25);
 
   /* Tipografía redondeada y tranquila en toda la app */
-  --f-display: "Nunito", "SF Pro Rounded", system-ui, -apple-system, sans-serif;
-  --f-body: "Nunito", "SF Pro Rounded", system-ui, -apple-system, sans-serif;
-  --f-mono: "Nunito", "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+  --f-display: "Plus Jakarta Sans", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --f-body: "Plus Jakarta Sans", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --f-mono: "Plus Jakarta Sans", system-ui, -apple-system, "Helvetica Neue", sans-serif;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -185,12 +185,27 @@ button { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .logo { width: 46px; height: 46px; flex: none; filter: drop-shadow(0 4px 8px var(--shadow)); }
 /* La esquina del logo da media vuelta de vez en cuando: sutil, sin cambiar colores */
-.lg-corner { transform-origin: 0 0; transform: rotate(180deg); animation: lg-flip 10s cubic-bezier(.45,0,.25,1) 1.5s infinite; }
+.lg-corner { transform-origin: 0 0; transform: rotate(180deg); animation: lg-flip 18s cubic-bezier(.45,0,.25,1) 1.2s infinite; }
+/* Giros como en el juego: cada uno es de 60° y termina encajado; dos giros seguidos y una pausa (ciclo de 6 giros = 360°) */
 @keyframes lg-flip {
-  0%, 44% { transform: rotate(180deg) scale(1); }
-  47% { transform: rotate(270deg) scale(1.08); }
-  50%, 94% { transform: rotate(360deg) scale(1); }
-  97% { transform: rotate(450deg) scale(1.08); }
+  0.00% { transform: rotate(180deg) scale(1); }
+  1.25% { transform: rotate(210deg) scale(1.05); }
+  2.50% { transform: rotate(240deg) scale(1); }
+  7.50% { transform: rotate(240deg) scale(1); }
+  8.75% { transform: rotate(270deg) scale(1.05); }
+  10.00% { transform: rotate(300deg) scale(1); }
+  33.33% { transform: rotate(300deg) scale(1); }
+  34.58% { transform: rotate(330deg) scale(1.05); }
+  35.83% { transform: rotate(360deg) scale(1); }
+  40.83% { transform: rotate(360deg) scale(1); }
+  42.08% { transform: rotate(390deg) scale(1.05); }
+  43.33% { transform: rotate(420deg) scale(1); }
+  66.67% { transform: rotate(420deg) scale(1); }
+  67.92% { transform: rotate(450deg) scale(1.05); }
+  69.17% { transform: rotate(480deg) scale(1); }
+  74.17% { transform: rotate(480deg) scale(1); }
+  75.42% { transform: rotate(510deg) scale(1.05); }
+  76.67% { transform: rotate(540deg) scale(1); }
   100% { transform: rotate(540deg) scale(1); }
 }
 .brand h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(20px, 2.1vw, 26px); line-height: 1.05; letter-spacing: -0.03em; margin: 0; }
@@ -411,6 +426,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .win p { margin: 0; color: var(--muted); font-variant-numeric: tabular-nums; text-wrap: balance; }
 .win .rec { color: var(--ok); font-weight: 700; }
 .win .actions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+.win-home { display: inline-flex; align-items: center; gap: 7px; }
+.win-home svg { width: 17px; height: 17px; }
 .x {
   position: absolute; top: 12px; right: 10px; width: 34px; height: 34px;
   border: 0; border-radius: 10px; background: transparent; color: var(--muted);
@@ -1176,6 +1193,7 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
               <button class="btn primary" id="win-again" type="button">Mezclar otra vez</button>
               <button class="btn" id="win-retry" type="button" hidden>Reintentar</button>
               <button class="btn" id="win-levels" type="button" hidden>Niveles</button>
+              <button class="btn win-home" id="win-home" type="button" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3.5 9.2 10 3.8l6.5 5.4V16a1 1 0 0 1-1 1h-3.3v-4.4H7.8V17H4.5a1 1 0 0 1-1-1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Inicio</button>
               <button class="btn" id="win-close" type="button">Seguir jugando</button>
             </div>
           </div>
@@ -2118,7 +2136,12 @@ const Sound = (() => {
     probe() {
       if (!on) return false;
       // En la app de iOS sí se puede sonar sin toque: primero se pide el modo de audio (como en unlock)
-      if (isNativeApp()) { try { if (navigator.audioSession) navigator.audioSession.type = "ambient"; } catch (e) {} }
+      if (isNativeApp()) {
+        // La app permite sonar sin toque, pero iOS crea el audio "suspendido" un instante:
+        // se arranca de una vez (resume) en lugar de esperar a que la persona toque la pantalla
+        try { if (navigator.audioSession) navigator.audioSession.type = "ambient"; } catch (e) {}
+        try { const AC = window.AudioContext || window.webkitAudioContext; const c = new AC(); build(c); watch(c); unlocked = true; c.resume().catch(() => {}); return true; } catch (e) { return false; }
+      }
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return false;
       try {
@@ -2918,7 +2941,7 @@ const Sound = (() => {
     if (mode === "level" && levelNum) return winLevel();
     $("#win-x").hidden = false;
     $("#win-stars").hidden = true; $("#win-hints").hidden = true; $("#win-next").hidden = true; $("#win-levels").hidden = true; $("#win-retry").hidden = true;
-    $("#win-again").hidden = false; $("#win-close").hidden = false;
+    $("#win-again").hidden = false; $("#win-close").hidden = false; $("#win-home").hidden = !isMobile();
     stopTimer();
     phase = "won";
     hintMove = null;
@@ -3799,6 +3822,55 @@ const Sound = (() => {
   $("#home-custom").addEventListener("click", () => { wasRunning = false; closeShell(); enterEditor(); });
   document.querySelectorAll("[data-open]").forEach((b) => b.addEventListener("click", () => pushScreen(b.dataset.open)));
   document.querySelectorAll("[data-back]").forEach((b) => b.addEventListener("click", popScreen));
+  // Deslizar desde la orilla izquierda para regresar (como en iOS), en cualquier pantalla con botón "Atrás"
+  (() => {
+    const EDGE = 28;
+    let drag = null;
+    shell.addEventListener("touchstart", (e) => {
+      if (e.touches.length !== 1 || !stack.length) return;
+      const t = e.touches[0];
+      if (t.clientX > EDGE) return;
+      const el = $("#" + stack[stack.length - 1]);
+      if (!el || !el.querySelector("[data-back]")) return;
+      const prevId = stack[stack.length - 2];
+      drag = { el, prev: prevId ? $("#" + prevId) : null, x0: t.clientX, y0: t.clientY, t0: performance.now(), dx: 0, on: false, w: shell.clientWidth || window.innerWidth };
+    }, { passive: true });
+    shell.addEventListener("touchmove", (e) => {
+      if (!drag) return;
+      const t = e.touches[0], dx = t.clientX - drag.x0, dy = t.clientY - drag.y0;
+      if (!drag.on) {
+        if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { drag = null; return; }   // es scroll vertical
+        if (dx < 8) return;
+        drag.on = true;
+        drag.el.style.transition = "none";
+        if (drag.prev) drag.prev.style.transition = "none";
+      }
+      e.preventDefault();
+      drag.dx = Math.max(0, dx);
+      const p = Math.min(1, drag.dx / drag.w);
+      drag.el.style.transform = `translateX(${drag.dx}px)`;
+      drag.el.style.boxShadow = `-12px 0 30px rgba(0, 0, 0, ${0.12 * (1 - p)})`;
+      if (drag.prev) drag.prev.style.transform = `translateX(${-24 * (1 - p)}%)`;
+    }, { passive: false });
+    const end = () => {
+      if (!drag) return;
+      const d = drag; drag = null;
+      if (!d.on) return;
+      const v = d.dx / Math.max(1, performance.now() - d.t0);
+      const go = d.dx > d.w * 0.35 || v > 0.5;
+      const ease = "transform 0.26s cubic-bezier(.2,.85,.25,1)";
+      d.el.style.transition = ease;
+      if (d.prev) d.prev.style.transition = ease;
+      d.el.style.transform = go ? "translateX(100%)" : "translateX(0)";
+      if (d.prev) d.prev.style.transform = go ? "translateX(0)" : "translateX(-24%)";
+      setTimeout(() => {
+        [d.el, d.prev].forEach((n) => { if (n) { n.style.transition = ""; n.style.transform = ""; n.style.boxShadow = ""; } });
+        if (go) popScreen();
+      }, 270);
+    };
+    shell.addEventListener("touchend", end);
+    shell.addEventListener("touchcancel", end);
+  })();
   // Cómo jugar: páginas deslizables
   const slides = $("#slides");
   let slideCur = 0, slideTimer = null;
@@ -4088,6 +4160,7 @@ const Sound = (() => {
     $("#win-levels").hidden = false;
     $("#win-retry").hidden = false;
     $("#win-close").hidden = true;
+    $("#win-home").hidden = !isMobile();
     $("#win-x").hidden = true;
     winEl.hidden = false;
     say(tr(`¡${lvName(levelNum)} completado con ${stars} ${stars === 1 ? "estrella" : "estrellas"}!`, `${lvName(levelNum)} complete with ${stars} ${stars === 1 ? "star" : "stars"}!`), "good");
@@ -4200,6 +4273,7 @@ const Sound = (() => {
   $("#win-next").addEventListener("click", () => startLevel(levelNum === 50 ? EXTREME : Math.min(50, (levelNum || 0) + 1)));
   $("#win-retry").addEventListener("click", () => startLevel(levelNum || 1));
   $("#win-levels").addEventListener("click", () => { winEl.hidden = true; phase = "free"; openLevels(); });
+  $("#win-home").addEventListener("click", () => { winEl.hidden = true; if (phase === "won") phase = "free"; goHome(); });
   function levelInfoText() {
     const pr = levelProg(), n = nextLevel(pr);
     return tr(`Nivel ${n} · ★ ${totalStars(pr)}/150 · ${pr.bank} ${pr.bank === 1 ? "pista guardada" : "pistas guardadas"}`,
