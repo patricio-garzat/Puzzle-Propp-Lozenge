@@ -3763,7 +3763,7 @@ const Sound = (() => {
   });
   svg.addEventListener("contextmenu", (e) => e.preventDefault());
   const NATURAL = /Mac/i.test(navigator.platform || navigator.userAgent);
-  let wheel = { acc: 0, locked: false, quietT: null, lastAbs: 0, firedAt: 0 };
+  let wheel = { acc: 0, locked: false, quietT: null, peak: 0, low: 0, firedAt: 0 };
   svg.addEventListener("wheel", (e) => {
     if (e.ctrlKey || painting_()) return; // pellizco del trackpad o pintando
     const v = pick(e);
@@ -3775,13 +3775,19 @@ const Sound = (() => {
     const fingerUp = inverted ? d > 0 : d < 0;
     const abs = Math.abs(d), now = performance.now();
     clearTimeout(wheel.quietT);
-    // Un gesto = un giro: después de girar se ignora todo (incluida la inercia del trackpad)
-    // hasta que deja de llegar movimiento un momento
-    wheel.quietT = setTimeout(() => { wheel.locked = false; wheel.acc = 0; }, 260);
-    if (wheel.locked) return;
+    // Un gesto = un giro. Después de girar se ignora la inercia del trackpad (movimiento que va bajando).
+    // Se libera cuando deja de llegar movimiento, o cuando, ya con la inercia apagándose,
+    // el movimiento vuelve a crecer con fuerza: eso es un deslizamiento nuevo.
+    wheel.quietT = setTimeout(() => { wheel.locked = false; wheel.acc = 0; }, 140);
+    if (wheel.locked) {
+      wheel.peak = Math.max(wheel.peak, abs);
+      const fading = wheel.low < wheel.peak * 0.35 && now - wheel.firedAt > 120;
+      if (fading && abs >= 9 && abs > wheel.low * 3) { wheel.locked = false; wheel.acc = 0; }
+      else { wheel.low = abs < wheel.low ? abs : wheel.low * 0.85 + abs * 0.15; return; }
+    }
     wheel.acc += fingerUp ? abs : -abs;
     if (Math.abs(wheel.acc) < 30) return;
-    wheel.locked = true; wheel.firedAt = now;
+    wheel.locked = true; wheel.firedAt = now; wheel.peak = abs; wheel.low = abs;
     const up = wheel.acc > 0; wheel.acc = 0;
     if (!v) return;
     focusKey = null;
