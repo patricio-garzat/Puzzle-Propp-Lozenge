@@ -617,6 +617,8 @@ kbd { font-family: var(--f-mono); font-size: 12px; font-weight: 600; padding: 1p
 .tile.nope { animation: nope 0.3s ease; transform-box: fill-box; transform-origin: center; }
 @keyframes nope { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
 .dock.edit { border-radius: 22px; border: 2px solid var(--face-top); }
+.edit-size { flex-basis: 100%; justify-content: center; }
+.edit-size button { flex: 1; justify-content: center; font-variant-numeric: tabular-nums; }
 .edit-label { font-family: var(--f-mono); font-weight: 800; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-left: 8px; }
 .swatches { display: inline-flex; gap: 6px; }
 .sw {
@@ -1465,6 +1467,7 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
             <span class="lbl">Girar</span>
           </button>
         </div>
+        <div class="seg edit-size" role="group" aria-label="Tamaño del cubo"><button type="button" data-edit-n="2">2×2×2</button><button type="button" data-edit-n="3">3×3×3</button><button type="button" data-edit-n="4">4×4×4</button></div>
         <div class="swatches" role="group" aria-label="Color para pintar">
           <button type="button" class="sw" data-color="1" aria-pressed="true" style="--c:var(--face-top)" title="Amarillo (1)"><span id="cnt-1">9</span></button>
           <button type="button" class="sw" data-color="0" aria-pressed="false" style="--c:var(--face-left)" title="Rojo (2)"><span id="cnt-0">9</span></button>
@@ -3402,6 +3405,7 @@ const Sound = (() => {
     par = null; parOver = false; route = null; editGen = null;
     tool = "paint"; paintColor = 1;
     buildBoard();
+    syncEditSize();
     Sound.tick();
     sayEdit();
     save();
@@ -3414,6 +3418,13 @@ const Sound = (() => {
     Sound.undo();
   }
 
+  // Tamaño en "Arma tu mezcla": empieza un cubo en blanco del tamaño elegido
+  document.querySelectorAll("[data-edit-n]").forEach((b) => b.addEventListener("click", () => {
+    const N = +b.dataset.editN;
+    if (phase !== "edit" || st.N === N) return;
+    enterEditor(N); syncEditUI();
+  }));
+  function syncEditSize() { document.querySelectorAll("[data-edit-n]").forEach((b) => b.setAttribute("aria-pressed", String(st && +b.dataset.editN === st.N))); }
   function setTool(t) { tool = t; hover = null; Sound.tick(); syncEditUI(); render(); sayEdit(); }
   function setPaintColor(c) { paintColor = c; if (tool !== "paint") tool = "paint"; Sound.tick(); syncEditUI(); render(); sayEdit(); }
 
