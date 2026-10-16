@@ -4272,7 +4272,9 @@ const Sound = (() => {
   $("#pause-levels").addEventListener("click", () => { pauseEl.hidden = true; openLevels(); });
   $("#win-next").addEventListener("click", () => startLevel(levelNum === 50 ? EXTREME : Math.min(50, (levelNum || 0) + 1)));
   $("#win-retry").addEventListener("click", () => startLevel(levelNum || 1));
-  $("#win-levels").addEventListener("click", () => { winEl.hidden = true; phase = "free"; openLevels(); });
+  // Niveles se abre encima: la ventana del nivel completado sigue ahí al regresar (Siguiente, Reintentar, etc.).
+  // Si se elige otro nivel, startLevel la cierra.
+  $("#win-levels").addEventListener("click", () => openLevels());
   $("#win-home").addEventListener("click", () => { winEl.hidden = true; if (phase === "won") phase = "free"; goHome(); });
   function levelInfoText() {
     const pr = levelProg(), n = nextLevel(pr);
