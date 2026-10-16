@@ -2458,6 +2458,9 @@ const Sound = (() => {
     // ¿El navegador deja sonar sin que la persona toque primero?
     probe() {
       if (!on) return false;
+      // Pedir "reproducción" desde ya (no necesita toque), para que dentro de la landing se oiga desde que abre
+      // aunque el iPhone esté en silencio; antes solo se pedía al primer toque
+      try { if (navigator.audioSession && navigator.audioSession.type !== "playback") navigator.audioSession.type = "playback"; } catch (e) {}
       const s = sharedAC();
       if (s && s.state === "running") { build(s); watch(s); unlocked = true; return true; }
       // En la app de iOS sí se puede sonar sin toque: primero se pide el modo de audio (como en unlock)
