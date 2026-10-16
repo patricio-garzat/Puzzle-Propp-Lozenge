@@ -185,28 +185,62 @@ button { font: inherit; color: inherit; }
 .brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .logo { width: 46px; height: 46px; flex: none; filter: drop-shadow(0 4px 8px var(--shadow)); }
 /* La esquina del logo da media vuelta de vez en cuando: sutil, sin cambiar colores */
-.lg-corner { transform-origin: 0 0; transform: rotate(180deg); animation: lg-flip 18s cubic-bezier(.45,0,.25,1) 1.2s infinite; }
-/* Giros como en el juego: cada uno es de 60° y termina encajado; dos giros seguidos y una pausa (ciclo de 6 giros = 360°) */
+.lg-corner { transform-origin: 0 0; transform: rotate(180deg); animation: lg-flip 7s linear 0.8s infinite; }
+/* Giros completos de 180° con la misma curva y el mismo "levantón" que un giro del juego; cada uno termina encajado.
+   Dos giros (180° + 180°) completan la vuelta y el ciclo se repite sin saltos. */
 @keyframes lg-flip {
-  0.00% { transform: rotate(180deg) scale(1); }
-  1.25% { transform: rotate(210deg) scale(1.05); }
-  2.50% { transform: rotate(240deg) scale(1); }
-  7.50% { transform: rotate(240deg) scale(1); }
-  8.75% { transform: rotate(270deg) scale(1.05); }
-  10.00% { transform: rotate(300deg) scale(1); }
-  33.33% { transform: rotate(300deg) scale(1); }
-  34.58% { transform: rotate(330deg) scale(1.05); }
-  35.83% { transform: rotate(360deg) scale(1); }
-  40.83% { transform: rotate(360deg) scale(1); }
-  42.08% { transform: rotate(390deg) scale(1.05); }
-  43.33% { transform: rotate(420deg) scale(1); }
-  66.67% { transform: rotate(420deg) scale(1); }
-  67.92% { transform: rotate(450deg) scale(1.05); }
-  69.17% { transform: rotate(480deg) scale(1); }
-  74.17% { transform: rotate(480deg) scale(1); }
-  75.42% { transform: rotate(510deg) scale(1.05); }
-  76.67% { transform: rotate(540deg) scale(1); }
-  100% { transform: rotate(540deg) scale(1); }
+  0.000% { transform: rotate(180.00deg) scale(1.0000); }
+  14.286% { transform: rotate(180.00deg) scale(1.0000); }
+  14.655% { transform: rotate(180.05deg) scale(1.0117); }
+  15.024% { transform: rotate(180.42deg) scale(1.0233); }
+  15.393% { transform: rotate(181.41deg) scale(1.0344); }
+  15.762% { transform: rotate(183.33deg) scale(1.0450); }
+  16.131% { transform: rotate(186.51deg) scale(1.0548); }
+  16.500% { transform: rotate(191.25deg) scale(1.0636); }
+  16.869% { transform: rotate(197.86deg) scale(1.0714); }
+  17.238% { transform: rotate(206.67deg) scale(1.0779); }
+  17.607% { transform: rotate(217.97deg) scale(1.0831); }
+  17.976% { transform: rotate(232.08deg) scale(1.0869); }
+  18.345% { transform: rotate(249.32deg) scale(1.0892); }
+  18.714% { transform: rotate(270.00deg) scale(1.0900); }
+  19.083% { transform: rotate(290.68deg) scale(1.0892); }
+  19.452% { transform: rotate(307.92deg) scale(1.0869); }
+  19.821% { transform: rotate(322.03deg) scale(1.0831); }
+  20.190% { transform: rotate(333.33deg) scale(1.0779); }
+  20.560% { transform: rotate(342.14deg) scale(1.0714); }
+  20.929% { transform: rotate(348.75deg) scale(1.0636); }
+  21.298% { transform: rotate(353.49deg) scale(1.0548); }
+  21.667% { transform: rotate(356.67deg) scale(1.0450); }
+  22.036% { transform: rotate(358.59deg) scale(1.0344); }
+  22.405% { transform: rotate(359.58deg) scale(1.0233); }
+  22.774% { transform: rotate(359.95deg) scale(1.0117); }
+  23.143% { transform: rotate(360.00deg) scale(1.0000); }
+  51.429% { transform: rotate(360.00deg) scale(1.0000); }
+  51.798% { transform: rotate(360.05deg) scale(1.0117); }
+  52.167% { transform: rotate(360.42deg) scale(1.0233); }
+  52.536% { transform: rotate(361.41deg) scale(1.0344); }
+  52.905% { transform: rotate(363.33deg) scale(1.0450); }
+  53.274% { transform: rotate(366.51deg) scale(1.0548); }
+  53.643% { transform: rotate(371.25deg) scale(1.0636); }
+  54.012% { transform: rotate(377.86deg) scale(1.0714); }
+  54.381% { transform: rotate(386.67deg) scale(1.0779); }
+  54.750% { transform: rotate(397.97deg) scale(1.0831); }
+  55.119% { transform: rotate(412.08deg) scale(1.0869); }
+  55.488% { transform: rotate(429.32deg) scale(1.0892); }
+  55.857% { transform: rotate(450.00deg) scale(1.0900); }
+  56.226% { transform: rotate(470.68deg) scale(1.0892); }
+  56.595% { transform: rotate(487.92deg) scale(1.0869); }
+  56.964% { transform: rotate(502.03deg) scale(1.0831); }
+  57.333% { transform: rotate(513.33deg) scale(1.0779); }
+  57.702% { transform: rotate(522.14deg) scale(1.0714); }
+  58.071% { transform: rotate(528.75deg) scale(1.0636); }
+  58.440% { transform: rotate(533.49deg) scale(1.0548); }
+  58.810% { transform: rotate(536.67deg) scale(1.0450); }
+  59.179% { transform: rotate(538.59deg) scale(1.0344); }
+  59.548% { transform: rotate(539.58deg) scale(1.0233); }
+  59.917% { transform: rotate(539.95deg) scale(1.0117); }
+  60.286% { transform: rotate(540.00deg) scale(1.0000); }
+  100.000% { transform: rotate(540.00deg) scale(1.0000); }
 }
 .brand h1 { font-family: var(--f-display); font-weight: 800; font-size: clamp(20px, 2.1vw, 26px); line-height: 1.05; letter-spacing: -0.03em; margin: 0; }
 .brand h1 .mark {
@@ -1017,6 +1051,152 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ===================== Diseño 2.0: tranquilo, vivo y fluido =====================
+   Fondos con auroras suaves, tarjetas de vidrio, botones con degradado y brillo, entradas escalonadas
+   y respuesta táctil con resorte. Todo respeta "reducir movimiento". */
+:root {
+  --glass: rgba(255, 255, 255, 0.78); --glass-strong: rgba(255, 255, 255, 0.92); --glass-line: rgba(255, 255, 255, 0.95);
+  --glass-edge: rgba(0, 56, 91, 0.07);
+  --lift: 0 1px 2px rgba(20, 50, 90, 0.06), 0 8px 24px rgba(40, 70, 120, 0.10);
+  --lift-hi: 0 2px 4px rgba(20, 50, 90, 0.06), 0 16px 36px rgba(40, 70, 120, 0.16);
+  --au-1: rgba(111, 142, 247, 0.26); --au-2: rgba(255, 201, 79, 0.26); --au-3: rgba(255, 123, 99, 0.18);
+  --g-amber: linear-gradient(135deg, #FFDA7A 0%, #FFBC4A 52%, #FF9E58 100%);
+  --g-blue: linear-gradient(135deg, #8DA8FF 0%, #5B7CF0 100%);
+  --g-coral: linear-gradient(135deg, #FF9F8A 0%, #F06A52 100%);
+  --g-mint: linear-gradient(135deg, #6EE2B5 0%, #22A97A 100%);
+  --spring: cubic-bezier(.2, .9, .25, 1.15);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --glass: rgba(40, 52, 76, 0.72); --glass-strong: rgba(44, 57, 82, 0.92); --glass-line: rgba(255, 255, 255, 0.07);
+    --glass-edge: rgba(0, 0, 0, 0.2);
+    --lift: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.32);
+    --lift-hi: 0 2px 4px rgba(0, 0, 0, 0.3), 0 18px 40px rgba(0, 0, 0, 0.42);
+    --au-1: rgba(111, 142, 247, 0.20); --au-2: rgba(255, 201, 79, 0.10); --au-3: rgba(255, 123, 99, 0.10);
+  }
+}
+:root[data-theme="dark"] {
+  --glass: rgba(40, 52, 76, 0.72); --glass-strong: rgba(44, 57, 82, 0.92); --glass-line: rgba(255, 255, 255, 0.07);
+  --glass-edge: rgba(0, 0, 0, 0.2);
+  --lift: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.32);
+  --lift-hi: 0 2px 4px rgba(0, 0, 0, 0.3), 0 18px 40px rgba(0, 0, 0, 0.42);
+  --au-1: rgba(111, 142, 247, 0.20); --au-2: rgba(255, 201, 79, 0.10); --au-3: rgba(255, 123, 99, 0.10);
+}
+
+/* Fondos con auroras (fijas, sin repintar en cada cuadro) */
+.screen {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(70% 45% at 0% 0%, var(--au-1), transparent 70%),
+    radial-gradient(60% 40% at 100% 8%, var(--au-2), transparent 72%),
+    radial-gradient(80% 45% at 50% 108%, var(--au-3), transparent 70%);
+}
+.screen.under { filter: brightness(0.97); }
+
+/* Inicio: auroras que se mueven despacio y rombos del juego flotando */
+#scr-home::before { animation: au-drift 14s ease-in-out infinite alternate; }
+#scr-home::after { content: ""; position: absolute; right: -30vw; bottom: 8vh; width: 90vw; height: 50vh; border-radius: 50%; background: radial-gradient(closest-side, var(--au-2), transparent); pointer-events: none; animation: au-drift 18s ease-in-out -6s infinite alternate-reverse; }
+@keyframes au-drift { 50% { transform: translate(-6vw, 3vh) scale(1.08); } 100% { transform: translate(4vw, -2vh) scale(0.96); } }
+.home-float { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.home-float .ft { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: calc(var(--s) * 0.58); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); opacity: .55; animation: ft-float 11s ease-in-out var(--d) infinite; }
+.home-float .ft.t { background: linear-gradient(160deg, var(--gt1), var(--gt2)); }
+.home-float .ft.l { background: linear-gradient(160deg, var(--gl1), var(--gl2)); }
+.home-float .ft.r { background: linear-gradient(160deg, var(--gr1), var(--gr2)); }
+@keyframes ft-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-18px) rotate(18deg); } }
+.home-hero, .home-actions, .home-foot { z-index: 1; }
+.home-logo { filter: drop-shadow(0 22px 30px var(--shadow-strong)); }
+.home-hero::before { content: ""; position: absolute; left: 50%; top: 0; width: 240px; height: 240px; translate: -50% -14%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 255, 255, 0.65), transparent); z-index: -1; animation: halo 6s ease-in-out infinite; }
+@keyframes halo { 50% { transform: scale(1.12); opacity: .7; } }
+:root[data-theme="dark"] .home-hero::before { background: radial-gradient(closest-side, rgba(143, 169, 255, 0.22), transparent); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .home-hero::before { background: radial-gradient(closest-side, rgba(143, 169, 255, 0.22), transparent); } }
+
+/* Botones grandes: tarjeta con ícono, texto y flecha */
+.big-btn {
+  flex-direction: row; justify-content: flex-start; gap: 14px; text-align: left;
+  min-height: 70px; padding: 12px 16px 12px 12px; border-radius: 22px;
+  box-shadow: var(--lift); position: relative; overflow: hidden; isolation: isolate;
+  transition: transform 0.45s var(--spring), box-shadow 0.3s ease;
+}
+.big-btn:active { transform: scale(0.97); box-shadow: var(--lift); }
+.big-btn .bb-txt { display: grid; gap: 1px; flex: 1; min-width: 0; }
+.big-btn .bb-txt > span { font-weight: 800; font-size: 18px; letter-spacing: -0.02em; }
+.big-btn small { font-family: var(--f-body); font-weight: 600; font-size: 12.5px; letter-spacing: 0; opacity: 0.72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.big-btn .bb-ic { flex: none; width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; color: #FFFFFF; }
+.big-btn .bb-ic svg { width: 24px; height: 24px; }
+.big-btn .bb-go { flex: none; width: 9px; height: 15px; opacity: .45; }
+.big-btn.primary { background: var(--g-amber); color: #3A2410; box-shadow: 0 12px 28px rgba(255, 150, 60, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
+.big-btn.primary:active { box-shadow: 0 6px 16px rgba(255, 150, 60, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.55); }
+.big-btn.primary .bb-ic { background: rgba(255, 255, 255, 0.35); color: #FFFFFF; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45); }
+.big-btn.primary::after { content: ""; position: absolute; top: 0; bottom: 0; left: -60%; width: 45%; background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.42), transparent); transform: skewX(-18deg); animation: bb-shine 5.5s ease-in-out 1.5s infinite; z-index: -1; }
+@keyframes bb-shine { 0%, 72% { left: -60%; } 100% { left: 130%; } }
+.big-btn.secondary { background: var(--glass); color: var(--ink); border: 1px solid var(--glass-line); box-shadow: var(--lift); -webkit-backdrop-filter: blur(16px) saturate(1.5); backdrop-filter: blur(16px) saturate(1.5); font-size: 17px; }
+.big-btn.secondary:active { box-shadow: var(--lift); }
+.big-btn.c-blue .bb-ic { background: var(--g-blue); box-shadow: 0 6px 14px rgba(83, 113, 230, 0.35); }
+.big-btn.c-coral .bb-ic { background: var(--g-coral); box-shadow: 0 6px 14px rgba(236, 95, 72, 0.32); }
+
+.home-tile { background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--lift); border-radius: 20px; padding: 14px 6px 12px; gap: 8px; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); transition: transform 0.45s var(--spring); }
+.home-tile:active { transform: scale(0.94); }
+.home-tile svg { width: 36px; height: 36px; padding: 8px; border-radius: 12px; color: #FFFFFF; }
+.home-tile:nth-child(1) svg { background: var(--g-mint); }
+.home-tile:nth-child(2) svg { background: var(--g-amber); }
+.home-tile:nth-child(3) svg { background: var(--g-blue); }
+
+/* Entrada escalonada de cada pantalla */
+.screen.enter > *:not(.home-float) { animation: rise 0.6s var(--spring) both; }
+.screen.enter > *:nth-child(2) { animation-delay: 0.04s; } .screen.enter > *:nth-child(3) { animation-delay: 0.08s; }
+.screen.enter > *:nth-child(4) { animation-delay: 0.12s; } .screen.enter > *:nth-child(5) { animation-delay: 0.16s; }
+.screen.enter > *:nth-child(6) { animation-delay: 0.2s; } .screen.enter > *:nth-child(n+7) { animation-delay: 0.24s; }
+#scr-home.enter .home-actions > * { animation: rise 0.65s var(--spring) both; }
+#scr-home.enter .home-actions > :nth-child(2) { animation-delay: .05s; } #scr-home.enter .home-actions > :nth-child(3) { animation-delay: .1s; }
+#scr-home.enter .home-actions > :nth-child(4) { animation-delay: .15s; } #scr-home.enter .home-actions > :nth-child(5) { animation-delay: .2s; }
+@keyframes rise { from { opacity: 0; transform: translateY(16px) scale(0.98); } }
+
+/* Barra de navegación y grupos */
+.nav-back { background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--lift); border-radius: 999px; padding: 7px 14px 7px 10px; font-size: 15px; transition: transform 0.4s var(--spring); }
+.nav-back:active { transform: scale(0.94); }
+.nav h2 { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.list, .stat-card, .lv-chip { background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--lift); }
+.list { border-radius: 20px; }
+.list-row + .list-row { border-top-color: var(--glass-edge); }
+.ico { border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); }
+.stat-card { border-radius: 20px; }
+.stat-card b { background: var(--g-blue); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.group-title, .sel-label, .lv-sec h4 { letter-spacing: 0.14em; }
+
+/* Niveles */
+.lv-sec h4 span:first-child { display: inline-flex; align-items: center; gap: 8px; }
+.lv-sec h4 span:first-child::before { content: ""; width: 14px; height: 8px; clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); background: var(--g-amber); }
+.lv-sec:nth-child(2) h4 span:first-child::before { background: var(--g-coral); }
+.lv-sec:nth-child(3) h4 span:first-child::before { background: var(--g-blue); }
+.lv { background: var(--glass-strong); border: 1px solid var(--glass-line); box-shadow: var(--lift); border-radius: 18px; transition: transform 0.4s var(--spring); }
+.lv:active { transform: scale(0.92); box-shadow: var(--lift); }
+.lv.next { background: var(--g-amber); border-color: transparent; color: #3A2410; box-shadow: 0 10px 24px rgba(255, 150, 60, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.5); animation: lv-glow 2.4s ease-in-out infinite; }
+@keyframes lv-glow { 50% { box-shadow: 0 10px 30px rgba(255, 150, 60, 0.55), 0 0 0 6px rgba(255, 190, 80, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.5); } }
+.lv.locked { background: transparent; border: 1px dashed var(--line); box-shadow: none; opacity: 0.7; }
+
+/* Juego: barra inferior y marcadores de vidrio */
+.dock { background: var(--glass); border: 1px solid var(--glass-line); box-shadow: var(--lift-hi); -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6); }
+@media (max-width: 560px) { .dock { border-radius: 26px; } }
+.tool, .seg button { transition: background-color 0.15s ease, transform 0.4s var(--spring), opacity 0.15s ease, color 0.15s ease; }
+.tool:active, .seg button:active { transform: scale(0.9); }
+
+/* Juego: el mismo fondo con auroras y el botón principal con degradado */
+body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transparent 70%), radial-gradient(60% 36% at 100% 6%, var(--au-2), transparent 72%), radial-gradient(80% 40% at 50% 106%, var(--au-3), transparent 70%); background-attachment: fixed; }
+.tool.go-play { background: var(--g-amber); color: #3A2410; box-shadow: 0 8px 18px rgba(255, 150, 60, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.5); font-weight: 800; }
+.tool.go-play:hover { background: var(--g-amber); }
+
+/* Ventana de nivel completado: entra con resorte y botones a juego */
+.scrim:not([hidden]) .win { animation: win-in 0.6s var(--spring) both; }
+@keyframes win-in { from { opacity: 0; transform: translateY(24px) scale(0.92); } }
+.win { box-shadow: var(--lift-hi); }
+.win .actions .btn { border-radius: 16px; transition: transform 0.4s var(--spring); }
+.win .actions .btn:active { transform: scale(0.94); }
+.win .actions .btn.primary { background: var(--g-amber); border-color: transparent; color: #3A2410; box-shadow: 0 10px 22px rgba(255, 150, 60, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.5); }
+
+@media (prefers-reduced-motion: reduce) {
+  #scr-home::before, #scr-home::after, .home-float .ft, .home-hero::before, .big-btn.primary::after, .lv.next, .screen.enter > *, #scr-home.enter .home-actions > *, .scrim:not([hidden]) .win { animation: none !important; }
+}
 </style>
 </head>
 <body>
@@ -1351,16 +1531,17 @@ body.extreme .lvl-num b { background: linear-gradient(135deg, #FFB547, #E8432E);
 </div>
 <div id="shell" hidden>
   <section class="screen" id="scr-home" aria-label="Inicio">
+    <div class="home-float" aria-hidden="true"><i class="ft t" style="--x:10%;--y:16%;--s:26px;--d:0s"></i><i class="ft r" style="--x:84%;--y:12%;--s:20px;--d:-3s"></i><i class="ft l" style="--x:88%;--y:44%;--s:16px;--d:-6s"></i><i class="ft r" style="--x:6%;--y:52%;--s:14px;--d:-2s"></i><i class="ft t" style="--x:78%;--y:70%;--s:12px;--d:-5s"></i><i class="ft l" style="--x:14%;--y:82%;--s:18px;--d:-8s"></i></div>
     <div class="home-hero">
       <svg class="home-logo" id="home-logo" viewBox="-1.08 -1.08 2.16 2.16" aria-hidden="true"></svg>
       <h1 class="home-title">Cube <span class="mark">Swipe</span></h1>
       <p class="home-sub">Un puzzle de cubo relajante</p>
     </div>
     <div class="home-actions">
-      <button class="big-btn primary" type="button" id="home-continue" hidden><span>Continuar</span><small id="home-continue-info"></small></button>
-      <button class="big-btn primary" type="button" id="home-levels"><span>Niveles</span><small id="home-levels-info">50 niveles · de 2×2×2 a 4×4×4</small></button>
-      <button class="big-btn secondary" type="button" id="home-play"><span>Partida libre</span><small id="home-play-info">Elige tamaño y dificultad</small></button>
-      <button class="big-btn secondary" type="button" id="home-custom"><span>Arma tu mezcla</span></button>
+      <button class="big-btn primary" type="button" id="home-continue" hidden><span class="bb-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.6l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8Z" fill="currentColor"/></svg></span><span class="bb-txt"><span>Continuar</span><small id="home-continue-info"></small></span><svg class="bb-go" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="big-btn primary" type="button" id="home-levels"><span class="bb-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.8l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.6l-5.4 2.9 1.1-6.1-4.5-4.2 6.1-.8Z" fill="currentColor"/></svg></span><span class="bb-txt"><span>Niveles</span><small id="home-levels-info">50 niveles · de 2×2×2 a 4×4×4</small></span><svg class="bb-go" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="big-btn secondary c-blue" type="button" id="home-play"><span class="bb-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 7.5v9L12 21l-8-4.5v-9Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M4 7.5 12 12l8-4.5M12 12v9" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="bb-txt"><span>Partida libre</span><small id="home-play-info">Elige tamaño y dificultad</small></span><svg class="bb-go" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <button class="big-btn secondary c-coral" type="button" id="home-custom"><span class="bb-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 4.5l5 5L9 20H4v-5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12.5 6.5l5 5" stroke="currentColor" stroke-width="2"/></svg></span><span class="bb-txt"><span>Arma tu mezcla</span><small>Pinta y arma tu propio reto</small></span><svg class="bb-go" viewBox="0 0 10 16" aria-hidden="true"><path d="M2 2l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="home-tiles">
         <button class="home-tile" type="button" data-open="scr-howto"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9.3 9.4a2.8 2.8 0 1 1 4 2.5c-.9.5-1.3 1-1.3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="17.2" r="1.1" fill="currentColor"/></svg><span>Cómo jugar</span></button>
         <button class="home-tile" type="button" data-open="scr-stats"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-10 0V4Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.6 3M17 6h2.5a2.5 2.5 0 0 1-2.6 3M12 13v4m-3.5 3h7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg><span>Récords</span></button>
@@ -2391,6 +2572,7 @@ const Sound = (() => {
     "Borrar": "Erase",
     "Progreso de niveles": "Level progress",
     "Acerca de": "About",
+    "Pinta y arma tu propio reto": "Paint and build your own challenge",
     "Versión": "Version",
     "Sitio web": "Website",
     "Soporte": "Support",
@@ -3738,6 +3920,8 @@ const Sound = (() => {
     el.classList.remove("under");
     void el.getBoundingClientRect();
     el.classList.add("on");
+    el.classList.remove("enter"); void el.offsetWidth; el.classList.add("enter");
+    clearTimeout(el._enterT); el._enterT = setTimeout(() => el.classList.remove("enter"), 1100);
     stack.push(id);
     if (id === "scr-select") syncSelect();
     if (id === "scr-stats") renderStats();
