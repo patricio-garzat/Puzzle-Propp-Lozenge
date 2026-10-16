@@ -3775,13 +3775,12 @@ const Sound = (() => {
     const fingerUp = inverted ? d > 0 : d < 0;
     const abs = Math.abs(d), now = performance.now();
     clearTimeout(wheel.quietT);
-    wheel.quietT = setTimeout(() => { wheel.locked = false; wheel.acc = 0; wheel.lastAbs = 0; }, 170);
-    // Un gesto nuevo mientras sigue la inercia del anterior: el movimiento vuelve a crecer de golpe
-    if (wheel.locked && now - wheel.firedAt > 140 && abs > 6 && abs > wheel.lastAbs * 1.8) { wheel.locked = false; wheel.acc = 0; }
-    wheel.lastAbs = abs;
+    // Un gesto = un giro: después de girar se ignora todo (incluida la inercia del trackpad)
+    // hasta que deja de llegar movimiento un momento
+    wheel.quietT = setTimeout(() => { wheel.locked = false; wheel.acc = 0; }, 260);
     if (wheel.locked) return;
     wheel.acc += fingerUp ? abs : -abs;
-    if (Math.abs(wheel.acc) < 24) return;
+    if (Math.abs(wheel.acc) < 30) return;
     wheel.locked = true; wheel.firedAt = now;
     const up = wheel.acc > 0; wheel.acc = 0;
     if (!v) return;
