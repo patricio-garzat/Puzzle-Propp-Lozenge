@@ -765,7 +765,7 @@ html.native #studio { background: #FFFFFF; box-shadow: 0 50vh 0 0 #FFFFFF; trans
   animation: sp-out 0.5s cubic-bezier(.4,0,.2,1) 5s forwards;
 }
 .sp-wrap { display: grid; justify-items: center; gap: 22px; animation: sp-zoom 0.5s cubic-bezier(.4,0,.2,1) 5s forwards; }
-.sp-mark { width: min(46vw, 32vh, 250px); height: auto; overflow: visible; }
+.sp-mark { width: min(60vw, 38vh, 290px); height: auto; overflow: visible; }
 .sp { transform-box: fill-box; transform-origin: 50% 100%; opacity: 0;
   animation: sp-drop 0.62s linear calc(0.55s + var(--k) * 0.085s) forwards; }
 @keyframes sp-drop {
@@ -1338,6 +1338,52 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
 .fs-fact .e svg { width: 18px; height: 18px; }
 .fs-fact:nth-child(2) .e { background: var(--g-coral, #EC5F48); } .fs-fact:nth-child(3) .e { background: var(--g-amber, #F5B12C); } .fs-fact:nth-child(4) .e { background: var(--g-mint, #22A97A); }
 .fs-fact b { font-family: var(--f-display); }
+
+/* ===== Intro de Cube Swipe 2.0 =====
+   Mismos tiempos que antes (rombos 0.55–1.9 s, asentado 2.1 s, giro 2.35–3.25 s con aterrizaje al 84 %,
+   letras 3.15 s), así los "thump" y la vibración de cada rombo siguen cayendo juntos. */
+#splash { background-color: var(--bg); background-image: radial-gradient(70% 45% at 0% 0%, var(--au-1, transparent), transparent 70%), radial-gradient(60% 40% at 100% 8%, var(--au-2, transparent), transparent 72%), radial-gradient(80% 45% at 50% 108%, var(--au-3, transparent), transparent 70%); }
+.sp-sky { position: absolute; inset: 0; pointer-events: none; overflow: hidden; opacity: 0; animation: sp-fade-in 1.2s ease 0.3s forwards; }
+.sp-sky .ft { position: absolute; left: var(--x); top: var(--y); width: var(--s); height: calc(var(--s) * 0.58); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); opacity: .5; animation: ft-float 9s ease-in-out var(--d) infinite; }
+.sp-sky .ft.t { background: linear-gradient(160deg, var(--gt1), var(--gt2)); }
+.sp-sky .ft.l { background: linear-gradient(160deg, var(--gl1), var(--gl2)); }
+.sp-sky .ft.r { background: linear-gradient(160deg, var(--gr1), var(--gr2)); }
+@keyframes sp-fade-in { to { opacity: 1; } }
+/* Asentado: el cubo se aplasta y rebota suave, y sale una onda de luz */
+.sp-cube { animation: sp-settle2 0.55s cubic-bezier(.3,1.4,.5,1) 2.08s; }
+@keyframes sp-settle2 { 0% { transform: none; } 30% { transform: scale(1.06, 0.93); } 62% { transform: scale(0.98, 1.03); } 100% { transform: none; } }
+.sp-wave { fill: none; stroke: #FFFFFF; stroke-width: 0.03; opacity: 0; transform: scale(0.7); animation: sp-wave 0.9s cubic-bezier(.15,.7,.3,1) 2.12s forwards; }
+@keyframes sp-wave { 0% { opacity: 0.7; transform: scale(0.72); } 100% { opacity: 0; transform: scale(1.55); } }
+/* Giro: anticipación, se levanta, gira de un solo tirón y encaja con un pequeño rebote */
+.sp-twist { animation: sp-twist2 0.9s linear 2.35s forwards; }
+@keyframes sp-twist2 {
+  0%   { transform: rotate(0deg) scale(1); animation-timing-function: cubic-bezier(.4,0,.6,1); }
+  14%  { transform: rotate(-12deg) scale(0.95); animation-timing-function: cubic-bezier(.45,0,.15,1); }
+  70%  { transform: rotate(172deg) scale(1.2); animation-timing-function: cubic-bezier(.4,0,.5,1); }
+  84%  { transform: rotate(188deg) scale(0.94); animation-timing-function: cubic-bezier(.3,0,.4,1); }
+  93%  { transform: rotate(178deg) scale(1.03); animation-timing-function: ease-out; }
+  100% { transform: rotate(180deg) scale(1); }
+}
+.sp-shadow { animation: sp-shadow2 0.9s ease 2.35s forwards; }
+@keyframes sp-shadow2 { 14% { opacity: 0.2; } 70% { opacity: 0.55; } 84%, 100% { opacity: 0; } }
+/* Al encajar: chispas de rombos que salen del centro */
+.sp-burst .pt { opacity: 0; transform: rotate(var(--a)) translateY(-0.3px) scale(0); animation: sp-pt 0.85s cubic-bezier(.15,.75,.3,1) calc(3.1s + var(--d)) forwards; }
+@keyframes sp-pt { 0% { opacity: 1; transform: rotate(var(--a)) translateY(-0.32px) scale(0.4); } 60% { opacity: 1; } 100% { opacity: 0; transform: rotate(var(--a)) translateY(-1.25px) scale(1.15) rotate(90deg); } }
+.sp-ring { stroke-width: 0.045; }
+/* Letras: suben una por una enfocándose, luego la franja de colores se dibuja y aparece el subtítulo */
+.sp-word span { opacity: 0; transform: translateY(60%) scale(0.9); filter: blur(6px); animation: sp-letter2 0.65s cubic-bezier(.2,1.2,.35,1) calc(3.15s + var(--i) * 0.045s) forwards; }
+@keyframes sp-letter2 { 60% { filter: blur(0); } to { opacity: 1; transform: none; filter: blur(0); } }
+.sp-word { position: relative; }
+.sp-bar { display: flex; width: min(52vw, 210px); height: 6px; margin-top: -10px; border-radius: 3px; overflow: hidden; transform: scaleX(0); transform-origin: left; animation: sp-bar 0.7s cubic-bezier(.6,0,.2,1) 3.45s forwards; }
+.sp-bar i { flex: 1; } .sp-bar i:nth-child(1) { background: var(--face-top); } .sp-bar i:nth-child(2) { background: var(--face-left); } .sp-bar i:nth-child(3) { background: var(--face-right); }
+@keyframes sp-bar { to { transform: scaleX(1); } }
+.sp-tag { margin-top: -8px; opacity: 0; letter-spacing: 0.4em; animation: sp-tag2 0.9s cubic-bezier(.2,.8,.2,1) 3.65s forwards; }
+@keyframes sp-tag2 { to { opacity: 1; letter-spacing: 0.16em; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  #splash .sp-wave, #splash .sp-burst, #splash .sp-sky .ft { display: none; }
+  #splash .sp-word span { filter: none !important; }
+  #splash .sp-bar { transform: none !important; } #splash .sp-tag { opacity: 1 !important; letter-spacing: 0.16em !important; }
+}
 </style>
 </head>
 <body>
@@ -1388,6 +1434,7 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
   </svg>
 </div>
 <div id="splash" class="hold" aria-hidden="true">
+  <div class="sp-sky" aria-hidden="true"><i class="ft t" style="--x:12%;--y:18%;--s:24px;--d:0s"></i><i class="ft r" style="--x:82%;--y:14%;--s:18px;--d:-3s"></i><i class="ft l" style="--x:86%;--y:58%;--s:15px;--d:-6s"></i><i class="ft r" style="--x:8%;--y:62%;--s:13px;--d:-2s"></i><i class="ft t" style="--x:74%;--y:82%;--s:12px;--d:-5s"></i><i class="ft l" style="--x:20%;--y:86%;--s:17px;--d:-8s"></i></div>
   <div class="sp-wrap">
     <svg class="sp-mark" viewBox="-1.32 -1.32 2.64 2.64">
       <defs>
@@ -1409,11 +1456,13 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
           <path class="sp-grid" d="M-0.0000,1.0000L-0.0000,0.5000L-0.4330,0.7500ZM-0.4330,0.7500L-0.4330,0.2500L-0.8660,0.5000ZM0.4330,0.7500L0.4330,0.2500L-0.0000,0.5000ZM-0.0000,0.5000L-0.0000,-0.0000L-0.4330,0.2500ZM-0.4330,0.2500L-0.4330,-0.2500L-0.8660,-0.0000ZM0.8660,0.5000L0.8660,-0.0000L0.4330,0.2500ZM0.4330,0.2500L0.4330,-0.2500L-0.0000,-0.0000ZM-0.0000,-0.0000L-0.0000,-0.5000L-0.4330,-0.2500ZM-0.4330,-0.2500L-0.4330,-0.7500L-0.8660,-0.5000ZM0.8660,-0.0000L0.8660,-0.5000L0.4330,-0.2500ZM0.4330,-0.2500L0.4330,-0.7500L-0.0000,-0.5000ZM-0.0000,-0.5000L-0.0000,-1.0000L-0.4330,-0.7500Z"/>
         </g>
         <g class="sp-cube"><g class="sp" style="--k:0"><polygon points="-0.3860,0.3314 -0.0470,0.5271 -0.0470,0.9186 -0.3860,0.7229" fill="url(#spL)" stroke="url(#spL)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="-0.3860,0.3314 -0.0470,0.5271 -0.0470,0.9186 -0.3860,0.7229" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:1"><polygon points="0.0470,0.5271 0.3860,0.3314 0.3860,0.7229 0.0470,0.9186" fill="url(#spR)" stroke="url(#spR)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.0470,0.5271 0.3860,0.3314 0.3860,0.7229 0.0470,0.9186" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:2"><polygon points="0.4800,0.2771 0.8190,0.0814 0.8190,0.4729 0.4800,0.6686" fill="url(#spR)" stroke="url(#spR)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.4800,0.2771 0.8190,0.0814 0.8190,0.4729 0.4800,0.6686" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:3"><polygon points="-0.8190,0.0814 -0.4800,0.2771 -0.4800,0.6686 -0.8190,0.4729" fill="url(#spL)" stroke="url(#spL)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="-0.8190,0.0814 -0.4800,0.2771 -0.4800,0.6686 -0.8190,0.4729" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:6"><polygon points="0.4800,-0.2229 0.8190,-0.4186 0.8190,-0.0271 0.4800,0.1686" fill="url(#spR)" stroke="url(#spR)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.4800,-0.2229 0.8190,-0.4186 0.8190,-0.0271 0.4800,0.1686" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:7"><polygon points="-0.8190,-0.4186 -0.4800,-0.2229 -0.4800,0.1686 -0.8190,-0.0271" fill="url(#spL)" stroke="url(#spL)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="-0.8190,-0.4186 -0.4800,-0.2229 -0.4800,0.1686 -0.8190,-0.0271" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:9"><polygon points="-0.4330,-0.6957 -0.0940,-0.5000 -0.4330,-0.3043 -0.7720,-0.5000" fill="url(#spT)" stroke="url(#spT)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="-0.4330,-0.6957 -0.0940,-0.5000 -0.4330,-0.3043 -0.7720,-0.5000" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:10"><polygon points="0.4330,-0.6957 0.7720,-0.5000 0.4330,-0.3043 0.0940,-0.5000" fill="url(#spT)" stroke="url(#spT)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.4330,-0.6957 0.7720,-0.5000 0.4330,-0.3043 0.0940,-0.5000" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:11"><polygon points="0.0000,-0.9457 0.3390,-0.7500 0.0000,-0.5543 -0.3390,-0.7500" fill="url(#spT)" stroke="url(#spT)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.0000,-0.9457 0.3390,-0.7500 0.0000,-0.5543 -0.3390,-0.7500" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp-twist"><polygon class="sp-shadow" points="0.0300,-0.4300 0.4630,-0.1800 0.4630,0.3200 0.0300,0.5700 -0.4030,0.3200 -0.4030,-0.1800" fill="#0B0820"/><g class="sp" style="--k:4"><polygon points="-0.3860,-0.1686 -0.0470,0.0271 -0.0470,0.4186 -0.3860,0.2229" fill="url(#spL)" stroke="url(#spL)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="-0.3860,-0.1686 -0.0470,0.0271 -0.0470,0.4186 -0.3860,0.2229" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:5"><polygon points="0.0470,0.0271 0.3860,-0.1686 0.3860,0.2229 0.0470,0.4186" fill="url(#spR)" stroke="url(#spR)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.0470,0.0271 0.3860,-0.1686 0.3860,0.2229 0.0470,0.4186" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g><g class="sp" style="--k:8"><polygon points="0.0000,-0.4457 0.3390,-0.2500 0.0000,-0.0543 -0.3390,-0.2500" fill="url(#spT)" stroke="url(#spT)" stroke-width="0.05" stroke-linejoin="round"/><polygon class="sp-flash" points="0.0000,-0.4457 0.3390,-0.2500 0.0000,-0.0543 -0.3390,-0.2500" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0.05" stroke-linejoin="round"/></g></g></g>
-        <polygon class="sp-ring" points="0.0000,-0.5500 0.4763,-0.2750 0.4763,0.2750 0.0000,0.5500 -0.4763,0.2750 -0.4763,-0.2750"/><polygon class="sp-ring r2" points="0.0000,-0.5500 0.4763,-0.2750 0.4763,0.2750 0.0000,0.5500 -0.4763,0.2750 -0.4763,-0.2750"/>
+        <circle class="sp-wave" r="0.98"/><g class="sp-burst"><g class="pt" style="--a:15deg;--d:0.00s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spT)"/></g><g class="pt" style="--a:45deg;--d:0.03s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spL)"/></g><g class="pt" style="--a:75deg;--d:0.06s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spR)"/></g><g class="pt" style="--a:105deg;--d:0.00s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spT)"/></g><g class="pt" style="--a:135deg;--d:0.03s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spL)"/></g><g class="pt" style="--a:165deg;--d:0.06s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spR)"/></g><g class="pt" style="--a:195deg;--d:0.00s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spT)"/></g><g class="pt" style="--a:225deg;--d:0.03s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spL)"/></g><g class="pt" style="--a:255deg;--d:0.06s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spR)"/></g><g class="pt" style="--a:285deg;--d:0.00s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spT)"/></g><g class="pt" style="--a:315deg;--d:0.03s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spL)"/></g><g class="pt" style="--a:345deg;--d:0.06s"><polygon points="0,-0.09 0.062,0 0,0.09 -0.062,0" fill="url(#spR)"/></g></g><polygon class="sp-ring" points="0.0000,-0.5500 0.4763,-0.2750 0.4763,0.2750 0.0000,0.5500 -0.4763,0.2750 -0.4763,-0.2750"/><polygon class="sp-ring r2" points="0.0000,-0.5500 0.4763,-0.2750 0.4763,0.2750 0.0000,0.5500 -0.4763,0.2750 -0.4763,-0.2750"/>
         <g clip-path="url(#sp-clip)"><g transform="rotate(20)"><rect class="sp-glint" x="-0.45" y="-1.8" width="0.9" height="3.6" fill="url(#sp-gl)"/></g></g>
       </g>
     </svg>
     <h2 class="sp-word" aria-label="Cube Swipe"><span style="--i:0">C</span><span style="--i:1">u</span><span style="--i:2">b</span><span style="--i:3">e</span><span style="--i:4">&nbsp;</span><span style="--i:5">S</span><span style="--i:6">w</span><span style="--i:7">i</span><span style="--i:8">p</span><span style="--i:9">e</span></h2>
+    <div class="sp-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+    <p class="sp-tag">Un puzzle de cubo relajante</p>
   </div>
 </div>
 <div class="bg" aria-hidden="true">
