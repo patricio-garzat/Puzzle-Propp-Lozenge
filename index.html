@@ -2571,11 +2571,15 @@ const Sound = (() => {
       for (let k = 0; k < 12; k++) H({ t: 0.55 + k * 0.085 + 0.62 * 0.62, vol: 0.13 });
       H({ t: 2.12, vol: 0.16 });                                              // asentamiento
       B({ t: 2.36, dur: 0.75, vol: 0.03, from: 400, to: 1000 });              // se levanta y gira
-      const land = 2.35 + 0.9 * 0.84;                                         // aterriza: thump y campanita grave
+      const M = (f, o) => { if (o.t >= from) mallet(f, Object.assign({}, o, { t: at(o.t) })); };
+      const D = (fs, o) => { if (o.t >= from) pad(fs, Object.assign({}, o, { t: at(o.t) })); };
+      const land = 2.35 + 0.9 * 0.84;                                         // aterriza: thump y marimba de madera (sin campana)
       H({ t: land, vol: 0.22 });
-      P(392, { t: land + 0.05, vol: 0.07, dur: 1.9 });
-      P(587.33, { t: land + 0.14, vol: 0.035, dur: 1.7 });
-      [523.25, 659.25].forEach((f, i) => P(f, { t: 3.2 + i * 0.16, vol: 0.022, dur: 1.5 })); // brillo del nombre
+      M(196, { t: land + 0.03, vol: 0.075, dur: 0.6 });
+      M(293.66, { t: land + 0.09, vol: 0.05, dur: 0.5 });
+      D([196, 293.66, 392], { t: land + 0.05, dur: 1.8, vol: 0.014 });
+      // El nombre: golpecitos de madera muy suaves que suben con las letras
+      [261.63, 329.63, 392].forEach((f, i) => M(f, { t: 3.2 + i * 0.13, vol: 0.026, dur: 0.35 }));
     },
     // Cada movimiento: solo un "thump" suave (más quedito si giras muy rápido)
     lift() {},
@@ -2610,19 +2614,22 @@ const Sound = (() => {
     starMiss() { thump({ vol: 0.08 }); },
     // El foquito llega a las pistas: golpecito de madera, más agudito pero corto
     coin() { mallet(pick([392, 440, 523.25]), { vol: 0.06, dur: 0.3 }); },
-    // Intro del estudio: el oso aparece con un soplo y una nota grave, golpecitos suaves por letra
+    // Intro del estudio (BluBer). En cada juego usa uno o dos sonidos de ese juego; en Cube Swipe:
+    // el "thump" de un rombo que se asienta y la marimba de madera. El oso aparece con un soplo cálido,
+    // cada letra de "BluBer" cae como un rombo y "GAMES" encaja con un giro (thump + marimba).
     studio(from = 0) {
       const c = ensure(); if (!c) return;
       const at = (o) => Object.assign({}, o, { t: o.t - from });
-      const P = (f, o) => { if (o.t >= from) pluck(f, at(o)); };
+      const M = (f, o) => { if (o.t >= from) mallet(f, at(o)); };
       const H = (o) => { if (o.t >= from) thump(at(o)); };
       const B = (o) => { if (o.t >= from) breath(at(o)); };
+      const D = (fs, o) => { if (o.t >= from) pad(fs, at(o)); };
       B({ t: 0.25, dur: 1.1, vol: 0.022, from: 300, to: 800 });
-      P(293.66, { t: 0.35, vol: 0.055, dur: 2 });
-      P(440, { t: 0.5, vol: 0.03, dur: 1.8 });
-      for (let i = 0; i < 6; i++) H({ t: 1.25 + i * 0.07, vol: 0.05 });
-      P(392, { t: 1.95, vol: 0.045, dur: 1.8 });
-      P(587.33, { t: 2.07, vol: 0.03, dur: 1.8 });
+      D([146.83, 220, 293.66], { t: 0.3, dur: 2.2, vol: 0.016 });
+      for (let i = 0; i < 6; i++) H({ t: 1.25 + i * 0.07, vol: 0.06 });
+      H({ t: 1.97, vol: 0.14 });
+      M(220, { t: 1.99, vol: 0.06, dur: 0.6 });
+      M(329.63, { t: 2.07, vol: 0.04, dur: 0.5 });
       B({ t: 2.8, dur: 0.9, vol: 0.012, from: 1800, to: 3200 });
     },
     // Retumbo grave que se acelera (presentación del nivel extremo)
