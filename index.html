@@ -1334,7 +1334,9 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
 .fs-empty { text-align: center; color: var(--muted); padding: 18px 8px; font-weight: 600; }
 .fs-facts { display: grid; gap: 8px; margin-top: 14px; }
 .fs-fact { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; background: var(--glass, var(--card)); border: 1px solid var(--glass-line, var(--line)); border-radius: 16px; padding: 10px 12px; font-size: 14px; font-weight: 600; }
-.fs-fact .e { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-size: 17px; background: var(--card-2); }
+.fs-fact .e { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; color: #FFFFFF; background: var(--g-blue, #5371E6); }
+.fs-fact .e svg { width: 18px; height: 18px; }
+.fs-fact:nth-child(2) .e { background: var(--g-coral, #EC5F48); } .fs-fact:nth-child(3) .e { background: var(--g-amber, #F5B12C); } .fs-fact:nth-child(4) .e { background: var(--g-mint, #22A97A); }
 .fs-fact b { font-family: var(--f-display); }
 </style>
 </head>
@@ -4432,11 +4434,12 @@ const Sound = (() => {
     const turns = all.reduce((a, x) => a + x.moves, 0), solved = all.reduce((a, x) => a + x.solved, 0);
     const fav = [2, 3, 4].filter((N) => f[N]).sort((a, b) => f[b].solved - f[a].solved)[0];
     const facts = [];
-    if (solved) facts.push(["🧊", tr(`Has girado <b>${turns}</b> grupos: son <b>${Math.floor(turns / 6)}</b> vueltas completas.`, `You've turned <b>${turns}</b> groups: that's <b>${Math.floor(turns / 6)}</b> full spins.`)]);
-    if (f.days && f.days.streak) facts.push(["🔥", tr(`Racha: <b>${f.days.streak}</b> ${f.days.streak === 1 ? "día" : "días"} seguidos resolviendo (mejor: ${f.days.best}).`, `Streak: <b>${f.days.streak}</b> ${f.days.streak === 1 ? "day" : "days"} in a row (best: ${f.days.best}).`)]);
-    if (fav && solved > 1) facts.push(["⭐", tr(`Tu tamaño favorito es el <b>${sizeName(fav)}</b>.`, `Your favorite size is <b>${sizeName(fav)}</b>.`)]);
-    if (solved) facts.push(["⏱️", tr(`En total has jugado <b>${fmtLong(all.reduce((a, x) => a + x.ms, 0))}</b> de partida libre.`, `You've played <b>${fmtLong(all.reduce((a, x) => a + x.ms, 0))}</b> of free play in total.`)]);
-    $("#fs-facts").innerHTML = facts.map(([e, t]) => `<div class="fs-fact"><span class="e">${e}</span><span>${t}</span></div>`).join("");
+    if (solved) facts.push(["turn", tr(`Has girado <b>${turns}</b> grupos: son <b>${Math.floor(turns / 6)}</b> vueltas completas.`, `You've turned <b>${turns}</b> groups: that's <b>${Math.floor(turns / 6)}</b> full spins.`)]);
+    if (f.days && f.days.streak) facts.push(["streak", tr(`Racha: <b>${f.days.streak}</b> ${f.days.streak === 1 ? "día" : "días"} seguidos resolviendo (mejor: ${f.days.best}).`, `Streak: <b>${f.days.streak}</b> ${f.days.streak === 1 ? "day" : "days"} in a row (best: ${f.days.best}).`)]);
+    if (fav && solved > 1) facts.push(["fav", tr(`Tu tamaño favorito es el <b>${sizeName(fav)}</b>.`, `Your favorite size is <b>${sizeName(fav)}</b>.`)]);
+    if (solved) facts.push(["time", tr(`En total has jugado <b>${fmtLong(all.reduce((a, x) => a + x.ms, 0))}</b> de partida libre.`, `You've played <b>${fmtLong(all.reduce((a, x) => a + x.ms, 0))}</b> of free play in total.`)]);
+    const FACT_ICON = {"turn": '<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20 4v4.5h-4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>', "streak": '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4M9 14.5l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>', "fav": '<svg viewBox="0 0 24 24"><path d="M12 3.2l2.6 5.4 5.9.8-4.3 4.1 1 5.9L12 16.6l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>', "time": '<svg viewBox="0 0 24 24"><circle cx="12" cy="12.5" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8.5v4.2l2.8 1.8M10 2.5h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'};
+    $("#fs-facts").innerHTML = facts.map(([e, t]) => `<div class="fs-fact"><span class="e" aria-hidden="true">${FACT_ICON[e]}</span><span>${t}</span></div>`).join("");
   }
   document.querySelectorAll("[data-fs-n]").forEach((b) => b.addEventListener("click", () => { fsN = +b.dataset.fsN; renderFree(true); }));
   function renderStats() {
