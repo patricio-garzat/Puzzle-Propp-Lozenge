@@ -1833,7 +1833,7 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
   <div class="fi-step fi-b">
     <p class="fi-k">…pero queda uno más</p>
     <b class="fi-big fi-x">Nivel extremo</b>
-    <span class="fi-pill">Cubo 8×8×8 · 200 movimientos</span>
+    <span class="fi-pill">Cubo 8×8×8 · 300 movimientos</span>
     <div class="fi-actions"><button class="btn primary" type="button" id="fi-go">Entrar</button><button class="btn" type="button" id="fi-later">Después</button></div>
   </div>
 </div>
@@ -2256,8 +2256,8 @@ const Core = (() => {
   const ramp = (a, b, n) => Array.from({ length: n }, (_, i) => Math.round(a + ((b - a) * i) / (n - 1)));
   ramp(10, 45, 15).forEach((K) => LEVELS.push({ N: 3, K }));
   ramp(35, 130, 20).forEach((K) => LEVELS.push({ N: 4, K }));
-  // 51: nivel extremo secreto (se desbloquea al pasar el 50): 8×8×8 revuelto con 200 giros
-  LEVELS.push({ N: 8, K: 200, extreme: true });
+  // 51: nivel extremo secreto (se desbloquea al pasar el 50): 8×8×8 revuelto con 300 giros
+  LEVELS.push({ N: 8, K: 300, extreme: true });
   // Generador pseudoaleatorio con semilla: la misma mezcla en todos los dispositivos
   function seeded(seed) {
     let a = seed >>> 0;
@@ -2764,7 +2764,7 @@ const Sound = (() => {
     "Completaste": "You completed",
     "…pero queda uno más": "…but there's one more",
     "Nivel extremo": "Extreme level",
-    "Cubo 8×8×8 · 200 movimientos": "Cube 8×8×8 · 200 moves",
+    "Cubo 8×8×8 · 300 movimientos": "Cube 8×8×8 · 300 moves",
     "Entrar": "Enter",
     "Después": "Later"
     };
