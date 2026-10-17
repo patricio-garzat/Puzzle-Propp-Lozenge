@@ -62,7 +62,7 @@ html = html.replace("</head>", no_zoom + "</head>", 1)
 pbx = open(os.path.join(HERE, "ios", "App", "App.xcodeproj", "project.pbxproj"), encoding="utf-8").read()
 version = re.search(r"MARKETING_VERSION = ([0-9.]+);", pbx).group(1)
 build = re.search(r"CURRENT_PROJECT_VERSION = (\d+);", pbx).group(1)
-html, n = re.subn(r'(id="app-version">)Web(<)', rf"\g<1>{version} ({build})\2", html)
+html, n = re.subn(r'(id="app-version">)Web(<)', rf"\g<1>{version}\2", html)  # solo la versión (p. ej. 1.0.3), sin el número de build
 assert n == 1, "no encontré la versión en Ajustes"
 
 shutil.rmtree(WWW, ignore_errors=True)
