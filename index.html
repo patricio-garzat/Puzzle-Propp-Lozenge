@@ -1310,6 +1310,32 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
 .steps2 li { counter-increment: st; display: grid; grid-template-columns: 26px 1fr; gap: 10px; align-items: start; }
 .steps2 li::before { transform: none; content: counter(st); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 800 12.5px var(--f-display); color: #FFFFFF; background: var(--g-blue, #5371E6); margin-top: 1px; }
 @media (prefers-reduced-motion: reduce) { .s2-cube .lg-corner, .s2-dot, .s2-f, .s2-cap { animation: none; } .s2-f, .s2-cap.up { opacity: 1; } }
+
+/* Récords: estadísticas de partida libre por tamaño */
+.fs-size { width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 12px; }
+.fs-size button { justify-content: center; padding: 9px 0; font-variant-numeric: tabular-nums; }
+.fs-card { background: var(--glass, var(--card)); border: 1px solid var(--glass-line, var(--line)); box-shadow: var(--lift, none); border-radius: 22px; padding: 18px; display: grid; gap: 16px; }
+.fs-card.enter { animation: rise 0.5s var(--spring, ease) both; }
+.fs-hero { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.fs-hero .ring { --p: 0; width: 74px; height: 74px; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(#5371E6 calc(var(--p) * 1%), var(--line) 0); }
+.fs-hero .ring b { width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center; background: var(--card); font: 800 16px var(--f-display); font-variant-numeric: tabular-nums; }
+.fs-hero .big { font: 800 34px/1 var(--f-display); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.fs-hero small { display: block; color: var(--muted); font-weight: 600; font-size: 13px; margin-top: 4px; }
+.fs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fs-tile { background: var(--card-2); border-radius: 16px; padding: 11px 12px; display: grid; gap: 2px; }
+.fs-tile span { font: 800 10.5px var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.fs-tile b { font: 800 19px var(--f-display); font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.fs-tile small { color: var(--muted); font-size: 12px; font-weight: 600; }
+.fs-bars { display: grid; gap: 8px; }
+.fs-bar { display: grid; grid-template-columns: 92px 1fr 34px; gap: 10px; align-items: center; font-size: 13.5px; font-weight: 600; }
+.fs-bar i { height: 8px; border-radius: 4px; background: var(--card-2); overflow: hidden; display: block; }
+.fs-bar i::after { content: ""; display: block; height: 100%; width: calc(var(--w) * 1%); border-radius: inherit; background: var(--c); transition: width .7s var(--spring, ease); }
+.fs-bar em { font-style: normal; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+.fs-empty { text-align: center; color: var(--muted); padding: 18px 8px; font-weight: 600; }
+.fs-facts { display: grid; gap: 8px; margin-top: 14px; }
+.fs-fact { display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: center; background: var(--glass, var(--card)); border: 1px solid var(--glass-line, var(--line)); border-radius: 16px; padding: 10px 12px; font-size: 14px; font-weight: 600; }
+.fs-fact .e { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; font-size: 17px; background: var(--card-2); }
+.fs-fact b { font-family: var(--f-display); }
 </style>
 </head>
 <body>
@@ -1734,12 +1760,14 @@ body { background-image: radial-gradient(70% 40% at 0% 0%, var(--au-1), transpar
   <section class="screen" id="scr-stats" aria-label="Récords">
     <header class="nav"><button class="nav-back" type="button" data-back><svg viewBox="0 0 12 20" aria-hidden="true"><path d="M10 2 2 10l8 8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Atrás</span></button><h2>Récords</h2><span></span></header>
     <div class="stat-grid">
-      <div class="stat-card"><b id="st-played">0</b><span>Jugadas</span></div>
+      <div class="stat-card"><b id="st-played">0</b><span>Partidas</span></div>
       <div class="stat-card"><b id="st-solved">0</b><span>Resueltas</span></div>
       <div class="stat-card"><b id="st-perfect">0</b><span>Perfectas</span></div>
     </div>
-    <p class="group-title">Mejores partidas</p>
-    <div class="list" id="st-best"></div>
+    <p class="group-title">Partida libre</p>
+    <div class="seg fs-size" role="group" aria-label="Tamaño"><button type="button" data-fs-n="2">2×2×2</button><button type="button" data-fs-n="3" aria-pressed="true">3×3×3</button><button type="button" data-fs-n="4">4×4×4</button></div>
+    <div class="fs-card" id="fs-card"></div>
+    <div class="fs-facts" id="fs-facts"></div>
   </section>
 
   <section class="screen" id="scr-settings" aria-label="Ajustes">
@@ -2730,6 +2758,7 @@ const Sound = (() => {
     "Borrar": "Erase",
     "Progreso de niveles": "Level progress",
     "Acerca de": "About",
+    "Partidas": "Played",
     "Los rombos de tres colores forman la ilusión de un cubo. Gira grupos de tres hasta que quede armado.": "Tiles in three colors create the illusion of a cube. Turn groups of three until it's rebuilt.",
     "↑ Horario": "↑ Clockwise",
     "↓ Antihorario": "↓ Counterclockwise",
@@ -3323,6 +3352,7 @@ const Sound = (() => {
     buzz([20, 40, 30]);
     bumpStat("solved");
     if (perfect) bumpStat("perfect");
+    recordFree({ N: st.N, moves, ms, perfect, hints: hintsUsed, kind: mode === "custom" ? "custom" : level });
     confetti();
     updateStats();
     setTimeout(() => { if (!winEl.hidden) $("#win-again").focus({ preventScroll: true }); }, 500);
@@ -4353,13 +4383,69 @@ const Sound = (() => {
   demo.addEventListener("pointercancel", demoEnd);
 
   // Récords
+  // ---- Estadísticas de partida libre (mezclas al azar y "Arma tu mezcla"), por tamaño ----
+  const FREE = "propp-free-stats-v1";
+  const dayKey = (d = new Date()) => `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  function readFree() { try { return JSON.parse(localStorage.getItem(FREE) || "{}") || {}; } catch (e) { return {}; } }
+  function recordFree(g) {
+    const f = readFree();
+    const z = f[g.N] || (f[g.N] = { solved: 0, perfect: 0, moves: 0, ms: 0, hints: 0, clean: 0, bestMoves: null, bestMs: null, kinds: {} });
+    z.solved++; if (g.perfect) z.perfect++;
+    z.moves += g.moves; z.ms += g.ms; z.hints += g.hints; if (!g.hints) z.clean++;
+    if (z.bestMoves === null || g.moves < z.bestMoves) z.bestMoves = g.moves;
+    if (g.ms > 0 && (z.bestMs === null || g.ms < z.bestMs)) z.bestMs = g.ms;
+    z.kinds[g.kind] = (z.kinds[g.kind] || 0) + 1;
+    // Racha: días seguidos resolviendo al menos un puzzle
+    const today = dayKey(), y = new Date(); y.setDate(y.getDate() - 1);
+    const d = f.days || (f.days = { last: null, streak: 0, best: 0 });
+    if (d.last !== today) { d.streak = d.last === dayKey(y) ? d.streak + 1 : 1; d.last = today; d.best = Math.max(d.best, d.streak); }
+    try { localStorage.setItem(FREE, JSON.stringify(f)); } catch (e) {}
+  }
+  let fsN = 3;
+  const fmtLong = (ms) => { const m = Math.round(ms / 60000); return m < 60 ? tr(`${m} min`, `${m} min`) : `${Math.floor(m / 60)} h ${m % 60} min`; };
+  function renderFree(animate) {
+    const f = readFree(), z = f[fsN];
+    document.querySelectorAll("[data-fs-n]").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.fsN === fsN)));
+    const card = $("#fs-card");
+    if (!z || !z.solved) {
+      card.innerHTML = `<p class="fs-empty">${tr(`Aún no resuelves un ${sizeName(fsN)} en partida libre.<br>¡Mezcla uno y empieza!`, `You haven't solved a ${sizeName(fsN)} in free play yet.<br>Shuffle one and get started!`)}</p>`;
+    } else {
+      const pct = Math.round((z.perfect / z.solved) * 100);
+      const kinds = [["easy", LEVEL_NAMES.easy, "#22A374"], ["mid", LEVEL_NAMES.mid, "#F5B12C"], ["hard", LEVEL_NAMES.hard, "#EC5F48"], ["custom", tr("Tu mezcla", "Your shuffle"), "#5371E6"]];
+      const top = Math.max(1, ...kinds.map(([k]) => z.kinds[k] || 0));
+      card.innerHTML =
+        `<div class="fs-hero"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div><div><div class="big">${z.solved}</div><small>${tr(z.solved === 1 ? "puzzle resuelto" : "puzzles resueltos", z.solved === 1 ? "puzzle solved" : "puzzles solved")} · ${z.perfect} ${tr(z.perfect === 1 ? "perfecto" : "perfectos", "perfect")}</small></div></div>` +
+        `<div class="fs-grid">` +
+        `<div class="fs-tile"><span>${tr("Mejor", "Best")}</span><b>${movs(z.bestMoves)}</b></div>` +
+        `<div class="fs-tile"><span>${tr("Más rápido", "Fastest")}</span><b>${z.bestMs ? fmt(z.bestMs) : "–"}</b></div>` +
+        `<div class="fs-tile"><span>${tr("Promedio", "Average")}</span><b>${Math.round(z.moves / z.solved)}</b><small>${tr("movimientos", "moves")}</small></div>` +
+        `<div class="fs-tile"><span>${tr("Tiempo promedio", "Average time")}</span><b>${fmt(z.ms / z.solved)}</b></div>` +
+        `<div class="fs-tile"><span>${tr("Sin pistas", "No hints")}</span><b>${z.clean}</b><small>${tr("de", "of")} ${z.solved}</small></div>` +
+        `<div class="fs-tile"><span>${tr("Tiempo jugado", "Time played")}</span><b>${fmtLong(z.ms)}</b></div>` +
+        `</div>` +
+        `<div class="fs-bars">` + kinds.map(([k, name, c]) => `<div class="fs-bar"><span>${name}</span><i style="--w:${animate ? 0 : ((z.kinds[k] || 0) / top) * 100};--c:${c}" data-w="${((z.kinds[k] || 0) / top) * 100}"></i><em>${z.kinds[k] || 0}</em></div>`).join("") + `</div>`;
+      if (animate) requestAnimationFrame(() => requestAnimationFrame(() => card.querySelectorAll("[data-w]").forEach((n) => n.style.setProperty("--w", n.dataset.w))));
+    }
+    if (animate) { card.classList.remove("enter"); void card.offsetWidth; card.classList.add("enter"); }
+    // Datos curiosos con todo lo jugado en partida libre
+    const all = [2, 3, 4].map((N) => f[N]).filter(Boolean);
+    const turns = all.reduce((a, x) => a + x.moves, 0), solved = all.reduce((a, x) => a + x.solved, 0);
+    const fav = [2, 3, 4].filter((N) => f[N]).sort((a, b) => f[b].solved - f[a].solved)[0];
+    const facts = [];
+    if (solved) facts.push(["🧊", tr(`Has girado <b>${turns}</b> grupos: son <b>${Math.floor(turns / 6)}</b> vueltas completas.`, `You've turned <b>${turns}</b> groups: that's <b>${Math.floor(turns / 6)}</b> full spins.`)]);
+    if (f.days && f.days.streak) facts.push(["🔥", tr(`Racha: <b>${f.days.streak}</b> ${f.days.streak === 1 ? "día" : "días"} seguidos resolviendo (mejor: ${f.days.best}).`, `Streak: <b>${f.days.streak}</b> ${f.days.streak === 1 ? "day" : "days"} in a row (best: ${f.days.best}).`)]);
+    if (fav && solved > 1) facts.push(["⭐", tr(`Tu tamaño favorito es el <b>${sizeName(fav)}</b>.`, `Your favorite size is <b>${sizeName(fav)}</b>.`)]);
+    if (solved) facts.push(["⏱️", tr(`En total has jugado <b>${fmtLong(all.reduce((a, x) => a + x.ms, 0))}</b> de partida libre.`, `You've played <b>${fmtLong(all.reduce((a, x) => a + x.ms, 0))}</b> of free play in total.`)]);
+    $("#fs-facts").innerHTML = facts.map(([e, t]) => `<div class="fs-fact"><span class="e">${e}</span><span>${t}</span></div>`).join("");
+  }
+  document.querySelectorAll("[data-fs-n]").forEach((b) => b.addEventListener("click", () => { fsN = +b.dataset.fsN; renderFree(true); }));
   function renderStats() {
-    const x = readStats(), best = readBest();
+    const x = readStats();
     $("#st-played").textContent = x.played; $("#st-solved").textContent = x.solved; $("#st-perfect").textContent = x.perfect;
-    $("#st-best").innerHTML = [2, 3, 4].map((N) => {
-      const b = best[N];
-      return `<div class="best-row"><b>${sizeName(N)}</b><span>${b ? `${movs(b.moves)} · ${fmt(b.ms)}` : tr("Sin récord todavía", "No record yet")}</span></div>`;
-    }).join("");
+    // Abre en el tamaño que más has jugado
+    const f = readFree(); const fav = [2, 3, 4].filter((N) => f[N]).sort((a, b) => f[b].solved - f[a].solved)[0];
+    if (fav) fsN = fav;
+    renderFree(true);
   }
   // Ajustes
   function syncSettings() {
@@ -4403,7 +4489,7 @@ const Sound = (() => {
   let resetArmed = false;
   $("#set-reset").addEventListener("click", () => {
     if (!resetArmed) { resetArmed = true; $("#set-reset").textContent = tr("Toca otra vez para borrar", "Tap again to erase"); Sound.tick(); return; }
-    try { localStorage.removeItem(BEST); localStorage.removeItem(STATS); } catch (e) {}
+    try { localStorage.removeItem(BEST); localStorage.removeItem(STATS); localStorage.removeItem("propp-free-stats-v1"); } catch (e) {}
     resetArmed = false; $("#set-reset").textContent = tr("Borrado", "Erased"); Sound.place(); updateStats();
   });
   // Borrar el progreso de niveles (estrellas y pistas guardadas) para empezar desde cero.
