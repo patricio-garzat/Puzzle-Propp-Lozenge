@@ -1,6 +1,6 @@
 """Genera index.html (la página publicada) a partir de rombos-de-propp.html, el código fuente del juego.
 Agrega doctype, lang="en", viewport y descripción, y envuelve el contenido en <head>/<body>.
-Uso (desde la carpeta BluBer Games): python3 tools/mkindex.py
+Uso (desde la carpeta CubeSwipe): python3 tools/mkindex.py
 """
 import os
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
